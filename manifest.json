@@ -1,0 +1,22 @@
+{
+  "name": "niichrome 2chブラウザ",
+  "short_name": "niichrome",
+  "description": "Chromeアプリ版２ちゃんねるブラウザ",
+  "version": "0.2.0",
+  "manifest_version": 2,
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+  "icons": {
+    "128": "128.png"
+  },
+  "permissions": [
+    "webview",
+    "<all_urls>",
+    "fullscreen",
+    "storage",
+    "unlimitedStorage"
+  ]
+}
