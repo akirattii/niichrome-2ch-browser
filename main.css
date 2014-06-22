@@ -10,72 +10,6 @@ html, body {
   color: #d0d0d0;
 }
 
-#topmenu {
-  position: fixed;
-  top: -40px;
-  left: 0px;
-  text-align: center;
-  color: white;
-  background: transparent;
-  width: 290px;
-  z-index: 9999;
-}
-#topmenu_toggle {
-  background-color: black;
-  width: 80px;
-  text-align: center;
-  position: relative;
-  top: 0px;
-  left: 0px;
-  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
-  border-radius: 0px 0px 4px 4px;
-  cursor: pointer;
-}
-#topmenu_content {
-  background-color: black;
-  width: 100%;
-  height: 40px;
-  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
-}
-   
-#bottommenu {
-  position: fixed;
-  bottom: -40px;
-  left: 0px;
-  text-align: center;
-  color: white;
-  background: transparent;
-  width: 100%;
-  z-index: 9999;
-}
-#bottommenu_toggle {
-  background-color: black;
-  width: 80px;
-  text-align: center;
-  position: relative;
-  bottom: 0px;
-  left: 48%;
-  border-radius: 4px 4px 0px 0px;
-  cursor: pointer;
-}
-#bottommenu_content {
-  background-color: black;
-  width: 100%;
-  height: 40px;
-  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
-}
-
-#leftmenu {
-  position: fixed;
-  top: 0px;
-  left: -100px;
-  margin: 0px;
-  min-width: 120px;
-  min-height: 100%;
-  background-color: gray;
-  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
-}
-
 
 /* main */
 
@@ -93,6 +27,7 @@ div#tlist {
   border-left: 1px solid gray;
   padding-left: 16px;
   overflow-y: auto;
+  -webkit-user-select: text; /* for enabling text selection */
 }
 #tlist_header {
   position: fixed;
@@ -486,6 +421,7 @@ div#tools .tool #txt_filter {
   border-radius: 2px;
   z-index: 9999;
   padding: 10px 8px 4px 12px;
+  -webkit-user-select: text; /* for enabling text selection */
 }
 
 

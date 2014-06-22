@@ -1,4 +1,33 @@
-$(function() {
+/**
+ * niichrome 2ch browser
+ *
+ * @version 0.3.1
+ * @author akirattii <tanaka.akira.2006@gmail.com>
+ * @license The MIT License
+ * @copyright (c) akirattii
+ * @see https://github.com/akirattii/niichrome-2ch-browser/
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy,
+ * modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+ $(function() {
 
   console.log = function(){};
 
@@ -75,15 +104,20 @@ $(function() {
 
   // command list usable on addressbar
   var cmd = {
-    bookmarks: "bookmarks"
+    bookmarks: "about:bookmarks"
   };
 
+  // process loading flag
   var nowloading = false;
+
+  // adult contents confirmed flag
+  var adultConfirmed = false;
 
   //
   // -- UI controls
   //
   var $window = $(window);
+  var $document = $(document);
   var btn_write = $("#btn_write");
   var btn_arrowBack = $("#btn_arrowBack");
   var btn_arrowForward = $("#btn_arrowForward");
@@ -163,7 +197,7 @@ $(function() {
   // -- shortcut key
   //
 
-  $(window).bind('keydown', function(event) {
+  $window.bind('keydown', function(event) {
     if (event.altKey) { // with "Alt" key
       switch (event.which) {
         case 39: // Alt+Right
@@ -207,7 +241,7 @@ $(function() {
   // -- BBS List
   //
 
-  $(document).on("click", "#blist .cate0", function() {
+  $document.on("click", "#blist .cate0", function() {
     $(this).next().slideToggle(200);
   });
 
@@ -216,18 +250,20 @@ $(function() {
     toggleBBSList();
   });
 
-  $(document).on("mouseleave", "#blist", function() {
+  $document.on("mouseleave", "#blist", function() {
     toggleBBSList(false);
   });
 
-  $(document).on("click", "#blist .cate1", function() {
+  $document.on("click", "#blist .cate1", function() {
     var url = $(this).data("url");
     var bbs = $(this).text();
     console.log("cate1 click:", url);
     // check if it's adult contents or not.
     if (util2ch.isAdultContents(url)) {
-      // TODO: If "adultConfirmed" in local cache === true, pass the next step.
-      dlg_adultCheck.show();
+      // If "adultConfirmed" in local cache === true, pass the next step.
+      if (!adultConfirmed) {
+        dlg_adultCheck.show();
+      }
     }
     // reverse color on clicking
     $("#blist .selected").removeClass("selected");
@@ -244,7 +280,8 @@ $(function() {
   });
 
   btn_adultCheckYes.click(function(e){
-    // TODO: save "adultConfirmed" flag to local cache.
+    // save "adultConfirmed" flag.
+    adultConfirmed = true;
     dlg_adultCheck.hide();
   });
   btn_adultCheckNo.click(function(e){
@@ -358,7 +395,17 @@ $(function() {
     if (e.keyCode === 13 || (xe && xe.keyCode === 13)) { // RETURN key
       console.log($(this).val());
       var url = $(this).val().trim();
+      if (!url) return;
+
+      if (!isCommand(url) &&
+          !util2ch.isBBSURL(url) &&
+          !util2ch.isReadCGIURL(url) &&
+          !util2ch.isDatURL(url)) {
+        // If url is neither commands nor 2ch's URL, it means keywords to search.
+        url = util2ch.getFind2chURL(url);
+      }
       $(this).val(url);
+
       // prettify read.cgi URL 
       // eg.: read.cgi/xxxxx/l50 → read.cgi/xxxxx/
       url = util2ch.prettifyReadCGIURL(url);
@@ -366,15 +413,15 @@ $(function() {
       if (InputValidator.txt_url()) {
         console.log("txt_url input data is valid");
         $(this).data("url", url);
-        if (util2ch.isBBSURL(url)) { 
-          // when the url is BBS's
+        if (util2ch.isBBSURL(url) || util2ch.isFind2chURL(url)) { 
+          // when BBS's url
           btn_reloadTList.data("url", url);
           reloadTList();
         } else if (url == cmd.bookmarks) {
           // show bookmark list
           btn_bmlist.trigger("click");
         } else {
-          // when the url is thread's etc.
+          // when thread's or others' url.
           viewResponses(url, null, true);
         }
       }
@@ -406,21 +453,27 @@ $(function() {
       // execute script
       wv[0].executeScript({
         code: "window.addEventListener('message', function(e){" +
-         "  console.log('Received command:', e.data.command);" +
+         "  console.log('Received:', e.data);" +
          "  if(e.data.command == 'getTitle'){" +
          "    console.log('Sending title...');" +
          "    e.source.postMessage({ title: document.title }, e.origin);" +
+         "    if(document.title == e.data.ttitle) document.getElementById('backBtn').style.display = 'none';" +
          "  }" +
          "});" +
-         "var backBtn = document.createElement('div');" +
-         "backBtn.innerText = '< Back';" +
-         "backBtn.setAttribute('onclick', 'history.back()');" + 
-         "backBtn.style.cssText = 'display:block;cursor:pointer;padding:10px 4px 10px 4px;background-color:rgba(0,0,0,0.8);border-radius:6px;color:white;position:fixed;bottom:2px;right:2px;';" +
-         "document.body.appendChild(backBtn);"
+         "var backBtn = document.getElementById('backBtn');" +
+         "if (!backBtn) {" +
+         "  backBtn = document.createElement('div');" +
+         "  backBtn.setAttribute('id', 'backBtn');" +
+         "  backBtn.innerText = '< Back';" +
+         "  backBtn.setAttribute('onclick', 'history.back()');" + 
+         "  backBtn.style.cssText = 'display:block;cursor:pointer;padding:10px 4px 10px 4px;background-color:rgba(0,0,0,0.8);border-radius:6px;color:white;position:fixed;bottom:2px;right:2px;';" +
+         "  document.body.appendChild(backBtn);" +
+         "}"
       });
       // post "getTitle" command to webview
       wv[0].contentWindow.postMessage({
-        command: 'getTitle'
+        command: 'getTitle',
+        ttitle: thread_title.text()
       }, '*');
     });
   }
@@ -442,20 +495,31 @@ $(function() {
       var el = txt_url;
       el.css("background-color", "white");
       var inputed = el.val();
-      // check if it is "command"
-      if (cmd[inputed]) {
+      // check if it is command
+      if (isCommand(inputed)) {
         return true;
       }
-      // check if it is valid url
+      // check if it is valid as 2ch's url
       if (util2ch.getBBSInfo(inputed)) {
         return true;
       }
-      // if invalid...
+      // check if it starts with "http[s]://find.2ch.net/search?"
+      if (util2ch.isFind2chURL(inputed)) {
+        return true;
+      }
+      // Otherwise, this is invalid...
       el.css("background-color", "#ffcfcf");
       return false;
     }
 
   };
+
+  function isCommand(str) {
+    for (var key in cmd) {
+      if (cmd[key] == str) return true;
+    }
+    return false;
+  }
 
 
   //
@@ -468,7 +532,7 @@ $(function() {
   function tog(v) {
     return v ? 'addClass' : 'removeClass';
   }
-  $(document).on('input', '.clearable', function() {
+  $document.on('input', '.clearable', function() {
     $(this)[tog(this.value)]('x');
   }).on('mousemove', '.x', function(e) {
     $(this)[tog(this.offsetWidth - 18 < e.clientX - this.getBoundingClientRect().left)]('onX');
@@ -493,7 +557,7 @@ $(function() {
   // -- thread list
   //
 
-  $(document).on("click", "#btn_bmRemove", function(e) {
+  $document.on("click", "#btn_bmRemove", function(e) {
     console.log("bmRemove Clicked");
     var row = e.currentTarget.parentNode;
     var url = $(row).data("url");
@@ -505,7 +569,7 @@ $(function() {
     e.stopPropagation(); // stop all events after this.
   });
 
-  $(document).on("click", "#tlist .body .row", function(e) {
+  $document.on("click", "#tlist .body .row", function(e) {
     // return when now loading.
     if (nowloading) return;
     var row = $(this); // a selected row on threadList
@@ -654,7 +718,7 @@ $(function() {
     });
   } // viewResponses
 
-  $(document).on("mouseenter", "#tlist .body .row", function() {
+  $document.on("mouseenter", "#tlist .body .row", function() {
     // if it is "bmlist"(bookmarkList), makes bookmark removable
     console.log("mouseenter row");
     var dataurl = bbs_title.data("url");
@@ -663,7 +727,7 @@ $(function() {
       btn_bmRemove.show();
     }
   });
-  $(document).on("mouseleave", "#tlist .body .row", function() {
+  $document.on("mouseleave", "#tlist .body .row", function() {
     var dataurl = txt_url.data("url");
     if (dataurl == cmd.bookmarks) {
       btn_bmRemove.hide();
@@ -695,6 +759,7 @@ $(function() {
     console.log("drawThreadList");
     var bbsurl = bbs_title.data("url");
     var ttitle_col_w = $("#tlist_row_wrapper .header .ttitle").width();
+    var isCommandURL = isCommand(bbsurl);
     getSS(bbsurl, function(ss) {
       var ss4save = {};
       var target = $("#tlist .body");
@@ -705,7 +770,7 @@ $(function() {
         var title = json.title;
         var res = json.res;
         var diff = "";
-        if (bbsurl != cmd.bookmarks && ss) {
+        if (!isCommandURL && ss) {
           var resInSS = ss[url];
           if (resInSS) {
             diff = res - resInSS;
@@ -744,7 +809,6 @@ $(function() {
     var res;
     var num, handle, email, date, uid, be, content;
     if (!startIdx) startIdx = 0;
-    console.time("2");
     for (var len = responses.length, i = 0; i < len; i++) {
       // start to build html from specified index of responses
       if (startIdx <= i) {
@@ -789,7 +853,7 @@ $(function() {
   // -- refpop and links
   //
 
-  $(document).on('click', ".res .content a[data-resnum]", function(e) {
+  $document.on('click', ".res .content a[data-resnum]", function(e) {
     console.log("resnum:", $(this).data("resnum"));
     var value = $(this).data("resnum");
     showRefpop({
@@ -797,7 +861,7 @@ $(function() {
       value: value
     }, e);
   });
-  $(document).on('click', ".res .res_header .num", function(e) {
+  $document.on('click', ".res .res_header .num", function(e) {
     console.log("num:", $(this).text());
     var value = $(this).text();
     showRefpop({
@@ -805,7 +869,7 @@ $(function() {
       value: value
     }, e);
   });
-  $(document).on('click', ".res .handle", function(e) {
+  $document.on('click', ".res .handle", function(e) {
     console.log("handle:", $(this).text());
     var value = $(this).text();
     showRefpop({
@@ -813,7 +877,7 @@ $(function() {
       value: value
     }, e);
   });
-  $(document).on('click', ".res .email", function(e) {
+  $document.on('click', ".res .email", function(e) {
     console.log("email:", $(this).text());
     var value = $(this).text();
     showRefpop({
@@ -821,7 +885,7 @@ $(function() {
       value: value
     }, e);
   });
-  $(document).on('click', ".res .uid", function(e) {
+  $document.on('click', ".res .uid", function(e) {
     console.log("uid:", $(this).text());
     var value = $(this).text();
     showRefpop({
@@ -830,7 +894,7 @@ $(function() {
     }, e);
   });
   // clicking a link with href
-  $(document).on('click', ".content a", function(e) {
+  $document.on('click', ".content a", function(e) {
     var href = $(this).attr("href");
     console.log("href=", href);
     if (util2ch.isReadCGIURL(href)){
@@ -874,7 +938,7 @@ $(function() {
       onsuccess: function(xhr) {
         var contentType = xhr.getResponseHeader("Content-Type");
         var percentComplete;
-        // if the link would be certainly "image", then load it.
+        // if the link's content type is "image", then load that.
         if (contentType.match(/^image\//)) {
           request.doRequest({
             method: "GET",
@@ -927,14 +991,17 @@ $(function() {
   }
 
   // When img ".thumb" clicked, change thumbnail to raw image.
-  $(document).on("click", ".thumb", function(e) {
+  $document.on("click", ".thumb", function(e) {
     console.log("img.thumb clicked");
+    // get thread pane's width
+    var w = thread_title.width();
     $(this).removeClass("thumb")
       .addClass("rawimg")
+      .width(w)
       .attr("title", "クリックで縮小");
   });
   // When img ".rawimg" clicked, change the raw image to thumbnail.
-  $(document).on("click", ".rawimg", function(e) {
+  $document.on("click", ".rawimg", function(e) {
     console.log("img.rawimg clicked");
     $(this).removeClass("rawimg")
       .addClass("thumb")
@@ -1077,7 +1144,7 @@ $(function() {
 
 
 
-  $(document).on("click", "#readmore", function(e) {
+  $document.on("click", "#readmore", function(e) {
     if (nowloading) return;
     execReadmore();
   });
@@ -1101,8 +1168,14 @@ $(function() {
     var bbs;
     var bbsrow = getBBSRowByURL(url);
     if (bbsrow) bbs = bbsrow.text();
+    if (util2ch.isFind2chURL(url)) {
+      bbs = "「" + util2ch.getKeywordFromFind2chURL(url) + "」関連スレ";
+    }
+    // set bbs title. It's re-set again after the below process for getting threadList
+    bbs_title.text(bbs); 
 
     // start loading image...
+    startLoading();
     el.removeClass("reload24");
     el.addClass("loading_mini");
     // loading thread list of the clicked bbs.
@@ -1115,10 +1188,12 @@ $(function() {
       // draw thread list.
       drawThreadList(list, function() {
         // finish loading image.
+        stopLoading();
         el.removeClass("loading_mini").addClass("reload24");
       });
     }, function(e) {
       // finish loading image.
+      stopLoading();
       el.removeClass("loading_mini").addClass("reload24");
       showErrorMessage("Error: スレッド一覧の取得に失敗しました");
     });
@@ -1323,12 +1398,12 @@ $(function() {
     thread_title[0].style.width = half_w + 20 + "px";
   }
 
-  $(document).on("mouseenter", ".refpop", function() {
+  $document.on("mouseenter", ".refpop", function() {
     console.log("mouseenter");
     // remove refpops of upper layer of an refpop onmoused.
     removeRefpops(this);
   });
-  $(document).on("mouseleave", ".refpop", function() {
+  $document.on("mouseleave", ".refpop", function() {
     console.log("mouseleave");
     // if most upper layer, remove itself.
     var lastIdx = refpops.length - 1;
@@ -1336,10 +1411,10 @@ $(function() {
       removeRefpop(lastIdx);
     }
   });
-  $(document).on("click", ".refpop", function() {
+  $document.on("click", ".refpop", function() {
     console.log("refpop clicked.");
   });
-  $(document).on("keydown", "body", function(e) {
+  $document.on("keydown", "body", function(e) {
     console.log("body keydown.", e.keyCode);
     if (e.keyCode == 27) { // ESC key
       removeRefpops();
