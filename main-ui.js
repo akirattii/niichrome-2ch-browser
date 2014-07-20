@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -246,9 +246,10 @@
   });
 
   // left menu animation
-  blist_toggle_bar.click(function() {
+  blist_toggle_bar.mouseover(function() {
     toggleBBSList();
   });
+
 
   $document.on("mouseleave", "#blist", function() {
     toggleBBSList(false);
