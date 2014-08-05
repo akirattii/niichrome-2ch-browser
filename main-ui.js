@@ -165,11 +165,13 @@
   var dlg_adultCheck = $("#dlg_adultCheck");
   var btn_adultCheckYes = $("#btn_adultCheckYes");
   var btn_adultCheckNo = $("#btn_adultCheckNo");
+  var lbl_version = $("#lbl_version");
 
   //
   // -- window onload
   //
   window.onload = function(e) {
+    lbl_version.text("v." + chrome.runtime.getManifest().version);
     readmore.hide();
     readhere.hide();
     // make webview pane draggable
@@ -403,7 +405,8 @@
           !util2ch.isReadCGIURL(url) &&
           !util2ch.isDatURL(url)) {
         // If url is neither commands nor 2ch's URL, it means keywords to search.
-        url = util2ch.getFind2chURL(url);
+        // url = util2ch.getFind2chURL(url);
+        url = util2ch.getDig2chURL(url);
       }
       $(this).val(url);
 
@@ -414,7 +417,7 @@
       if (InputValidator.txt_url()) {
         console.log("txt_url input data is valid");
         $(this).data("url", url);
-        if (util2ch.isBBSURL(url) || util2ch.isFind2chURL(url)) { 
+        if (util2ch.isBBSURL(url) || util2ch.isDig2chURL(url)) { 
           // when BBS's url
           btn_reloadTList.data("url", url);
           reloadTList();
@@ -504,13 +507,14 @@
       if (util2ch.getBBSInfo(inputed)) {
         return true;
       }
-      // check if it starts with "http[s]://find.2ch.net/search?"
-      if (util2ch.isFind2chURL(inputed)) {
-        return true;
-      }
-      // Otherwise, this is invalid...
-      el.css("background-color", "#ffcfcf");
-      return false;
+      // // check if it starts with "http[s]://.2ch.net/search?"
+      // if (util2ch.isFind2chURL(inputed)) {
+      //   return true;
+      // }
+      // // Otherwise, this is invalid...
+      // el.css("background-color", "#ffcfcf");
+      // return false;
+      return true;
     }
 
   };
@@ -1169,8 +1173,8 @@
     var bbs;
     var bbsrow = getBBSRowByURL(url);
     if (bbsrow) bbs = bbsrow.text();
-    if (util2ch.isFind2chURL(url)) {
-      bbs = "「" + util2ch.getKeywordFromFind2chURL(url) + "」関連スレ";
+    if (util2ch.isDig2chURL(url)) {
+      bbs = "「" + util2ch.getKeywordFromDig2chURL(url) + "」関連スレ";
     }
     // set bbs title. It's re-set again after the below process for getting threadList
     bbs_title.text(bbs); 
