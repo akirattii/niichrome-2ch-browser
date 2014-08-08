@@ -368,7 +368,11 @@ div#lbl_version {
   position: fixed;
   top: 8px;
   right: 2px;
+}
+div#lbl_version a {
+  text-decoration: none;
   color: #e0e0e0;
+  font-size: 0.8em;
 }
 
 
@@ -483,13 +487,36 @@ img.rawimg {
 img.thumb {
   cursor: pointer;
   max-width: 60px;
-  max-height: 60px;
+  /*max-height: 60px;*/
 }
 
 .percentComplete {
   font-size: 0.8em;
   color: #cfcfcf;
 }
+
+/* amazon */
+.amazonPane {
+  /*background-color: #ffffff;*/
+  padding: 2px 4px 4px 4px;
+}
+.amazonPane .starlevel5 {
+  background-image: url('img/starlevels.png'); /*星画像*/
+  background-repeat: no-repeat; /* 繰り返しはナシ */
+  width: 75px;                  /* 横幅は星５つ分 */
+  height: 15px;                 /* 高さは星１つ分 */
+}
+.amazonPane .star50 { background-position: left top; }
+.amazonPane .star40 { background-position: -15px top; }
+.amazonPane .star30 { background-position: -30px top; }
+.amazonPane .star20 { background-position: -45px top; }
+.amazonPane .star10 { background-position: -60px top; }
+.amazonPane .star0 { background-position: -75px top; }
+.amazonPane .star45 { background-position: -150px top; }
+.amazonPane .star35 { background-position: -165px top; }
+.amazonPane .star25 { background-position: -180px top; }
+.amazonPane .star15 { background-position: -195px top; }
+.amazonPane .star5 { background-position: -210px top; }
 
 /* adult check dialog */
 #dlg_adultCheck {

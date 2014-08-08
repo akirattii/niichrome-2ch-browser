@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.3.2
+ * @version 0.5.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -27,9 +27,9 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
- $(function() {
+$(function() {
 
-  console.log = function(){};
+  console.log = function() {};
 
   // fullscreen mode
   // chrome.app.window.current().fullscreen();
@@ -38,6 +38,7 @@
   var request = niichrome.request();
   var util2ch = niichrome.util2ch();
   var idbutil = niichrome.idbutil("niichromedb", 1);
+  var amazonutil = niichrome.amazonutil();
 
   //
   // -- set up indexedDB
@@ -171,7 +172,7 @@
   // -- window onload
   //
   window.onload = function(e) {
-    lbl_version.text("v." + chrome.runtime.getManifest().version);
+    lbl_version.find("a").text("v." + chrome.runtime.getManifest().version);
     readmore.hide();
     readhere.hide();
     // make webview pane draggable
@@ -282,12 +283,12 @@
     reloadTList();
   });
 
-  btn_adultCheckYes.click(function(e){
+  btn_adultCheckYes.click(function(e) {
     // save "adultConfirmed" flag.
     adultConfirmed = true;
     dlg_adultCheck.hide();
   });
-  btn_adultCheckNo.click(function(e){
+  btn_adultCheckNo.click(function(e) {
     chrome.app.window.current().close();
   });
 
@@ -401,9 +402,9 @@
       if (!url) return;
 
       if (!isCommand(url) &&
-          !util2ch.isBBSURL(url) &&
-          !util2ch.isReadCGIURL(url) &&
-          !util2ch.isDatURL(url)) {
+        !util2ch.isBBSURL(url) &&
+        !util2ch.isReadCGIURL(url) &&
+        !util2ch.isDatURL(url)) {
         // If url is neither commands nor 2ch's URL, it means keywords to search.
         // url = util2ch.getFind2chURL(url);
         url = util2ch.getDig2chURL(url);
@@ -417,7 +418,7 @@
       if (InputValidator.txt_url()) {
         console.log("txt_url input data is valid");
         $(this).data("url", url);
-        if (util2ch.isBBSURL(url) || util2ch.isDig2chURL(url)) { 
+        if (util2ch.isBBSURL(url) || util2ch.isDig2chURL(url)) {
           // when BBS's url
           btn_reloadTList.data("url", url);
           reloadTList();
@@ -457,22 +458,22 @@
       // execute script
       wv[0].executeScript({
         code: "window.addEventListener('message', function(e){" +
-         "  console.log('Received:', e.data);" +
-         "  if(e.data.command == 'getTitle'){" +
-         "    console.log('Sending title...');" +
-         "    e.source.postMessage({ title: document.title }, e.origin);" +
-         "    if(document.title == e.data.ttitle) document.getElementById('backBtn').style.display = 'none';" +
-         "  }" +
-         "});" +
-         "var backBtn = document.getElementById('backBtn');" +
-         "if (!backBtn) {" +
-         "  backBtn = document.createElement('div');" +
-         "  backBtn.setAttribute('id', 'backBtn');" +
-         "  backBtn.innerText = '< Back';" +
-         "  backBtn.setAttribute('onclick', 'history.back()');" + 
-         "  backBtn.style.cssText = 'display:block;cursor:pointer;padding:10px 4px 10px 4px;background-color:rgba(0,0,0,0.8);border-radius:6px;color:white;position:fixed;bottom:2px;right:2px;';" +
-         "  document.body.appendChild(backBtn);" +
-         "}"
+          "  console.log('Received:', e.data);" +
+          "  if(e.data.command == 'getTitle'){" +
+          "    console.log('Sending title...');" +
+          "    e.source.postMessage({ title: document.title }, e.origin);" +
+          "    if(document.title == e.data.ttitle) document.getElementById('backBtn').style.display = 'none';" +
+          "  }" +
+          "});" +
+          "var backBtn = document.getElementById('backBtn');" +
+          "if (!backBtn) {" +
+          "  backBtn = document.createElement('div');" +
+          "  backBtn.setAttribute('id', 'backBtn');" +
+          "  backBtn.innerText = '< Back';" +
+          "  backBtn.setAttribute('onclick', 'history.back()');" +
+          "  backBtn.style.cssText = 'display:block;cursor:pointer;padding:10px 4px 10px 4px;background-color:rgba(0,0,0,0.8);border-radius:6px;color:white;position:fixed;bottom:2px;right:2px;';" +
+          "  document.body.appendChild(backBtn);" +
+          "}"
       });
       // post "getTitle" command to webview
       wv[0].contentWindow.postMessage({
@@ -481,6 +482,7 @@
       }, '*');
     });
   }
+
   function prepareWriteForm(url) {
     console.log("prepareWriteForm");
     // convert to read.cgi's url
@@ -545,14 +547,14 @@
     $(this).removeClass('x onX').val('').trigger("keydown");
   });
 
-  txt_filter.on("keydown", function(e){
+  txt_filter.on("keydown", function(e) {
     console.log("txt_filter change.");
     // filtering of thread's response
-    setTimeout(function(){
+    setTimeout(function() {
       filterRes(txt_filter.val());
     }, 0);
     // filtering of thread list
-    setTimeout(function(){
+    setTimeout(function() {
       filterTList(txt_filter.val());
     }, 100);
   });
@@ -593,7 +595,7 @@
   function viewResponses(url, row, historyUpdate) {
     startLoading(row);
     // If URL contains "headline.2ch.net", read data of ".dat" instead of "read.cgi".
-    if (util2ch.isHeadlineURL(url)){
+    if (util2ch.isHeadlineURL(url)) {
       if (!row) {
         row = getTListRowByURL(util2ch.datURLToReadCGIURL(url));
       }
@@ -645,15 +647,15 @@
         btn_arrowDn.removeClass("disabled");
         // back & forward buttons disability
         var baf = util2ch.getBackAndForwardURL(url);
-        if(baf.backURL) {
-          btn_arrowBack.removeClass("disabled");   
+        if (baf.backURL) {
+          btn_arrowBack.removeClass("disabled");
         } else {
-          btn_arrowBack.addClass("disabled");   
+          btn_arrowBack.addClass("disabled");
         }
-        if(baf.forwardURL) {
-          btn_arrowForward.removeClass("disabled");   
+        if (baf.forwardURL) {
+          btn_arrowForward.removeClass("disabled");
         } else {
-          btn_arrowForward.addClass("disabled");   
+          btn_arrowForward.addClass("disabled");
         }
         // close res write webview if opened.
         pane_wv[0].style.visibility = "hidden";
@@ -674,7 +676,7 @@
           .data("resnum", lastResnum)
           .data("url", url)
           .remove() // remove readhere div from responses
-          .insertAfter($("#resnum" + resnum)); // move readhere div to prev of readmore div
+        .insertAfter($("#resnum" + resnum)); // move readhere div to prev of readmore div
         // make previous selected row's style to "unselected"
         var prevSelectedRow = tlist_row_wrapper.find(".selected");
         if (prevSelectedRow[0]) {
@@ -682,14 +684,14 @@
         }
         // make new selected row's style to "selected"
         var selectedRow;
-        if (row){
+        if (row) {
           selectedRow = row;
         } else {
           selectedRow = tlist_row_wrapper.find("[data-url='" + url + "']");
         }
         if (selectedRow[0]) {
           // affect each cols of selected row to "selected"
-          selectedRow.children().addClass("selected"); 
+          selectedRow.children().addClass("selected");
           // update the text of ".rescnt" col of the selected row
           selectedRow.find(".rescnt").text(lastResnum);
           // zero-init the text of ".newcnt" col of the selected row
@@ -800,7 +802,7 @@
         url: bbsurl,
         ss: ss4save
       });
-      
+
     });
   }
 
@@ -826,17 +828,17 @@
         res.be ? be = res.be : be = "";
         res.content ? content = res.content : content = "";
 
-        htmlBuf += '<div class="res" id="resnum' + num + '">\n' + 
-        '<div class="res_header">\n' + 
-        '<span class="num">' + num + '</span>:&nbsp;\n' + 
-        '<span class="handle"><b>' + handle + '</b></span>\n' + 
-        '[<span class="email">' + email + '</span>]&nbsp;\n' + 
-        '<span class="date">' + date + '</span>\n' + 
-        '<span class="uid">' + uid + '</span>\n' + 
-        '<span class="be">' + be + '</span>\n' + 
-        '</div>\n' + 
-        '<div class="content">' + res.content + '</div>\n' + 
-        '</div>\n';
+        htmlBuf += '<div class="res" id="resnum' + num + '">\n' +
+          '<div class="res_header">\n' +
+          '<span class="num">' + num + '</span>:&nbsp;\n' +
+          '<span class="handle"><b>' + handle + '</b></span>\n' +
+          '[<span class="email">' + email + '</span>]&nbsp;\n' +
+          '<span class="date">' + date + '</span>\n' +
+          '<span class="uid">' + uid + '</span>\n' +
+          '<span class="be">' + be + '</span>\n' +
+          '</div>\n' +
+          '<div class="content">' + res.content + '</div>\n' +
+          '</div>\n';
       }
     }
     if (startIdx != 0) {
@@ -902,7 +904,7 @@
   $document.on('click', ".content a", function(e) {
     var href = $(this).attr("href");
     console.log("href=", href);
-    if (util2ch.isReadCGIURL(href)){
+    if (util2ch.isReadCGIURL(href)) {
       e.keyCode = 13; // set Enter key to the event
       txt_url.val(href).trigger("keydown", e);
       return;
@@ -916,6 +918,11 @@
     } else if (isVideoLink(href)) {
       // pop video
       popVideo(href, $(this));
+      return false;
+    } else if (amazonutil.isValidURL(href)) {
+      if ($(this).data("jumplink") == "1") return true;
+      // pop amazon info panel
+      popAmazon(href, $(this));
       return false;
     } else {
       // jump
@@ -983,7 +990,7 @@
     // popup video
     console.log("popVideo");
     // check if img already exists
-    var next2elem = elem.next().next(); // <a ...><br><iframe .../>
+    var next2elem = elem.next().next(); // <a ...><br><webview .../>
     if (next2elem.is("webview") && next2elem.data("url") == url) {
       console.log("this video's already loaded.");
       return;
@@ -993,6 +1000,88 @@
     // make an video element
     var iframe = $("<br><webview width='420' height='345' data-url='" + url + "' src='" + src + "'></webview>");
     elem.after(iframe);
+  }
+
+  function popAmazon(url, elem) {
+    // popup amazon pane
+    console.log("popAmazon");
+    // check if img already exists
+    var next2elem = elem.next().next(); // <a ...><br><div .../>
+    if (next2elem.is("div") && next2elem.data("url") == url) {
+      console.log("this amazon's pane has already loaded.");
+      return;
+    }
+    var div = $("<br>" +
+      "<div class='amazonPane' data-url='" + url + "'>" +
+      "  <img class='loading_mini'></img>" +
+      "  <p class='percentComplete'></p>" +
+      "  <div class='starlevel5' style='display:none'></div>" +
+      "  <a href='' data-jumplink='1' target='_blank'></a>" +
+      "</div>");
+    elem.after(div);
+    var imgElem = div.find("img");
+    var aElem = div.find("a");
+    asin = amazonutil.getASIN(url);
+    if (!asin) {
+      imgElem.removeClass("loading_mini");
+      return;
+    }
+    amazonutil.getItemByASIN(asin, function(item) {
+      // make an amazon info's Pane
+      div.next().data("url", url);
+      // item title & price
+      var amazon_detail = item.title;
+      if (item.price) amazon_detail += " " + item.price;
+      aElem.text(amazon_detail).attr("href", item.url);
+      var percentCompleteElem = div.find(".percentComplete");
+      // warning for adult item
+      if (item.warn) {
+        imgElem.removeClass("loading_mini");
+        return;
+      }
+      // review stars
+      if (!isNaN(item.stars)) {
+        var stars = Math.round(item.stars * 2) / 2 * 10;
+        div.find(".starlevel5")
+          .addClass("star" + stars)
+          .attr("title", item.stars).show();
+      }
+      // item image
+      if (item.imgSrc && item.imgSrc.lastIndexOf("data:", 0) === 0) {
+        imgElem
+          .addClass("thumb")
+          .removeClass("loading_mini")
+          .attr("src", item.imgSrc);
+      } else if (item.imgSrc && item.imgSrc.lastIndexOf("http", 0) === 0) {
+        // load image by xhr
+        request.doRequest({
+          method: "GET",
+          responseType: "blob",
+          url: item.imgSrc,
+          onprogress: function(xhr) {
+            percentComplete = Math.floor((xhr.loaded / xhr.total) * 100);
+            percentCompleteElem.text(percentComplete + "%");
+          },
+          onsuccess: function(xhr) {
+            var ourl = window.webkitURL.createObjectURL(xhr.response);
+            imgElem
+              .attr("src", ourl)
+              .addClass("thumb")
+              .removeClass("loading_mini")
+              .attr("title", "クリックで拡大");
+            percentCompleteElem.text("");
+          }
+        }, function(e) { // onerror of doRequest for getting image.
+          imgElem.removeClass("loading_mini");
+        });
+      } else {
+        imgElem.removeClass("loading_mini");
+      }
+    }, function(e) { // onerror of amazonutil.getItemByASIN
+      imgElem.removeClass("loading_mini");
+      // jump when amazon bestsellers link etc.
+      elem.data("jumplink", "1").attr("target", "_blank").trigger("click");
+    });
   }
 
   // When img ".thumb" clicked, change thumbnail to raw image.
@@ -1021,6 +1110,7 @@
       return false;
     }
   }
+
   function isVideoLink(url) {
     console.log("isVideoLink");
     var ret = getDirectVideoURL(url);
@@ -1030,8 +1120,9 @@
       return false;
     }
   }
+
   /** 
-   * get video's direct URL from youtube's one. 
+   * get video's direct URL from youtube's one.
    */
   function getDirectVideoURL(url) {
     var arr;
@@ -1177,7 +1268,7 @@
       bbs = "「" + util2ch.getKeywordFromDig2chURL(url) + "」関連スレ";
     }
     // set bbs title. It's re-set again after the below process for getting threadList
-    bbs_title.text(bbs); 
+    bbs_title.text(bbs);
 
     // start loading image...
     startLoading();
@@ -1246,16 +1337,17 @@
     });
   });
 
-  btn_arrowBack.click(function(e){
+  btn_arrowBack.click(function(e) {
     console.log("btn_arrowBack");
     if ($(this).hasClass("disabled")) return;
     goBackOrForward(true); // go back
   });
-  btn_arrowForward.click(function(e){
+  btn_arrowForward.click(function(e) {
     console.log("btn_arrowForward");
     if ($(this).hasClass("disabled")) return;
     goBackOrForward(false); // go forward
   });
+
   function goBackOrForward(back) {
     var curURL = thread_title.data("url");
     if (!curURL) return;
@@ -1266,8 +1358,8 @@
     } else if (!back && baf.forwardURL) {
       url = baf.forwardURL;
     }
-    if (url){
-      viewResponses(url, null, false);  
+    if (url) {
+      viewResponses(url, null, false);
     }
   }
 
@@ -1324,7 +1416,7 @@
     }
     return null;
   }
-  
+
   function getBBSRowByURL(url) {
     var rows = $("#blist .cate1");
     for (var len = rows.length, i = 1; i < len; i++) { // starts index 1 cause index 0 is a row for template.
@@ -1381,7 +1473,7 @@
   function redraw() {
     var ww = $window.width();
     var wh = $window.height();
-    
+
     //
     // #tlist and #thread height setting
     var properTblHeight = wh - tlist_row_wrapper.offset().top;
@@ -1645,6 +1737,7 @@
     }
     $("#tlist_row_wrapper .body").replaceWith(parent_cloned);
   }
+
   function filterRes(txt) {
     // -- filtering res.
     var re = new RegExp(txt, "i");
