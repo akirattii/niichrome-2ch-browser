@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.5.0
+ * @version 0.5.1
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -593,7 +593,7 @@ $(function() {
    *    default is "false"
    */
   function viewResponses(url, row, historyUpdate) {
-    startLoading(row);
+    startLoading(url, row);
     // If URL contains "headline.2ch.net", read data of ".dat" instead of "read.cgi".
     if (util2ch.isHeadlineURL(url)) {
       if (!row) {
@@ -1088,7 +1088,7 @@ $(function() {
   $document.on("click", ".thumb", function(e) {
     console.log("img.thumb clicked");
     // get thread pane's width
-    var w = thread_title.width();
+    var w = thread_title.width() - 24;
     $(this).removeClass("thumb")
       .addClass("rawimg")
       .width(w)
@@ -1146,10 +1146,12 @@ $(function() {
   //
 
   // start loading.
-  function startLoading(row) {
+  function startLoading(url, row) {
     if (row) row.addClass("loading_in_cell");
     txt_url.addClass("loading_in_cell_rev");
-    readmore.addClass("loading_in_cell");
+    if (url == $("#readmore").data("url")) {
+      readmore.addClass("loading_in_cell");
+    }
     nowloading = true;
   }
   // stop loading.
