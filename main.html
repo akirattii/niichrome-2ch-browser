@@ -6,6 +6,7 @@
   <title>niichrome</title>
   <link href="main.css" rel="stylesheet"></link>
   <link rel="stylesheet" href="lib/css/jquery-ui-1.10.4.custom.min.css">
+  <link rel="stylesheet" href="lib/css/niichrome-findbar.css">
 </head>
 
 <body>
@@ -40,9 +41,43 @@
     <div class="tool">
       <div id="btn_addBm" class="btn star_on24 grayout" title="お気に入りに登録"></div>
     </div>
-    <div id="lbl_version">
-      <a href="https://chrome.google.com/webstore/detail/niichrome-2ch%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6/iabgdknpefinjdmfacfgkpfiiglbdhnc" target="_blank">v.###</a>
+    <div id="btn_settings">
+      &#9776;
     </div>
+  </div><!-- tools -->
+
+  <div id="pane_settings">
+    <div class="setting" id="btn_settingBMList">
+      <div class="setting_title">お気に入り一覧</div>
+      <div class="setting_sc">Ctrl+B</div>
+      <div style="clear:both;"></div>
+    </div>
+    <div class="setting" id="btn_settingBM">
+      <div class="setting_title">お気に入り登録/削除</div>
+      <div class="setting_sc">Ctrl+D</div>
+      <div style="clear:both;"></div>
+    </div>
+    <hr>
+    <div class="setting" id="btn_settingFind">
+      <div class="setting_title">スレ内検索</div>
+      <div class="setting_sc">Ctrl+F</div>
+      <div style="clear:both;"></div>
+    </div>
+    <hr>
+    <div class="setting" id="btn_settingAbout">
+      <div class="setting_title">About</div>
+      <div class="setting_sc"></div>
+      <div style="clear:both;"></div>
+    </div>
+    <hr>
+    <div class="setting" id="btn_settingQuit" title="アプリを終了します">
+      <div class="setting_title">終了</div>
+      <div class="setting_sc">Ctrl+W</div>
+      <div style="clear:both;"></div>
+    </div>
+    <hr>
+    <div id="btn_closePaneSettings" title="設定メニューを閉じます">×</div>
+    <div id="lbl_version">v.###</div>
   </div>
 
   <div id="tlist"> 
@@ -119,6 +154,15 @@
     </div>
   </div>
 
+  <div id="findbar">
+    <input class="findbar_input" type="text" value="" placeholder="スレ内検索">
+    <div class="findbar_result">&nbsp;</div>
+    <div class="button findbar_next">↓</div>
+    <div class="button findbar_prev">↑</div>
+    <div class="button findbar_close">×</div>
+    <div style="clear:both;"></div>
+  </div>
+
 </body>
 <script src="lib/js/niichrome-logger.js"></script>
 <script src="lib/js/niichrome-idbutil.js"></script>
@@ -127,6 +171,7 @@
 <script src="lib/js/niichrome-amazonutil.js"></script>
 <script src="lib/js/jquery-2.1.0.min.js"></script>
 <script src="lib/js/jquery-ui-1.10.4.custom.min.js"></script>
-<script type="text/javascript" src="lib/js/draggable.js"></script>
+<script src="lib/js/draggable.js"></script>
+<script src="lib/js/niichrome-findbar.js"></script>
 <script src="main-ui.js"></script>
 </html>

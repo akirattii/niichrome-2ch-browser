@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.5.1
+ * @version 0.6.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -31,6 +31,9 @@ $(function() {
 
   console.log = function() {};
 
+  // chrome web store URL
+  CWS_URL = "https://chrome.google.com/webstore/detail/niichrome-2ch%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6/iabgdknpefinjdmfacfgkpfiiglbdhnc";
+
   // fullscreen mode
   // chrome.app.window.current().fullscreen();
   chrome.app.window.current().maximize();
@@ -39,6 +42,10 @@ $(function() {
   var util2ch = niichrome.util2ch();
   var idbutil = niichrome.idbutil("niichromedb", 1);
   var amazonutil = niichrome.amazonutil();
+  var findbar = niichrome.findbar("#findbar", "#thread", {
+    toggleSpeed: 100,
+    scrollMargin: 260
+  });
 
   //
   // -- set up indexedDB
@@ -167,12 +174,22 @@ $(function() {
   var btn_adultCheckYes = $("#btn_adultCheckYes");
   var btn_adultCheckNo = $("#btn_adultCheckNo");
   var lbl_version = $("#lbl_version");
+  var btn_settings = $("#btn_settings");
+  var pane_settings = $("#pane_settings");
+  var btn_closePaneSettings = $("#btn_closePaneSettings");
+  var btn_settingBMList = $("#btn_settingBMList");
+  var btn_settingBM = $("#btn_settingBM");
+  var btn_settingFind = $("#btn_settingFind");
+  var btn_settingAbout = $("#btn_settingAbout");
+  var btn_settingQuit = $("#btn_settingQuit");
+
+  txt_url.focus();
 
   //
   // -- window onload
   //
   window.onload = function(e) {
-    lbl_version.find("a").text("v." + chrome.runtime.getManifest().version);
+    lbl_version.text(chrome.runtime.getManifest().name + " v." + chrome.runtime.getManifest().version);
     readmore.hide();
     readhere.hide();
     // make webview pane draggable
@@ -223,22 +240,30 @@ $(function() {
           break;
         case 70: // Ctrl+F
           event.preventDefault();
-          console.log('Ctrl+F');
-          txt_filter.select();
+          if (event.shiftKey) {
+            console.log('Ctrl+Shift+F');
+            // Ctrl+Shift+F
+            txt_filter.select();
+          } else {
+            console.log('Ctrl+F');
+            // Ctrl+F
+            btn_settingFind.trigger("click");
+          }
           break;
         case 66: // Ctrl+B
           event.preventDefault();
           console.log('Ctrl+B');
-          btn_bmlist.trigger("click");
+          btn_settingBMList.trigger("click");
           break;
         case 68: // Ctrl+D
           event.preventDefault();
           console.log('Ctrl+D');
-          btn_addBm.trigger("click");
+          btn_settingBM.trigger("click");
           break;
       }
     }
   });
+
 
   //
   // -- BBS List
@@ -1329,6 +1354,45 @@ $(function() {
   //
   // -- menu icons
   //
+
+  //
+  // settings button
+  btn_settings.click(function(e) {
+    pane_settings.slideToggle("fast");
+    console.log("pane_settings shown");
+    var offset = {
+      top: $(this).offset().top + $(this).height() + 2,
+      left: $(this).offset().left - pane_settings.width() + $(this).width()
+    }
+    pane_settings.offset(offset);
+  });
+  $document.on("click", "#pane_settings .setting", function(e) {
+    if ($(e.currentTarget).hasClass("disabled")) return;
+    pane_settings.hide();
+  });
+  btn_closePaneSettings.click(function(e){
+    pane_settings.hide();
+  });
+  // settings - "お気に入り一覧"
+  btn_settingBMList.click(function(e) {
+    btn_bmlist.trigger("click");
+  });
+  // settings - "お気に入り登録/削除"
+  btn_settingBM.click(function(e) {
+    btn_addBm.trigger("click");
+  });
+  // settings - "スレ内検索"
+  btn_settingFind.click(function(e) {
+    findbar.show();
+  });
+  // settings - "About"
+  btn_settingAbout.click(function(e) {
+    window.open(CWS_URL);
+  });
+  // settings - "終了"
+  btn_settingQuit.click(function(e) {
+    window.close();
+  });
 
   // tool icon buttons' effect
   $("#tools .btn").click(function(e) {

@@ -1,0 +1,68 @@
+.findbar_highlight.findbar_focus {
+  /*border: 1px solid gray;*/
+  background-color: yellow;
+}
+.findbar_highlight {
+  background-color: #ffff99;
+  color: black;
+  font-weight: normal;
+}
+/* findbar pane */
+#findbar {
+  z-index: 99999;
+  display: none;
+  position: fixed;
+  top: 36px;
+  right: 0px;
+  background-color: #333333;
+  padding: 4px 2px 4px 6px;
+  border-radius: 0px 0px 0px 6px;
+  box-shadow: 10px 10px 10px rgba(0,0,0,0.8); 
+}
+#findbar * {
+  float: left;
+}
+/* input box */
+#findbar .findbar_input {
+  width: 120px;
+  padding: 2px 38px 2px 0px;
+  margin: 2px 0px 0px 0px;
+  font-size: 0.9em;
+}
+/* result pane */
+#findbar .findbar_result {
+  position: relative;
+  left: -36px; /* follow .findbar_input's padding-right */
+  min-width: 0px;
+  max-width: 0px;
+  padding: 4px 0px 0px 0px;
+  color: #686868;
+  text-align: left;
+}
+#findbar .findbar_result.notFound {
+  color: red;
+}
+/* buttons */
+#findbar .button {
+  padding: 2px;
+  margin: 2px 0px 0px 0px;
+  cursor: pointer;
+  background: -webkit-gradient(linear, left top, left bottom, from(gray), to(black));
+  min-width: 20px;
+  max-width: 20px;
+  text-align: center;
+  border: 1px solid white;
+}
+#findbar .findbar_next {
+  border-radius: 0px 0px 0px 0px;
+}
+#findbar .findbar_prev {
+  border-radius: 0px 2px 2px 0px;
+}
+#findbar .findbar_close {
+  border-radius: 4px;
+  margin-left: 4px;
+  background: transparent;
+  color: white;
+  border: 0px solid gray;
+}

@@ -364,17 +364,61 @@ div#tools .tool #txt_filter {
   border-radius: 3px;
   background-color: white;
 }
-div#lbl_version {
+div#tools #btn_settings {
+  color: #cacaca;
   position: fixed;
-  top: 8px;
-  right: 2px;
+  right: 0px;
+  font-weight: bold;
+  font-size: 1.3em;
+  padding: 6px 10px 0px 6px;
+  cursor: pointer;
 }
-div#lbl_version a {
-  text-decoration: none;
-  color: #e0e0e0;
-  font-size: 0.8em;
+div#tools #btn_settings:hover {
+  color: #ffffff;
 }
 
+
+/* settings menu */
+#pane_settings {
+  display: none;
+  background-color: white;
+  padding: 0px;
+  color: black;
+  position: fixed;
+  z-index: 999999;
+  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
+  min-width: 300px;
+}
+#pane_settings .setting {
+  margin: 0px;
+  padding: 8px 8px 8px 12px;
+  cursor: pointer;
+}
+#pane_settings .setting:hover {
+  background-color: #229be8;
+  color: white;
+}
+#pane_settings .setting_title {
+  float: left;
+}
+#pane_settings .setting_sc {
+  color: #c0c0c0;
+  float: right;
+  text-align: right;
+  font-size: 0.8em;
+}
+#pane_settings #lbl_version {
+  text-align: right;
+  padding: 4px 12px 8px 12px;
+  font-size: 0.8em;
+}
+#pane_settings #btn_closePaneSettings {
+  font-weight: bold;
+  float: left;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0px 0px 0px 12px;
+}
 
 /* icon buttons */
 .btn {
