@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.6.1
+ * @version 0.7.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -121,6 +121,9 @@ $(function() {
   // adult contents confirmed flag
   var adultConfirmed = false;
 
+  // for appearing history urls on Back & Forward button's long press.
+  var pressTimer;
+
   //
   // -- UI controls
   //
@@ -170,6 +173,7 @@ $(function() {
   var wv = $("#wv");
   var btn_closeWv = $("#btn_closeWv");
   var body = $("body");
+  var menu_historyURLs = $("#menu_historyURLs");
   var dlg_adultCheck = $("#dlg_adultCheck");
   var btn_adultCheckYes = $("#btn_adultCheckYes");
   var btn_adultCheckNo = $("#btn_adultCheckNo");
@@ -212,6 +216,42 @@ $(function() {
       execReadmore();
     }
   });
+
+  //
+  // -- window clicked
+  //
+  $window.on("click", function(e) {
+    hideIfUnhovered([
+      menu_historyURLs,
+      pane_settings
+    ], e);
+  });
+
+  /**
+   * hide elements of un-hovered
+   */
+  function hideIfUnhovered(elems, e) {
+    console.log("hideIfUnhovered");
+    // Unless the element is hovered, hide it.
+    var elem;
+    for (var i = 0, len = elems.length; i < len; i++) {
+      elem = elems[i];
+      if (!isMouseHovered(elem, e)) elem.hide();
+    }
+  }
+
+  function isMouseHovered(elem, evt) {
+    var vRangeStart = elem.offset().top;
+    var vRangeEnd = vRangeStart + elem.height();
+    var hRangeStart = elem.offset().left;
+    var hRangeEnd = hRangeStart + elem.width();
+    if (vRangeStart <= evt.clientY && evt.clientY <= vRangeEnd &&
+      hRangeStart <= evt.clientX && evt.clientX <= hRangeEnd) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   //
   // -- shortcut key
@@ -648,7 +688,7 @@ $(function() {
         }
         // access history update
         if (historyUpdate) {
-          util2ch.updateHistory(url, prevURL);
+          util2ch.updateHistory(url, title, prevURL);
         }
         //
         setThreadInfo({
@@ -1359,19 +1399,20 @@ $(function() {
   //
   // settings button
   btn_settings.click(function(e) {
-    pane_settings.toggle();
+    pane_settings.show();
     console.log("pane_settings shown");
     var offset = {
       top: $(this).offset().top + $(this).height() + 2,
       left: $(this).offset().left - pane_settings.width() + $(this).width()
     }
     pane_settings.offset(offset);
+    return false;
   });
   $document.on("click", "#pane_settings .setting", function(e) {
     if ($(e.currentTarget).hasClass("disabled")) return;
     pane_settings.hide();
   });
-  btn_closePaneSettings.click(function(e){
+  btn_closePaneSettings.click(function(e) {
     pane_settings.hide();
   });
   // settings - "お気に入り一覧"
@@ -1404,26 +1445,86 @@ $(function() {
     });
   });
 
+  // Back button
   btn_arrowBack.click(function(e) {
     console.log("btn_arrowBack");
     if ($(this).hasClass("disabled")) return;
     goBackOrForward(true); // go back
   });
+  // show "Back" history on long press.
+  btn_arrowBack.mouseup(function() {
+    clearTimeout(pressTimer)
+    return false;
+  }).mousedown(function(e) {
+    pressTimer = window.setTimeout(function() {
+      popupHistoryMenus(e, false); // popup "back" history.
+    }, 1000);
+    return false;
+  });
+
+  // Forward button
   btn_arrowForward.click(function(e) {
     console.log("btn_arrowForward");
     if ($(this).hasClass("disabled")) return;
     goBackOrForward(false); // go forward
   });
+  // show "Forward" history on long press.
+  btn_arrowForward.mouseup(function() {
+    clearTimeout(pressTimer)
+    return false;
+  }).mousedown(function(e) {
+    pressTimer = window.setTimeout(function() {
+      popupHistoryMenus(e, true); // popup "forward" history.
+    }, 1000);
+    return false;
+  });
+
+  function popupHistoryMenus(evt, isForward) {
+    // set back history 
+    var curURL = txt_url.data("url");
+    var history;
+    if (isForward) {
+      history = util2ch.getHistoryURLs(curURL).forwardHistory;
+    } else {
+      history = util2ch.getHistoryURLs(curURL).backHistory;
+    }
+    var df = $(document.createDocumentFragment());
+    for (var i = 0, len = history.length; i < len; i++) {
+      var row = $('<div class="row" data-url="' + history[i].url + '"">' + history[i].title + '</div>');
+      df.append(row);
+    }
+    menu_historyURLs
+      .empty()
+      .append(df)
+      .show()
+      .offset({
+        top: evt.clientY - 2,
+        left: evt.clientX - 2
+      });
+  }
+
+  $document.on("click", "#menu_historyURLs .row", function(e) {
+    var url = $(this).data("url");
+    goFromHistory(url);
+    menu_historyURLs.hide();
+  });
+
+  // jump from history
+  function goFromHistory(url) {
+    if (url) {
+      viewResponses(url, null, false);
+    }
+  }
 
   function goBackOrForward(back) {
     var curURL = thread_title.data("url");
     if (!curURL) return;
     var baf = util2ch.getBackAndForwardURL(curURL);
     var url;
-    if (back && baf.backURL) {
-      url = baf.backURL;
-    } else if (!back && baf.forwardURL) {
-      url = baf.forwardURL;
+    if (back && baf.backURL && baf.backURL.url) {
+      url = baf.backURL.url;
+    } else if (!back && baf.forwardURL && baf.forwardURL.url) {
+      url = baf.forwardURL.url;
     }
     if (url) {
       viewResponses(url, null, false);
