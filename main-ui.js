@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.6.0
+ * @version 0.6.1
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -426,6 +426,10 @@ $(function() {
       var url = $(this).val().trim();
       if (!url) return;
 
+      // prettify read.cgi URL 
+      // eg.: read.cgi/xxxxx/l50 → read.cgi/xxxxx/
+      url = util2ch.prettifyReadCGIURL(url);
+
       if (!isCommand(url) &&
         !util2ch.isBBSURL(url) &&
         !util2ch.isReadCGIURL(url) &&
@@ -436,9 +440,6 @@ $(function() {
       }
       $(this).val(url);
 
-      // prettify read.cgi URL 
-      // eg.: read.cgi/xxxxx/l50 → read.cgi/xxxxx/
-      url = util2ch.prettifyReadCGIURL(url);
 
       if (InputValidator.txt_url()) {
         console.log("txt_url input data is valid");
@@ -696,7 +697,7 @@ $(function() {
         }
         // draw responses.
         var lastResnum = drawResponses(responses, startIdx);
-        if (lastResnum < 0) showErrorMessage("dat落ちです");
+        if (lastResnum < 0) showErrorMessage("datが存在しない or dat落ち or 鯖落ちです");
         readhere
           .data("resnum", lastResnum)
           .data("url", url)
@@ -1358,7 +1359,7 @@ $(function() {
   //
   // settings button
   btn_settings.click(function(e) {
-    pane_settings.slideToggle("fast");
+    pane_settings.toggle();
     console.log("pane_settings shown");
     var offset = {
       top: $(this).offset().top + $(this).height() + 2,
