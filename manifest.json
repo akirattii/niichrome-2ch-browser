@@ -2,7 +2,7 @@
   "name": "niichrome 2chブラウザ",
   "short_name": "niichrome",
   "description": "Chromeアプリ版２ちゃんねるブラウザ",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "manifest_version": 2,
   "app": {
     "background": {
