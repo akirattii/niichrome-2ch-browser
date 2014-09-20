@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.7.1
+ * @version 0.7.4
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -46,6 +46,13 @@ $(function() {
     toggleSpeed: 100,
     scrollMargin: 260
   });
+
+  //
+  // -- configs for this app
+  //
+  var appConfig = {
+    fontSize: 16
+  };
 
   //
   // -- set up indexedDB
@@ -124,6 +131,7 @@ $(function() {
   // for appearing history urls on Back & Forward button's long press.
   var pressTimer;
 
+
   //
   // -- UI controls
   //
@@ -183,6 +191,8 @@ $(function() {
   var btn_closePaneSettings = $("#btn_closePaneSettings");
   var btn_settingBMList = $("#btn_settingBMList");
   var btn_settingBM = $("#btn_settingBM");
+  var btn_settingSizeUp = $("#btn_settingSizeUp");
+  var btn_settingSizeDn = $("#btn_settingSizeDn");
   var btn_settingFind = $("#btn_settingFind");
   var btn_settingAbout = $("#btn_settingAbout");
   var btn_settingQuit = $("#btn_settingQuit");
@@ -272,7 +282,19 @@ $(function() {
           break;
       }
     } else if (event.ctrlKey || event.metaKey) { // with "Ctrl" key
+      console.log("which:", event.which);
       switch (event.which) {
+        // fontsize adjustment
+        case 107: // Ctrl+"+"
+          event.preventDefault();
+          console.log('Ctrl+"+"');
+          btn_settingSizeUp.trigger("click");
+          break;
+        case 109: // Ctrl+"-"
+          event.preventDefault();
+          console.log('Ctrl+"-"');
+          btn_settingSizeDn.trigger("click");
+          break;
         case 76: // Ctrl+L
           event.preventDefault();
           console.log('Ctrl+L');
@@ -1264,6 +1286,18 @@ $(function() {
     el.attr("title", "現在" + el[0].className);
   }
 
+  /** 
+   * font size adjustment
+   * @param {int} fontSize up/down tick
+   */
+  function applyFontSize(upDown) {
+    if (!upDown) upDown = 0;
+    var fontSize = appConfig.fontSize;
+    var newFontSize = fontSize + upDown;
+    $("body").css("font-size", newFontSize);
+    appConfig.fontSize = newFontSize;
+  }
+
   //
   // -- message for info and error 
   //
@@ -1426,6 +1460,14 @@ $(function() {
   // settings - "スレ内検索"
   btn_settingFind.click(function(e) {
     findbar.show();
+  });
+  // settings - "文字サイズ拡大"
+  btn_settingSizeUp.click(function(e) {
+    applyFontSize(1);
+  });
+  // settings - "文字サイズ縮小"
+  btn_settingSizeDn.click(function(e) {
+    applyFontSize(-1);
   });
   // settings - "About"
   btn_settingAbout.click(function(e) {
@@ -1874,8 +1916,8 @@ $(function() {
     var rby = e.clientY + pu.height(); // right bottom Y
     var WW = $window.width();
     var WH = $window.height();
-    var top = e.clientY - 16; // "-4" is for creating refpop under mouse cursor.
-    var left = e.clientX - 4; // "-4" is for creating refpop under mouse cursor.
+    var top = e.clientY - 16; // "-16" is for creating refpop under mouse cursor.
+    var left = e.clientX - 18; // "-18" is for creating refpop under mouse cursor.
     if (rtx >= WW) {
       left -= rtx - WW;
     }
