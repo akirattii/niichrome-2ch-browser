@@ -1,0 +1,153 @@
+/* 
+  Theme 'simple' for niichrome 2ch browser 
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+}
+html, body {
+  font-size: 16px;
+  height: 100%;
+  min-height: 100%;
+  background-color: #ffffff;
+  color: #232323;
+}
+
+/* thread list */ 
+div#tlist {
+  background-color: #ffffff;
+}
+#tlist_header {
+  background-color: rgba(256,256,256,0.8);
+  color: #434343;
+}
+#tlist_row_wrapper .body .row:hover .col {
+  background-color: #cacaca;
+  color: #000000;
+}
+#tlist_row_wrapper .col {
+  border: 0px solid #cdcdcd;
+}
+#tlist_row_wrapper .header .col {
+  color: #232323;
+  background-color: #ffffff;
+  border-bottom: 1px solid #dfdfdf;
+}
+
+
+div#thread {
+  color: #000000;
+  background-color: #ffffff;
+}
+div#thread #thread_title {
+  background-color: rgba(255,255,255,0.9);
+  border-bottom: 1px solid #dfdfdf;
+  color: #44aac2;
+  padding-left: 12px;
+}
+/* response */
+div#thread .res_wrapper {
+  background-color: transparent;
+}
+.res_wrapper .res .res_header .num {
+  color: #696969;
+}
+.res_wrapper .res .res_header .handle {
+  color: #469942;
+}
+.res_wrapper .res .res_header .date {
+  color: #8a8a8a;
+}
+.res_wrapper .res .res_header .uid {
+  color: #9faf68;
+}
+.res_wrapper .res .res_header .be {
+  color: #8a8a8a;
+}
+.res_wrapper .res .res_header .email {
+  color: #CAAFCF;
+}
+.res_wrapper .res .content {
+  color: #232323;
+}
+.res_wrapper .res .content a {
+  color: #1292AF;
+}
+
+
+
+div#blist_wrapper {
+  background-color: #ffffff;
+}
+div#blist {
+  background-color: #ffffff;
+}
+div#blist #btn_bmlist {
+  background: -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,1.0)), to(#232323));
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #8a8a8a;
+  border-bottom: 1px solid #8a8a8a;
+  color: #ffffff;
+}
+div#blist #btn_bmlist:hover {
+  background: -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,1.0)), to(#696969));
+  color: black;
+}
+div#blist .cate0 {
+  border: 1px solid #cacaca;
+  background: -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,0.5)), to(#999999));
+}
+div#blist .cate1:hover {
+  background-color: #cacaca;
+  color: #000000;
+}
+
+
+div#tools {
+  background-color: #696969;
+  border-bottom: 1px solid #3f3f3f;
+}
+div#tools #btn_settings {
+  color: #eaeaea;
+}
+div#tools #btn_settings:hover {
+  color: #ffffff;
+}
+
+/* click and reverse background for bbslist and threadlist */
+.selected {
+  background-color: #232323;
+  color: #ffffff;
+}
+
+.refpop {
+  background-color:#f0f0f0;
+  border:1px solid gray;
+  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
+}
+
+div#readhere {
+  background-color: #9afa9a;
+  color: #232323;
+  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.9);
+}
+div#readmore {
+  color: #52B2BF;
+}
+div#lbl_kakolog {
+  background-color: #ff8c8c;
+  color: #232323;
+  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.9);
+}
+
+::-webkit-scrollbar-track {
+  background-color: #cacaca;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #44aac2;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #64cae2;
+}

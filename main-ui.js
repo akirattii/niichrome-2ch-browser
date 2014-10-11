@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.7.5
+ * @version 0.7.8
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -33,6 +33,13 @@ $(function() {
 
   // chrome web store URL
   CWS_URL = "https://chrome.google.com/webstore/detail/niichrome-2ch%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6/iabgdknpefinjdmfacfgkpfiiglbdhnc";
+
+  // TODO:
+  // theme setting
+  // $('link[rel="stylesheet"][href="themes/theme.css"]').each(function() {
+  //   this.href = "themes/theme-gray/theme-gray.css";
+  // });
+
 
   // fullscreen mode
   // chrome.app.window.current().fullscreen();
@@ -529,6 +536,12 @@ $(function() {
     console.log("btn_showPaneWrite");
     if ($(this).hasClass("disabled")) return;
     pane_wv[0].style.visibility = "visible";
+    // insert css
+    wv[0].insertCSS({
+      code: "div > div,iframe,dl,a,hr { display: none; } " +
+        "form { display: block; } " +
+        "h1 { padding: 12px 2px 12px 2px; } "
+    });
   });
 
   btn_closeWv.click(function(e) {
@@ -540,7 +553,8 @@ $(function() {
     wv[0].addEventListener("loadcommit", function() {
       // insert css
       wv[0].insertCSS({
-        code: "iframe,div,hr,img,dl,a,script { display: none; } " +
+        code: "div > div,iframe,dl,a,hr { display: none; } " +
+          "form { display: block; } " +
           "h1 { padding: 12px 2px 12px 2px; } "
       });
       // execute script
