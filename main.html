@@ -7,7 +7,7 @@
   <link href="main.css" rel="stylesheet"></link>
   <link rel="stylesheet" href="lib/css/jquery-ui-1.10.4.custom.min.css">
   <link rel="stylesheet" href="lib/css/niichrome-findbar.css">
-  <link href="themes/theme.css" rel="stylesheet"></link>
+  <link href="themes/theme.css" rel="stylesheet" data-custom-theme></link>
 </head>
 
 <body>
@@ -42,11 +42,29 @@
     <div class="tool">
       <div id="btn_addBm" class="btn star_on24 grayout" title="お気に入りに登録"></div>
     </div>
-    <div id="btn_settings">
-      &#9776;
-    </div>
+    <div id="btn_settings"></div>
   </div><!-- tools -->
 
+  <div id="pane_confBg">
+    <div id="pane_confWrapper">
+      <h1>設定</h1>
+      <div id="btn_closeConfPane">×</div>
+      <div style="clear:both;"></div>
+      <div id="pane_conf">
+        <div id="conf_font">
+          <h3>フォント</h3>
+          サイズ: <input type="number" id="txt_confFontSize" min="8" max="30"> px
+        </div><!-- conf_themes -->
+        <div id="conf_themes">
+          <h3>テーマ</h3>
+          <select id="sel_themes">
+            <option value="default">デフォルト</option>
+          </select>
+        </div><!-- conf_themes -->
+
+      </div><!-- pane_conf -->
+    </div><!-- pane_confWrapper -->
+  </div><!-- pane_confBg -->
 
   <div id="menu_historyURLs">
     <div class="row" data-url="test">hoge</div>
@@ -78,6 +96,12 @@
     <div class="setting" id="btn_settingSizeDn">
       <div class="setting_title">文字サイズ縮小</div>
       <div class="setting_sc">Ctrl -</div>
+      <div style="clear:both;"></div>
+    </div>
+    <hr>
+    <div class="setting" id="btn_settingConfig">
+      <div class="setting_title">設定</div>
+      <div class="setting_sc"></div>
       <div style="clear:both;"></div>
     </div>
     <hr>
@@ -123,7 +147,8 @@
     <div id="blist">
       <div id="btn_bmlist" title="お気に入り一覧">お気に入り</div>
       <div id="blist_header">
-        <h2 id="btn_reloadBList" class="reload_in_cell">BBS一覧</h2>
+        <div id="btn_reloadBList" class="reload_in_cell" title="BBS一覧を再取得">&nbsp;</div>
+        BBS一覧
       </div>
       <!-- bbslist template -->
       <div id="blist_tpl" class="tpl cate">
@@ -161,7 +186,8 @@
 
 
   <div id="message">message</div>
-  
+
+
   <div id="dlg_adultCheck">
     <div style="margin-left:auto;margin-right:auto;margin-top:10%;margin-bottom:auto;">
       <h2>アダルト確認</h2>

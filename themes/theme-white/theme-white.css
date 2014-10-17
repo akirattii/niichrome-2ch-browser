@@ -1,5 +1,5 @@
 /* 
-  Theme 'gray' for niichrome 2ch browser 
+  Theme 'simple' for niichrome 2ch browser 
 */
 
 * {
@@ -10,16 +10,16 @@ html, body {
   font-size: 16px;
   height: 100%;
   min-height: 100%;
-  background-color: #dfdfdf;
+  background-color: #ffffff;
   color: #232323;
 }
 
 /* thread list */ 
 div#tlist {
-  background-color: #cfcfcf;
+  background-color: #ffffff;
 }
 #tlist_header {
-  background-color: rgba(200,200,200,0.8);
+  background-color: rgba(256,256,256,0.8);
   color: #434343;
 }
 #tlist_row_wrapper .body .row:hover .col {
@@ -31,19 +31,19 @@ div#tlist {
 }
 #tlist_row_wrapper .header .col {
   color: #232323;
-  background-color: transparent;
-  border-bottom: 1px solid #afafaf;
+  background-color: #ffffff;
+  border-bottom: 1px solid #dfdfdf;
 }
 
 
 div#thread {
   color: #000000;
-  background-color: #bfbfbf;
+  background-color: #ffffff;
 }
 div#thread #thread_title {
-  background-color: rgba(210,210,210,0.9);
-  border-bottom: 1px solid #afafaf;
-  color: #339af2;
+  background-color: rgba(255,255,255,0.9);
+  border-bottom: 1px solid #dfdfdf;
+  color: #44aac2;
   padding-left: 12px;
 }
 /* response */
@@ -69,7 +69,7 @@ div#thread .res_wrapper {
   color: #CAAFCF;
 }
 .res_wrapper .res .content {
-  color: #303030;
+  color: #232323;
 }
 .res_wrapper .res .content a {
   color: #1292AF;
@@ -78,10 +78,10 @@ div#thread .res_wrapper {
 
 
 div#blist_wrapper {
-  background-color: #dfdfdf;
+  background-color: #ffffff;
 }
 div#blist {
-  background-color: #dfdfdf;
+  background-color: #ffffff;
 }
 div#blist #btn_bmlist {
   background: -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,1.0)), to(#232323));
@@ -105,12 +105,12 @@ div#blist .cate1:hover {
 }
 div#blist_toggle_bar {
   background-image: url(/img/mesh8.png);
-  -webkit-filter:invert(70%);
+  -webkit-filter:invert();
 }
 
 div#tools {
-  background-color: #afafaf;
-  border-bottom: 1px solid #cccccc;
+  background-color: #fcfcfc;
+  border-bottom: 1px solid #f1f1f1;
 }
 div#tools #btn_settings {
   content: url("/img/setting24.png");
@@ -119,23 +119,23 @@ div#tools #btn_settings {
 
 /* click and reverse background for bbslist and threadlist */
 .selected {
-  background-color: #adadad;
-  color: #000000;
+  background-color: #232323;
+  color: #ffffff;
 }
 
 .refpop {
-  background-color:#d0d0d0;
+  background-color:#f0f0f0;
   border:1px solid gray;
   box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
 }
 
 div#readhere {
-  background-color: #3a9a5a;
+  background-color: #9afa9a;
   color: #232323;
   box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.9);
 }
 div#readmore {
-  color: #1292AF;
+  color: #52B2BF;
 }
 div#lbl_kakolog {
   background-color: #ff8c8c;
@@ -196,8 +196,8 @@ div#lbl_kakolog {
   background-color: #cacaca;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #248aa2;
+  background-color: #44aac2;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #44aac2;
+  background-color: #64cae2;
 }

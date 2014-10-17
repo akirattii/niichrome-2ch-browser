@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.7.8
+ * @version 0.8.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -34,13 +34,6 @@ $(function() {
   // chrome web store URL
   CWS_URL = "https://chrome.google.com/webstore/detail/niichrome-2ch%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6/iabgdknpefinjdmfacfgkpfiiglbdhnc";
 
-  // TODO:
-  // theme setting
-  // $('link[rel="stylesheet"][href="themes/theme.css"]').each(function() {
-  //   this.href = "themes/theme-gray/theme-gray.css";
-  // });
-
-
   // fullscreen mode
   // chrome.app.window.current().fullscreen();
   chrome.app.window.current().maximize();
@@ -54,12 +47,30 @@ $(function() {
     scrollMargin: 260
   });
 
-  //
-  // -- configs for this app
-  //
-  var appConfig = {
-    fontSize: 16
+
+  // appConfig's default setting
+  DEFAULT_APP_CONFIG = {
+    fontSize: 16, // px
+    theme: 'default'
   };
+
+  // this app's config
+  var appConfig = DEFAULT_APP_CONFIG;
+
+  // observe appConfig
+  Object.observe(appConfig, function(changes) {
+    console.log("appConfig changed: ", changes);
+    saveAppConfig(); // save appConfig into the storage
+  });
+
+  // load appConfig from the storage
+  loadAppConfig(function() {
+    /* apply configs to window */
+    // fontSize
+    applyFontSize(appConfig.fontSize);
+    // theme 
+    applyTheme(appConfig.theme);
+  });
 
   //
   // -- set up indexedDB
@@ -187,6 +198,11 @@ $(function() {
   var pane_wv = $("#pane_wv");
   var wv = $("#wv");
   var btn_closeWv = $("#btn_closeWv");
+  var pane_confBg = $("#pane_confBg");
+  var pane_confWrapper = $("#pane_confWrapper");
+  var pane_conf = $("#pane_conf");
+  var btn_closeConfPane = $("#btn_closeConfPane");
+  var txt_confFontSize = $("#txt_confFontSize");
   var body = $("body");
   var menu_historyURLs = $("#menu_historyURLs");
   var dlg_adultCheck = $("#dlg_adultCheck");
@@ -201,6 +217,7 @@ $(function() {
   var btn_settingSizeUp = $("#btn_settingSizeUp");
   var btn_settingSizeDn = $("#btn_settingSizeDn");
   var btn_settingFind = $("#btn_settingFind");
+  var btn_settingConfig = $("#btn_settingConfig");
   var btn_settingAbout = $("#btn_settingAbout");
   var btn_settingQuit = $("#btn_settingQuit");
 
@@ -1304,12 +1321,16 @@ $(function() {
    * font size adjustment
    * @param {int} fontSize up/down tick
    */
-  function applyFontSize(upDown) {
+  function tickFontSize(upDown) {
     if (!upDown) upDown = 0;
     var fontSize = appConfig.fontSize;
     var newFontSize = fontSize + upDown;
-    $("body").css("font-size", newFontSize);
+    applyFontSize(newFontSize + "px");
     appConfig.fontSize = newFontSize;
+  }
+  // apply specific fontSize
+  function applyFontSize(fontSize) {
+    $("body").css("font-size", fontSize);
   }
 
   //
@@ -1477,11 +1498,15 @@ $(function() {
   });
   // settings - "文字サイズ拡大"
   btn_settingSizeUp.click(function(e) {
-    applyFontSize(1);
+    tickFontSize(1);
   });
   // settings - "文字サイズ縮小"
   btn_settingSizeDn.click(function(e) {
-    applyFontSize(-1);
+    tickFontSize(-1);
+  });
+  // settings - "設定"
+  btn_settingConfig.click(function(e) {
+    openConfPane();
   });
   // settings - "About"
   btn_settingAbout.click(function(e) {
@@ -1977,6 +2002,143 @@ $(function() {
       }
     }
     $("#res_wrapper").replaceWith(parent_cloned);
+  }
+
+  //
+  // -- Configurations
+  // 
+
+  $("#sel_themes").on("change", function(e) {
+    var theme = $(this).val();
+    applyTheme(theme);
+    // save to appConfig
+    appConfig.theme = theme;
+  });
+
+  $("#txt_confFontSize").on("change", function(e) {
+    var val = $(this).val();
+    if ($.isNumeric(val)) {
+      applyFontSize(val + "px");
+      // save to appConfig
+      appConfig.fontSize = parseInt(val);
+    } else {
+      $(this).val(appConfig.fontSize);
+    }
+  });
+
+  function getThemes(onSuccess, onError) {
+    var ret = [];
+    chrome.runtime.getPackageDirectoryEntry(function(root) {
+      root.getDirectory("themes", {
+        create: false
+      }, function(dirEntry) {
+        var dirReader = dirEntry.createReader();
+        dirReader.readEntries(function(entries) {
+          for (var len = entries.length, i = 0; i < len; i++) {
+            var entry = entries[i];
+            if (entry.isDirectory) {
+              console.log('Directory: ' + entry.fullPath + ", " + entry.name);
+              ret.push(entry.name);
+            }
+          }
+          onSuccess(ret);
+          return;
+        }, onError); // dirReader.readEntries
+      }, onError); // getDirectory
+    }); // getPackageDirectoryEntry
+  }
+
+  // reflect the theme to mainWindow
+  function applyTheme(theme) {
+    var themepath;
+    if (theme == "default") {
+      themepath = "themes/theme.css";
+    } else {
+      themepath = "themes/" + theme + "/" + theme + ".css";
+    }
+    $('link[rel="stylesheet"][data-custom-theme]')[0].href = themepath;
+  }
+
+  $("#btn_closeConfPane").click(closeConfPane);
+
+
+  function openConfPane() {
+    console.log("openConfPane");
+    pane_confBg.show();
+    // font
+    setConfFontSize();
+    // theme
+    createThemeOptions();
+  }
+
+  function closeConfPane() {
+    console.log("closeConfPane");
+    pane_confBg.hide();
+    // saveAppConfig();
+  }
+
+  function setConfFontSize() {
+    txt_confFontSize.val(appConfig.fontSize);
+  }
+
+  // create themes list if themes.length <= 1 ('default' only)
+  function createThemeOptions() {
+    var sel_themes = $("#sel_themes");
+    var sel_themes_len = $("#sel_themes option").length;
+    if (sel_themes_len <= 1) {
+      getThemes(function(themes) {
+        var theme;
+        var themename;
+        for (var len = themes.length, i = 0; i < len; i++) {
+          theme = themes[i];
+          themename = theme.split("theme-")[1];
+          sel_themes.append('<option value="' + theme + '">' + themename + '</option>');
+        }
+        // make current theme 'selected'
+        var currentTheme = appConfig.theme;
+        if (!currentTheme) currentTheme = "default";
+        $("#sel_themes").val(currentTheme);
+      });
+    }
+  }
+
+  // save appConfig to localStorage
+  function saveAppConfig() {
+    console.log("saveAppConfig");
+    var appConfigStr = JSON.stringify(appConfig);
+    chrome.storage.local.set({
+      'appConfig': appConfigStr
+    }, function() {
+      console.log('appConfig has been saved to localStorage. Stringified appConfig: ', appConfigStr);
+    });
+  }
+
+  // load appConfig from localStorage
+  function loadAppConfig(cb) {
+    console.log("loadAppConfig");
+    chrome.storage.local.get("appConfig", function(items) {
+      var appConfigStrInStorage = items.appConfig;
+      var appConfigInStorage;
+      console.log("appConfig in storage:", appConfigInStorage);
+      if (appConfigStrInStorage) {
+        var appConfigInStorage = JSON.parse(appConfigStrInStorage);
+        for (var k in appConfigInStorage) {
+          console.log(k, appConfigInStorage[k]);
+          appConfig[k] = appConfigInStorage[k];
+        }
+      } else {
+        console.log("set appConfig as default because no appConfig in the storage.");
+      }
+      cb();
+    });
+  }
+
+  // clear appConfig in localStorage
+  function clearAppConfig() {
+    console.log("clearAppConfig");
+    chrome.storage.local.remove("appConfig", function() {
+      console.log("Cleared appConfig in localStorage.");
+    });
   }
 
 });
