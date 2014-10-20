@@ -143,6 +143,11 @@ div#lbl_kakolog {
   box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.9);
 }
 
+
+.percentComplete {
+  color: #232323;
+}
+
 .star_on24 {
   /*-webkit-filter:invert();*/
 }

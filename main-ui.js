@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.8.0
+ * @version 0.8.1
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -88,11 +88,11 @@ $(function() {
           pair of dat's URL and resNum 
           eg. { "http://hoge.com/bbs1/dat/222.dat": 123, "http://hoge.com/bbs1/dat/222.dat": 345 ... }
     */
-    {
-      storename: 'snapshots',
-      keyPath: 'url',
-      autoIncrement: false
-    },
+    // {
+    //   storename: 'snapshots',
+    //   keyPath: 'url',
+    //   autoIncrement: false
+    // },
     /* 
       [readheres]
       Res number of the thread read by user.
@@ -455,7 +455,7 @@ $(function() {
     console.log("btn_bmlist click");
     toggleBBSList(false);
     // make the threadList reloading button disabled, because bookmarkList is unreloadable.
-    btn_reloadTList.hide();
+    // btn_reloadTList.hide();
     setBBSInfo({
       url: cmd.bookmarks,
       bbs: "お気に入り"
@@ -463,8 +463,31 @@ $(function() {
     getAllBookmarks(function(list) {
       console.log("list", list);
       drawThreadList(list);
+      // GET latest resnums on bookmark & set calced new counts
+      setLatestResnumsOnBM(function() {
+        setResNewCount();
+      });
     });
   });
+
+  // get and set the latest resnums of bookmarked threads.
+  function setLatestResnumsOnBM(cb) {
+    var elems = $("#tlist .body > div");
+    var cnt = elems.length;
+    elems.each(function() {
+      var el = $(this);
+      var rescntEl = el.find(".col.rescnt");
+      var url = el.data("url");
+      util2ch.getLatestResnum(url, function(resnum) {
+        console.log(resnum);
+        rescntEl.text(resnum);
+        if (!--cnt) { // if the final of each()
+          cb();
+          return;
+        }
+      });
+    });
+  }
 
   //
 
@@ -881,47 +904,58 @@ $(function() {
     }, 100);
   });
 
+
   function drawThreadList(list, endHandler) {
     console.log("drawThreadList");
     var bbsurl = bbs_title.data("url");
     var ttitle_col_w = $("#tlist_row_wrapper .header .ttitle").width();
     var isCommandURL = isCommand(bbsurl);
-    getSS(bbsurl, function(ss) {
-      var ss4save = {};
-      var target = $("#tlist .body");
-      var html = "";
-      for (var len = list.length, i = 0; i < len; i++) {
-        var json = list[i];
-        var url = util2ch.datURLToReadCGIURL(json.url); // dat's url to read.cgi's url
-        var title = json.title;
-        var res = json.res;
-        var diff = "";
-        if (!isCommandURL && ss) {
-          var resInSS = ss[url];
-          if (resInSS) {
-            diff = res - resInSS;
-          } else {
-            diff = "New";
-          }
-        }
-        html += '<div data-url="' + url + '" class="row">\n' +
-          '<div class="col ttitle" title="' + title.replace(/"/g, '&quot;') + '" style="width:' + ttitle_col_w + 'px">' + title + '</div>\n' +
-          '<div class="col newcnt">' + diff + '</div>\n' +
-          '<div class="col rescnt">' + res + '</div>\n' +
-          '</div>';
-        ss4save[url] = res;
-      }
-      target.html(html);
-      // callback onEnd
-      if (endHandler) endHandler();
-      // go to top
-      tlist.scrollTop(0);
-      // save the snapshot
-      saveSS(bbsurl, {
-        url: bbsurl,
-        ss: ss4save
-      });
 
+    var target = $("#tlist .body");
+    var html = "";
+    var json, url, title, res;
+    for (var len = list.length, i = 0; i < len; i++) {
+      json = list[i];
+      url = util2ch.datURLToReadCGIURL(json.url); // dat's url to read.cgi's url
+      title = json.title;
+      if (!isBookmarkView()) {
+        res = json.res;
+      } else {
+        res = "";
+      }
+      html += '<div data-url="' + url + '" class="row">\n' +
+        '<div class="col ttitle" title="' + title.replace(/"/g, '&quot;') + '" style="width:' + ttitle_col_w + 'px">' + title + '</div>\n' +
+        '<div class="col newcnt"></div>\n' +
+        '<div class="col rescnt">' + res + '</div>\n' +
+        '</div>';
+    }
+    target.html(html);
+    // callback onEnd
+    if (endHandler) endHandler();
+    // go to top
+    tlist.scrollTop(0);
+    // set new count of each threads if it is NOT the bookmark view
+    if (!isBookmarkView()) setResNewCount();
+  }
+
+  // calc & set new count of each thread
+  function setResNewCount() {
+    $("#tlist .body > div").each(function() {
+      var el = $(this);
+      var url = el.data("url");
+      var rescntEl = el.find(".col.rescnt");
+      var newcntEl = el.find(".col.newcnt");
+      var rescnt = rescntEl.text();
+      if ($.isNumeric(rescnt)) {
+        rescnt = parseInt(rescnt);
+      } else {
+        return;
+      }
+      getReadhereFromStore(url, function(resnum) {
+        if (!resnum) return;
+        var newcnt = rescnt - resnum;
+        newcntEl.text(newcnt);
+      });
     });
   }
 
@@ -1385,8 +1419,21 @@ $(function() {
   btn_reloadTList.click(function(e) {
     if (nowloading) return;
     console.log("btn_reloadTList url:", $(this).data("url"));
-    reloadTList();
+    $("#bbs_title").data("url")
+    if (isBookmarkView()) {
+      btn_bmlist.trigger("click");
+    } else {
+      reloadTList();
+    }
   });
+
+  function isBookmarkView() {
+    if (bbs_title.data("url") == cmd.bookmarks) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   function execReadmore() {
     var url = readmore.data("url");
@@ -1923,22 +1970,22 @@ $(function() {
     idbutil.remove("bookmarks", daturl);
   }
 
-  // get a snapshot of the bbs from snapshots store
-  function getSS(bbsurl, cb) {
-    idbutil.get("snapshots", bbsurl, function(data) {
-      console.log("snapshot of " + bbsurl, data);
-      if (data) {
-        cb(data.ss);
-      } else {
-        cb();
-      }
-    });
-  }
-  // save a snapshot of the bbs to snapshots store
-  function saveSS(bbsurl, item) {
-    console.log("saveSS.");
-    idbutil.update("snapshots", item);
-  }
+  // // get a snapshot of the bbs from snapshots store
+  // function getSS(bbsurl, cb) {
+  //   idbutil.get("snapshots", bbsurl, function(data) {
+  //     console.log("snapshot of " + bbsurl, data);
+  //     if (data) {
+  //       cb(data.ss);
+  //     } else {
+  //       cb();
+  //     }
+  //   });
+  // }
+  // // save a snapshot of the bbs to snapshots store
+  // function saveSS(bbsurl, item) {
+  //   console.log("saveSS.");
+  //   idbutil.update("snapshots", item);
+  // }
 
 
   /**
