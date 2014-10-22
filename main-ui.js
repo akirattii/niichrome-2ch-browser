@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.8.1
+ * @version 0.8.2
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -155,7 +155,6 @@ $(function() {
   //
   var $window = $(window);
   var $document = $(document);
-  var btn_write = $("#btn_write");
   var btn_arrowBack = $("#btn_arrowBack");
   var btn_arrowForward = $("#btn_arrowForward");
   var btn_arrowUp = $("#btn_arrowUp");
@@ -622,6 +621,18 @@ $(function() {
         command: 'getTitle',
         ttitle: thread_title.text()
       }, '*');
+      // block evil external sites
+      wv[0].request.onBeforeRequest.addListener(
+        function(details) {
+          return {
+            cancel: true
+          };
+        }, {
+          //urls: ["*://*.microad.jp/*"], 
+          urls: ["<all_urls>"],
+          types: ["sub_frame", "stylesheet", "script", "image", "object", "xmlhttprequest", "other"]
+        }, ["blocking"]); // block evil external sites
+
     });
   }
 
