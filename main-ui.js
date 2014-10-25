@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.8.2
+ * @version 0.8.3
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -46,6 +46,7 @@ $(function() {
     toggleSpeed: 100,
     scrollMargin: 260
   });
+  var updatechecker = niichrome.updatechecker();
 
 
   // appConfig's default setting
@@ -77,6 +78,7 @@ $(function() {
   //
   idbutil.openDB([
     /* -- stores -- */
+
     /*
       [snapshots]
       Used for storeing thread list (url & resnum) of each bbs.
@@ -93,6 +95,7 @@ $(function() {
     //   keyPath: 'url',
     //   autoIncrement: false
     // },
+
     /* 
       [readheres]
       Res number of the thread read by user.
@@ -107,6 +110,7 @@ $(function() {
       keyPath: 'url',
       autoIncrement: false
     },
+
     /* 
       [bookmarks]
       User's bookmark.
@@ -187,7 +191,9 @@ $(function() {
   var tlist_row_wrapper = $("#tlist_row_wrapper");
   var tlist_header = $("#tlist_header");
   var tlist_row_wrapper_ttitle = $("#tlist_row_wrapper .ttitle");
-  var message = $("#message");
+  var pane_message = $("#pane_message");
+  var txt_message = $("#txt_message");
+  var btn_closePaneMessage = $("#btn_closePaneMessage");
   var res_tpl = $("#res_tpl");
   var blist_tpl = $("#blist_tpl");
   var tlist_tpl = $("#tlist_tpl");
@@ -234,6 +240,12 @@ $(function() {
     // init webview pane of kakiko
     initWriteForm();
     // createContextMenus(); // needs "contextMenus" to "permissions" of manifest.
+    updatechecker.check(function(updatedVer) {
+      if (updatedVer) {
+        showMessage("お使いの " + chrome.runtime.getManifest().name + " は v." + updatedVer +
+          " にバージョンアップしました！ <a href='" + CWS_URL + "' target='_blank'>詳細</a>", false);
+      }
+    });
   }
 
   //
@@ -1382,21 +1394,39 @@ $(function() {
   // -- message for info and error 
   //
 
-  function showMessage(msg, bgcolor) {
+  btn_closePaneMessage.click(function(e) {
+    pane_message.hide();
+  });
+
+  /**
+   * @param {string} msg
+   * @param {boolean} fadeout
+   *  If it will be true, shows fadeoutable messagebox.
+   *  default is true.
+   * @param {string} bgcolor
+   *  background's color.
+   *  default is "#fdfdaf"
+   */
+  function showMessage(msg, fadeout, bgcolor) {
     if (bgcolor) {
-      message.css("background-color", bgcolor);
+      pane_message.css("background-color", bgcolor);
     } else {
-      message.css("background-color", "#fdfdaf");
+      pane_message.css("background-color", "#fdfdaf");
     }
-    message.text(msg);
-    message.fadeIn();
-    setTimeout(function() {
-      message.fadeOut();
-    }, 2000);
+    if (fadeout == undefined) fadeout = true;
+    txt_message.html(msg);
+    if (fadeout) {
+      pane_message.fadeIn();
+      setTimeout(function() {
+        pane_message.fadeOut();
+      }, 3000);
+    } else {
+      pane_message.show();
+    }
   }
 
   function showErrorMessage(msg) {
-    showMessage(msg, "#ffcfcf");
+    showMessage(msg, true, "#ffcfcf");
   }
 
   //
