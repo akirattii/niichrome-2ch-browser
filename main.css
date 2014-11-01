@@ -641,6 +641,10 @@ img.thumb {
   color: #cfcfcf;
 }
 
+.jumpToYoutube {
+  font-size: 0.8em;
+}
+
 /* amazon */
 .amazonPane {
   /*background-color: #ffffff;*/

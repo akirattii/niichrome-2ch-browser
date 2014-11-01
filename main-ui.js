@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.8.3
+ * @version 0.8.7
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -474,28 +474,29 @@ $(function() {
     getAllBookmarks(function(list) {
       console.log("list", list);
       drawThreadList(list);
-      // GET latest resnums on bookmark & set calced new counts
-      setLatestResnumsOnBM(function() {
-        setResNewCount();
-      });
+      setResCountAndNewCountOnBM();
     });
   });
 
-  // get and set the latest resnums of bookmarked threads.
-  function setLatestResnumsOnBM(cb) {
+  // get and set the latest rescounts and newcounts of bookmarked threads.
+  function setResCountAndNewCountOnBM() {
     var elems = $("#tlist .body > div");
     var cnt = elems.length;
     elems.each(function() {
       var el = $(this);
       var rescntEl = el.find(".col.rescnt");
+      var newcntEl = el.find(".col.newcnt");
       var url = el.data("url");
-      util2ch.getLatestResnum(url, function(resnum) {
-        console.log(resnum);
-        rescntEl.text(resnum);
-        if (!--cnt) { // if the final of each()
-          cb();
-          return;
-        }
+      // get latest rescount of this thread
+      util2ch.getLatestResnum(url, function(rescnt) {
+        console.log(rescnt);
+        rescntEl.text(rescnt);
+        // calc newcount and set.
+        getReadhereFromStore(url, function(rescntInBM) {
+          if (!rescntInBM) return;
+          var newcnt = rescnt - rescntInBM;
+          newcntEl.text(newcnt);
+        });
       });
     });
   }
@@ -958,11 +959,11 @@ $(function() {
     // go to top
     tlist.scrollTop(0);
     // set new count of each threads if it is NOT the bookmark view
-    if (!isBookmarkView()) setResNewCount();
+    if (!isBookmarkView()) setResNewCounts();
   }
 
   // calc & set new count of each thread
-  function setResNewCount() {
+  function setResNewCounts() {
     $("#tlist .body > div").each(function() {
       var el = $(this);
       var url = el.data("url");
@@ -1091,7 +1092,7 @@ $(function() {
       // view image's thumbnail.
       popThumb(href, $(this));
       return false;
-    } else if (isVideoLink(href)) {
+    } else if (isVideoLink(href) && $(this).hasClass("jumpToYoutube") == false) {
       // pop video
       popVideo(href, $(this));
       return false;
@@ -1173,8 +1174,12 @@ $(function() {
     }
     // convert 'http://www.youtube.com/watch?v=***' to 'http://www.youtube.com/v/***'
     var src = getDirectVideoURL(url);
+    // create video width // FIXME: This's uneffective for video's width adjustment.
+    var width = thread_title.width() - 24;
     // make an video element
-    var iframe = $("<br><webview width='420' height='345' data-url='" + url + "' src='" + src + "'></webview>");
+    var html = "<br><webview width='" + width + "' data-url='" + url + "' src='" + src + "'></webview>"
+      + "<br><a href='" + url + "' target='_blank' class='jumpToYoutube'>YouTubeで見る</a>";
+    var iframe = $(html);
     elem.after(iframe);
   }
 
