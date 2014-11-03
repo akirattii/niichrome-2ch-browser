@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.8.7
+ * @version 0.8.8
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -194,6 +194,10 @@ $(function() {
   var pane_message = $("#pane_message");
   var txt_message = $("#txt_message");
   var btn_closePaneMessage = $("#btn_closePaneMessage");
+  var pane_dialogYN_wrapper = $("#pane_dialogYN_wrapper");
+  var pane_dialogYN_txt = $("#pane_dialogYN_txt");
+  var btn_dialogY = $("#btn_dialogY");
+  var btn_dialogN = $("#btn_dialogN");
   var res_tpl = $("#res_tpl");
   var blist_tpl = $("#blist_tpl");
   var tlist_tpl = $("#tlist_tpl");
@@ -208,6 +212,7 @@ $(function() {
   var pane_conf = $("#pane_conf");
   var btn_closeConfPane = $("#btn_closeConfPane");
   var txt_confFontSize = $("#txt_confFontSize");
+  var btn_confClearReadheres = $("#btn_confClearReadheres");
   var body = $("body");
   var menu_historyURLs = $("#menu_historyURLs");
   var dlg_adultCheck = $("#dlg_adultCheck");
@@ -534,6 +539,31 @@ $(function() {
     }
   }
 
+  btn_confClearReadheres.click(function() {
+    console.log("btn_confClearReadheres click");
+    // show YesNo dialog.
+    var msg = "「ここまで読んだ」履歴を<br>削除しますか？";
+    showDialogYN(msg, function() {
+      // YES
+      idbutil.clear("readheres");
+      pane_dialogYN_wrapper.hide();
+    }, function() {
+      // NO
+      pane_dialogYN_wrapper.hide();
+    });
+  });
+
+  //
+  // -- dialog box
+  //
+
+  // shows YesNoDialogBox
+  function showDialogYN(msg, onYes, onNo) {
+    btn_dialogY.unbind("click").bind("click", onYes);
+    btn_dialogN.unbind("click").bind("click", onNo);
+    pane_dialogYN_txt.html(msg);
+    pane_dialogYN_wrapper.show();
+  }
 
 
   //
@@ -839,10 +869,12 @@ $(function() {
         var lastResnum = drawResponses(responses, startIdx);
         if (lastResnum < 0) showErrorMessage("datが存在しない or dat落ち or 鯖落ちです");
         readhere
-          .data("resnum", lastResnum)
-          .data("url", url)
           .remove() // remove readhere div from responses
-        .insertAfter($("#resnum" + resnum)); // move readhere div to prev of readmore div
+        .insertAfter($("#resnum" + resnum)) // move readhere div to prev of readmore div
+        .data("resnum", lastResnum)
+          .data("url", url);
+        // set lastResnum as ThreadTitle's data
+        thread_title.data("resnum", lastResnum);
         // make previous selected row's style to "unselected"
         var prevSelectedRow = tlist_row_wrapper.find(".selected");
         if (prevSelectedRow[0]) {
@@ -1177,8 +1209,7 @@ $(function() {
     // create video width // FIXME: This's uneffective for video's width adjustment.
     var width = thread_title.width() - 24;
     // make an video element
-    var html = "<br><webview width='" + width + "' data-url='" + url + "' src='" + src + "'></webview>"
-      + "<br><a href='" + url + "' target='_blank' class='jumpToYoutube'>YouTubeで見る</a>";
+    var html = "<br><webview width='" + width + "' data-url='" + url + "' src='" + src + "'></webview>" + "<br><a href='" + url + "' target='_blank' class='jumpToYoutube'>YouTubeで見る</a>";
     var iframe = $(html);
     elem.after(iframe);
   }
@@ -1716,7 +1747,7 @@ $(function() {
     var url = thread_title.data("url");
     var title = thread_title.data("title");
     var tlist_url = bbs_title.data("url");
-    var resnum = readhere.data("resnum");
+    var resnum = thread_title.data("resnum");
     if (!url || !title) {
       return;
     }
@@ -1952,18 +1983,30 @@ $(function() {
     refpops.splice(targetIdx, 1); // object remove.
   }
 
-  // get resnum from readhere store by key=url
+  // get resnum from bookmark's or readhere's store by key=url
   function getReadhereFromStore(daturl, cb) {
     console.log("getReadhereFromStore", daturl);
-    idbutil.get("readheres", daturl, function(data) {
-      console.log("data", data);
-      var ret;
-      if (data && data.res) {
-        ret = data.res;
+    var ret;
+    // First, get resnum from bookmarks.
+    getBookmark(daturl, function(bm) {
+      if (bm) {
+        ret = bm.res;
+        cb(ret);
+        return;
+      } else {
+        // If can not get resnum from bookmarks store, try to get it from readheres store.
+        idbutil.get("readheres", daturl, function(data) {
+          console.log("data", data);
+          if (data && data.res) {
+            ret = data.res;
+          }
+          cb(ret);
+          return;
+        });
       }
-      cb(ret);
-    });
+    }); // getBookmark
   }
+
   // save readhere info to store
   function saveReadhereToStore(daturl, resnum) {
     console.log("saveReadhereToStore", daturl, resnum);

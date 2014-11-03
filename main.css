@@ -316,7 +316,7 @@ div#blist_toggle_bar {
   padding: 0px;
   color: black;
   position: fixed;
-  z-index: 999999;
+  z-index: 99999;
   box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
   min-width: 100%;
   min-height: 100%;
@@ -367,8 +367,14 @@ div#blist_toggle_bar {
   margin-bottom: 8px;
   border-bottom: 1px solid #cdcdcd;
 }
+#pane_conf button {
+  padding: 2px 4px;
+}
 #pane_conf :not(h3) {
   font-size: 1.1rem;
+}
+#pane_conf .confDescription {
+  font-size: 0.8em;
 }
 #pane_conf::-webkit-scrollbar {
   width: 10px;
@@ -410,6 +416,61 @@ div#btn_closePaneMessage {
 div#pane_message #txt_message {
 }
 
+
+/*
+  YesNoDialog pane
+*/
+div#pane_dialogYN_wrapper {
+  display: none;
+  background-color: rgba(0,0,0,0.4);
+  padding: 0px;
+  color: black;
+  position: fixed;
+  z-index: 999999;
+  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
+  min-width: 100%;
+  min-height: 100%;
+}
+div#pane_dialogYN {
+  max-width: 300px;
+  max-height: 200px;
+  background-color: white;
+  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
+  border-radius: 4px;
+  /* centering */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  /* /centering */
+}
+div#pane_dialogYN_btn_wrapper {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  text-align: center;
+  margin: 4px 12px;
+}
+div#pane_dialogYN_txt {
+  text-align: center;
+  padding: 20px 12px;
+  font-size: 1.1em;
+}
+div#pane_dialogYN button {
+  font-size: 1.2em;
+  font-weight: bold;
+  width: 100px;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 10px 6px;
+  cursor: pointer;
+  background: -webkit-gradient(linear, left top, left bottom, from(rgba(200,200,200,0.9)), to(#444444));
+}
+div#pane_dialogYN button:hover {
+  background: -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,0.9)), to(#666666));
+}
 
 div#tools {
   font-size: 20px;
