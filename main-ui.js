@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.8.8
+ * @version 0.8.9
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -869,10 +869,9 @@ $(function() {
         var lastResnum = drawResponses(responses, startIdx);
         if (lastResnum < 0) showErrorMessage("datが存在しない or dat落ち or 鯖落ちです");
         readhere
-          .remove() // remove readhere div from responses
-        .insertAfter($("#resnum" + resnum)) // move readhere div to prev of readmore div
-        .data("resnum", lastResnum)
-          .data("url", url);
+          .data("resnum", lastResnum)
+          .data("url", url)
+          .remove().insertAfter($("#resnum" + resnum)); // move readhere div to prev of readmore div
         // set lastResnum as ThreadTitle's data
         thread_title.data("resnum", lastResnum);
         // make previous selected row's style to "unselected"
