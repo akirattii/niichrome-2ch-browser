@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.8.9
+ * @version 0.9.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -614,7 +614,7 @@ $(function() {
   // -- write pane
   //
 
-  btn_showPaneWrite.click(function(e) {
+  btn_showPaneWrite.click(function(e, data) { // data = { from:, mail:, msg: }
     console.log("btn_showPaneWrite");
     if ($(this).hasClass("disabled")) return;
     pane_wv[0].style.visibility = "visible";
@@ -623,6 +623,21 @@ $(function() {
       code: "div > div,iframe,dl,a,hr { display: none; } " +
         "form { display: block; } " +
         "h1 { padding: 12px 2px 12px 2px; } "
+    });
+    // preset anything into write form's input.
+    var from = "";
+    var mail = "sage";
+    var msg = "";
+    if (data) {
+      if (data.from) from = data.from;
+      if (data.mail) mail = data.mail;
+      if (data.msg) msg = data.msg;
+    }
+    // execute script
+    wv[0].executeScript({
+      code: "var ipt_from = document.getElementsByName('FROM')[0]; ipt_from.value = '" + from + "';" +
+        "var ipt_mail = document.getElementsByName('mail')[0]; ipt_mail.value = '" + mail + "';" +
+        "var ta_msg = document.getElementsByName('MESSAGE')[0]; ta_msg.value = '" + msg + "';"
     });
   });
 
@@ -1037,15 +1052,19 @@ $(function() {
         res.content ? content = res.content : content = "";
 
         htmlBuf += '<div class="res" id="resnum' + num + '">\n' +
-          '<div class="res_header">\n' +
-          '<span class="num">' + num + '</span>:&nbsp;\n' +
-          '<span class="handle"><b>' + handle + '</b></span>\n' +
-          '[<span class="email">' + email + '</span>]&nbsp;\n' +
-          '<span class="date">' + date + '</span>\n' +
-          '<span class="uid">' + uid + '</span>\n' +
-          '<span class="be">' + be + '</span>\n' +
-          '</div>\n' +
-          '<div class="content">' + res.content + '</div>\n' +
+          ' <div class="res_header">\n' +
+          '  <span class="num">' + num + '</span>:&nbsp;\n' +
+          '  <span class="handle"><b>' + handle + '</b></span>\n' +
+          '  [<span class="email">' + email + '</span>]&nbsp;\n' +
+          '  <span class="date">' + date + '</span>\n' +
+          '  <span class="uid">' + uid + '</span>\n' +
+          '  <span class="be">' + be + '</span>\n' +
+          ' </div>\n' +
+          ' <div class="content">' + res.content + '</div>\n' +
+          ' <div class="restool">\n' +
+          '  <div class="btn btn_reply" title="返信">&nbsp;</div>\n' +
+          '  <div style="clear:both"></div>\n' +
+          ' </div>\n' +
           '</div>\n';
       }
     }
@@ -2101,6 +2120,50 @@ $(function() {
     pu.css("top", top + "px");
     pu.css("left", left + "px");
   }
+
+  //
+  // -- restool box
+
+  // show toolBox on hover the res.
+  $document.on({
+    mouseenter: function() {
+      //stuff to do on mouse enter
+      $(this).find(".restool").css("visibility", "visible");
+    },
+    mouseleave: function() {
+      //stuff to do on mouse leave
+      $(this).find(".restool").css("visibility", "hidden");
+    }
+  }, ".res");
+
+  // reply button click
+  $document.on("click", ".restool .btn_reply", function() {
+    var repmsg = createReplyMessage($(this).parent().parent());
+    btn_showPaneWrite.trigger("click", [{
+      from: "",
+      email: "sage",
+      msg: repmsg
+    }]);
+  });
+
+  /**
+   * create replying message for the specific res
+   * @param {element} resElem
+   *  jquery element selectored '.res'
+   */
+  function createReplyMessage(resElem) {
+    var ret;
+    var num = resElem.find(".res_header .num").text();
+    var htmlcontent = resElem.find(".content")
+      .html()
+      .replace(/<br\s*[\/]?>/gi, '\\n> '); // replace <br> with '\n>'
+    var txtcontent = $("<div>" + htmlcontent + "</div>")
+      .text() // html to text
+      .replace(/'/gi, "\\'"); // escape
+    ret = ">>" + num + '\\n> ' + txtcontent;
+    return ret;
+  }
+
 
   //
   // -- filter functions

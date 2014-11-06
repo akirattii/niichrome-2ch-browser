@@ -175,7 +175,7 @@ div#thread .res_wrapper {
   cursor: pointer;
 }
 .res_wrapper .res .content {
-  padding: 8px 2px 28px 20px;
+  padding: 8px 2px 4px 20px;
   font-size: 1.1em;
   line-height: 1.2em;
   font-family: 'ＭＳ Ｐゴシック','ＭＳＰゴシック','Takao Pゴシック','TakaoPGothic','IPAMonaPGothic',monospace;
@@ -187,6 +187,25 @@ div#thread .res_wrapper {
   text-decoration: none;
 }
 
+.restool {
+  visibility: hidden;
+  margin: 0px 20px 20px 20px;
+  background-color: transparent;
+}
+.restool > .btn {
+  min-height: 24px;
+  min-width: 24px;
+  background: -webkit-gradient(linear, left top, left bottom, from(#eeeeee), to(#888888));
+  border-radius: 2px;
+  float: right;
+  margin: 0px 2px 0px 0px;
+}
+.restool > .btn:hover {
+  background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#aaaaaa));
+}
+.restool .btn_reply {
+  content: url("/img/reply18.png");
+}
 
 div#blist_wrapper {
   position: fixed;
@@ -286,11 +305,13 @@ div#blist_toggle_bar {
   width: 600px;
   height: 400px;
   position: fixed;
-  top: 120px;
+  top: 80px;
+  left: 40px;
   border-radius: 6px 6px 0px 0px;
   border: 1px solid #aaaaaa;
   background-color:#535353;
   visibility: hidden;
+  z-index: 999999;
 }
 #pane_wv p {
   float: left;
