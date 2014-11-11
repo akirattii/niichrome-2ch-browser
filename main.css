@@ -195,7 +195,7 @@ div#thread .res_wrapper {
 .restool > .btn {
   min-height: 24px;
   min-width: 24px;
-  background: -webkit-gradient(linear, left top, left bottom, from(#eeeeee), to(#888888));
+  background: -webkit-gradient(linear, left top, left bottom, from(#cccccc), to(#666666));
   border-radius: 2px;
   float: right;
   margin: 0px 2px 0px 0px;
@@ -396,6 +396,10 @@ div#blist_toggle_bar {
 }
 #pane_conf .confDescription {
   font-size: 0.8em;
+}
+#pane_conf #ta_confNGWords {
+  width: 100%;
+  height: 80px;
 }
 #pane_conf::-webkit-scrollbar {
   width: 10px;

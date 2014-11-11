@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.9.0
+ * @version 0.10.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -52,7 +52,8 @@ $(function() {
   // appConfig's default setting
   DEFAULT_APP_CONFIG = {
     fontSize: 16, // px
-    theme: 'default'
+    theme: 'default',
+    ngWords: undefined, // NG word list {string[]}
   };
 
   // this app's config
@@ -213,6 +214,7 @@ $(function() {
   var btn_closeConfPane = $("#btn_closeConfPane");
   var txt_confFontSize = $("#txt_confFontSize");
   var btn_confClearReadheres = $("#btn_confClearReadheres");
+  var ta_confNGWords = $("#ta_confNGWords");
   var body = $("body");
   var menu_historyURLs = $("#menu_historyURLs");
   var dlg_adultCheck = $("#dlg_adultCheck");
@@ -804,138 +806,138 @@ $(function() {
    *    default is "false"
    */
   function viewResponses(url, row, historyUpdate) {
-    startLoading(url, row);
-    // If URL contains "headline.2ch.net", read data of ".dat" instead of "read.cgi".
-    if (util2ch.isHeadlineURL(url)) {
-      if (!row) {
-        row = getTListRowByURL(util2ch.datURLToReadCGIURL(url));
+      startLoading(url, row);
+      // If URL contains "headline.2ch.net", read data of ".dat" instead of "read.cgi".
+      if (util2ch.isHeadlineURL(url)) {
+        if (!row) {
+          row = getTListRowByURL(util2ch.datURLToReadCGIURL(url));
+        }
+        url = util2ch.readCGIURLToDatURL(url);
       }
-      url = util2ch.readCGIURLToDatURL(url);
-    }
-    txt_url.val(url);
-    var readhereurl = readhere.data("url");
-    if (!historyUpdate) historyUpdate = false;
-    console.log("url:", url);
-    // get resnum of readhere
-    getReadhereFromStore(url, function(resnum) {
-      var startIdx = resnum; // starting resnum to display
-      // load res.
-      util2ch.getResponses(url, function(data, type) {
-        console.log("type:", type, " data:", data);
-        var responses = data.responses;
-        // If type="html", get threadTitle from data.title. Else from selected row's "title" attr.
-        var title;
-        var prevURL = thread_title.data("url");
-        if (type == "dat") {
-          if (row) title = row.find(".ttitle").attr("title");
-        } else { // "html" or "kako"
-          title = data.title;
-        }
-        // access history update
-        if (historyUpdate) {
-          util2ch.updateHistory(url, title, prevURL);
-        }
-        //
-        setThreadInfo({
-          url: url,
-          title: title
-        });
-        // if type="kako", disabled btn_write & readmore
-        if (type == "kako") {
-          btn_showPaneWrite.addClass("disabled");
-          readmore.hide();
-          lbl_kakolog.show();
-        } else {
-          btn_showPaneWrite.removeClass("disabled");
-          readmore.show();
-          lbl_kakolog.hide();
-          // preload read.cgi for preparing to write a response.
-          prepareWriteForm(url);
-        }
-        // make the buttons of readhere, arrowUp and arrowDn enable.
-        btn_jumpToReadhere.removeClass("disabled");
-        btn_arrowUp.removeClass("disabled");
-        btn_arrowDn.removeClass("disabled");
-        // back & forward buttons disability
-        var baf = util2ch.getBackAndForwardURL(url);
-        if (baf.backURL) {
-          btn_arrowBack.removeClass("disabled");
-        } else {
-          btn_arrowBack.addClass("disabled");
-        }
-        if (baf.forwardURL) {
-          btn_arrowForward.removeClass("disabled");
-        } else {
-          btn_arrowForward.addClass("disabled");
-        }
-        // close res write webview if opened.
-        pane_wv[0].style.visibility = "hidden";
-        // if first visit of thread, clear responses.
-        if (!resnum || readhereurl != url) {
-          // $("#res_wrapper").empty();
-          startIdx = 0;
-          if (resnum === undefined) {
-            resnum = 0; // init resnum for getting all res.
-            // jump to top
-            thread.scrollTop(0);
+      txt_url.val(url);
+      var readhereurl = readhere.data("url");
+      if (!historyUpdate) historyUpdate = false;
+      console.log("url:", url);
+      // get resnum of readhere
+      getReadhereFromStore(url, function(resnum) {
+        var startIdx = resnum; // starting resnum to display
+        // load res.
+        util2ch.getResponses(url, appConfig.ngWords, function(data, type) {
+          console.log("type:", type, " data:", data);
+          var responses = data.responses;
+          // If type="html", get threadTitle from data.title. Else from selected row's "title" attr.
+          var title;
+          var prevURL = thread_title.data("url");
+          if (type == "dat") {
+            if (row) title = row.find(".ttitle").attr("title");
+          } else { // "html" or "kako"
+            title = data.title;
           }
-        }
-        // draw responses.
-        var lastResnum = drawResponses(responses, startIdx);
-        if (lastResnum < 0) showErrorMessage("datが存在しない or dat落ち or 鯖落ちです");
-        readhere
-          .data("resnum", lastResnum)
-          .data("url", url)
-          .remove().insertAfter($("#resnum" + resnum)); // move readhere div to prev of readmore div
-        // set lastResnum as ThreadTitle's data
-        thread_title.data("resnum", lastResnum);
-        // make previous selected row's style to "unselected"
-        var prevSelectedRow = tlist_row_wrapper.find(".selected");
-        if (prevSelectedRow[0]) {
-          prevSelectedRow.removeClass("selected");
-        }
-        // make new selected row's style to "selected"
-        var selectedRow;
-        if (row) {
-          selectedRow = row;
+          // access history update
+          if (historyUpdate) {
+            util2ch.updateHistory(url, title, prevURL);
+          }
+          //
+          setThreadInfo({
+            url: url,
+            title: title
+          });
+          // if type="kako", disabled btn_write & readmore
+          if (type == "kako") {
+            btn_showPaneWrite.addClass("disabled");
+            readmore.hide();
+            lbl_kakolog.show();
+          } else {
+            btn_showPaneWrite.removeClass("disabled");
+            readmore.show();
+            lbl_kakolog.hide();
+            // preload read.cgi for preparing to write a response.
+            prepareWriteForm(url);
+          }
+          // make the buttons of readhere, arrowUp and arrowDn enable.
+          btn_jumpToReadhere.removeClass("disabled");
+          btn_arrowUp.removeClass("disabled");
+          btn_arrowDn.removeClass("disabled");
+          // back & forward buttons disability
+          var baf = util2ch.getBackAndForwardURL(url);
+          if (baf.backURL) {
+            btn_arrowBack.removeClass("disabled");
+          } else {
+            btn_arrowBack.addClass("disabled");
+          }
+          if (baf.forwardURL) {
+            btn_arrowForward.removeClass("disabled");
+          } else {
+            btn_arrowForward.addClass("disabled");
+          }
+          // close res write webview if opened.
+          pane_wv[0].style.visibility = "hidden";
+          // if first visit of thread, clear responses.
+          if (!resnum || readhereurl != url) {
+            // $("#res_wrapper").empty();
+            startIdx = 0;
+            if (resnum === undefined) {
+              resnum = 0; // init resnum for getting all res.
+              // jump to top
+              thread.scrollTop(0);
+            }
+          }
+          // draw responses.
+          var lastResnum = drawResponses(responses, startIdx);
+          if (lastResnum < 0) showErrorMessage("datが存在しない or dat落ち or 鯖落ちです");
+          readhere
+            .data("resnum", lastResnum)
+            .data("url", url)
+            .remove().insertAfter($("#resnum" + resnum)); // move readhere div to prev of readmore div
+          // set lastResnum as ThreadTitle's data
+          thread_title.data("resnum", lastResnum);
+          // make previous selected row's style to "unselected"
+          var prevSelectedRow = tlist_row_wrapper.find(".selected");
+          if (prevSelectedRow[0]) {
+            prevSelectedRow.removeClass("selected");
+          }
+          // make new selected row's style to "selected"
+          var selectedRow;
+          if (row) {
+            selectedRow = row;
+          } else {
+            selectedRow = tlist_row_wrapper.find("[data-url='" + url + "']");
+          }
+          if (selectedRow[0]) {
+            // affect each cols of selected row to "selected"
+            selectedRow.children().addClass("selected");
+            // update the text of ".rescnt" col of the selected row
+            selectedRow.find(".rescnt").text(lastResnum);
+            // zero-init the text of ".newcnt" col of the selected row
+            selectedRow.find(".newcnt").text("0");
+          }
+          // update readhere's resnum
+          saveReadhereToStore(url, lastResnum);
+          // change readhere's visibility
+          if (resnum === 0) {
+            readhere.css("display", "none");
+            btn_jumpToReadhere.addClass("disabled");
+          } else {
+            readhere.css("display", "block");
+            btn_jumpToReadhere
+              .removeClass("disabled")
+              .trigger("click");
+          }
+          stopLoading();
+        }, function(e) { // onerror of util2ch.getResponses.
+          showErrorMessage("レスを取得できませんでした");
+          stopLoading();
+        }); // util2ch.getResponses
+      });
+      // check this thread whether bookmarked or not
+      getBookmark(url, function(data) {
+        if (!data) {
+          styleBmStar(false);
         } else {
-          selectedRow = tlist_row_wrapper.find("[data-url='" + url + "']");
+          styleBmStar(true);
         }
-        if (selectedRow[0]) {
-          // affect each cols of selected row to "selected"
-          selectedRow.children().addClass("selected");
-          // update the text of ".rescnt" col of the selected row
-          selectedRow.find(".rescnt").text(lastResnum);
-          // zero-init the text of ".newcnt" col of the selected row
-          selectedRow.find(".newcnt").text("0");
-        }
-        // update readhere's resnum
-        saveReadhereToStore(url, lastResnum);
-        // change readhere's visibility
-        if (resnum === 0) {
-          readhere.css("display", "none");
-          btn_jumpToReadhere.addClass("disabled");
-        } else {
-          readhere.css("display", "block");
-          btn_jumpToReadhere
-            .removeClass("disabled")
-            .trigger("click");
-        }
-        stopLoading();
-      }, function(e) { // onerror of util2ch.getResponses.
-        showErrorMessage("レスを取得できませんでした");
-        stopLoading();
-      }); // util2ch.getResponses
-    });
-    // check this thread whether bookmarked or not
-    getBookmark(url, function(data) {
-      if (!data) {
-        styleBmStar(false);
-      } else {
-        styleBmStar(true);
-      }
-    });
-  } // viewResponses
+      });
+    } // viewResponses
 
   $document.on("mouseenter", "#tlist .body .row", function() {
     // if it is "bmlist"(bookmarkList), makes bookmark removable
@@ -1050,22 +1052,27 @@ $(function() {
         res.uid ? uid = res.uid : uid = "";
         res.be ? be = res.be : be = "";
         res.content ? content = res.content : content = "";
-
-        htmlBuf += '<div class="res" id="resnum' + num + '">\n' +
-          ' <div class="res_header">\n' +
-          '  <span class="num">' + num + '</span>:&nbsp;\n' +
-          '  <span class="handle"><b>' + handle + '</b></span>\n' +
-          '  [<span class="email">' + email + '</span>]&nbsp;\n' +
-          '  <span class="date">' + date + '</span>\n' +
-          '  <span class="uid">' + uid + '</span>\n' +
-          '  <span class="be">' + be + '</span>\n' +
-          ' </div>\n' +
-          ' <div class="content">' + res.content + '</div>\n' +
-          ' <div class="restool">\n' +
-          '  <div class="btn btn_reply" title="返信">&nbsp;</div>\n' +
-          '  <div style="clear:both"></div>\n' +
-          ' </div>\n' +
-          '</div>\n';
+        
+        if (res.ng) {
+          // if contains NG words, then abooooon!
+          htmlBuf += '<div class="res" id="resnum' + num + '"></div>\n';
+        } else {
+          htmlBuf += '<div class="res" id="resnum' + num + '">\n' +
+            ' <div class="res_header">\n' +
+            '  <span class="num">' + num + '</span>:&nbsp;\n' +
+            '  <span class="handle"><b>' + handle + '</b></span>\n' +
+            '  [<span class="email">' + email + '</span>]&nbsp;\n' +
+            '  <span class="date">' + date + '</span>\n' +
+            '  <span class="uid">' + uid + '</span>\n' +
+            '  <span class="be">' + be + '</span>\n' +
+            ' </div>\n' +
+            ' <div class="content">' + res.content + '</div>\n' +
+            ' <div class="restool">\n' +
+            '  <div class="btn btn_reply" title="返信">&nbsp;</div>\n' +
+            '  <div style="clear:both"></div>\n' +
+            ' </div>\n' +
+            '</div>\n';
+        }
       }
     }
     if (startIdx != 0) {
@@ -1377,14 +1384,14 @@ $(function() {
 
   // start loading.
   function startLoading(url, row) {
-    if (row) row.addClass("loading_in_cell");
-    txt_url.addClass("loading_in_cell_rev");
-    if (url == $("#readmore").data("url")) {
-      readmore.addClass("loading_in_cell");
+      if (row) row.addClass("loading_in_cell");
+      txt_url.addClass("loading_in_cell_rev");
+      if (url == $("#readmore").data("url")) {
+        readmore.addClass("loading_in_cell");
+      }
+      nowloading = true;
     }
-    nowloading = true;
-  }
-  // stop loading.
+    // stop loading.
   function stopLoading() {
     $("#tlist_row_wrapper .body .loading_in_cell").removeClass("loading_in_cell");
     txt_url.removeClass("loading_in_cell_rev");
@@ -1433,13 +1440,13 @@ $(function() {
    * @param {int} fontSize up/down tick
    */
   function tickFontSize(upDown) {
-    if (!upDown) upDown = 0;
-    var fontSize = appConfig.fontSize;
-    var newFontSize = fontSize + upDown;
-    applyFontSize(newFontSize + "px");
-    appConfig.fontSize = newFontSize;
-  }
-  // apply specific fontSize
+      if (!upDown) upDown = 0;
+      var fontSize = appConfig.fontSize;
+      var newFontSize = fontSize + upDown;
+      applyFontSize(newFontSize + "px");
+      appConfig.fontSize = newFontSize;
+    }
+    // apply specific fontSize
   function applyFontSize(fontSize) {
     $("body").css("font-size", fontSize);
   }
@@ -1681,7 +1688,7 @@ $(function() {
   }).mousedown(function(e) {
     pressTimer = window.setTimeout(function() {
       popupHistoryMenus(e, false); // popup "back" history.
-    }, 1000);
+    }, 500);
     return false;
   });
 
@@ -2044,34 +2051,34 @@ $(function() {
 
   // get bookmarks from store
   function getAllBookmarks(cb) {
-    console.log("getAllBookmarks");
-    var col = "update";
-    var range = null;
-    var direction = "prev";
-    idbutil.list("bookmarks", col, range, direction, function(data) {
-      cb(data);
-    });
-  }
-  // get a bookmark from store by key
+      console.log("getAllBookmarks");
+      var col = "update";
+      var range = null;
+      var direction = "prev";
+      idbutil.list("bookmarks", col, range, direction, function(data) {
+        cb(data);
+      });
+    }
+    // get a bookmark from store by key
   function getBookmark(daturl, cb) {
-    console.log("getBookmark", daturl);
-    idbutil.get("bookmarks", daturl, function(data) {
-      cb(data);
-    });
-  }
-  // save a bookmark to store
+      console.log("getBookmark", daturl);
+      idbutil.get("bookmarks", daturl, function(data) {
+        cb(data);
+      });
+    }
+    // save a bookmark to store
   function saveBookmark(daturl, title, resnum) {
-    console.log("saveBookmark");
-    var update = new Date().getTime();
-    var data = {
-      url: daturl,
-      title: title,
-      res: resnum,
-      update: update
-    };
-    idbutil.update("bookmarks", data);
-  }
-  // remove a bookmark from store
+      console.log("saveBookmark");
+      var update = new Date().getTime();
+      var data = {
+        url: daturl,
+        title: title,
+        res: resnum,
+        update: update
+      };
+      idbutil.update("bookmarks", data);
+    }
+    // remove a bookmark from store
   function removeBookmark(daturl) {
     console.log("removeBookmark");
     idbutil.remove("bookmarks", daturl);
@@ -2224,6 +2231,15 @@ $(function() {
     }
   });
 
+  $("#ta_confNGWords").on("change", function(e) {
+    var val = $(this).val();
+    if (!val) {
+      appConfig.ngWords = undefined;
+      return;
+    }
+    appConfig.ngWords = val.split("\n");
+  });
+
   function getThemes(onSuccess, onError) {
     var ret = [];
     chrome.runtime.getPackageDirectoryEntry(function(root) {
@@ -2266,7 +2282,9 @@ $(function() {
     // font
     setConfFontSize();
     // theme
-    createThemeOptions();
+    setConfThemeOptions();
+    // NG words
+    setConfNGWords();
   }
 
   function closeConfPane() {
@@ -2280,7 +2298,7 @@ $(function() {
   }
 
   // create themes list if themes.length <= 1 ('default' only)
-  function createThemeOptions() {
+  function setConfThemeOptions() {
     var sel_themes = $("#sel_themes");
     var sel_themes_len = $("#sel_themes option").length;
     if (sel_themes_len <= 1) {
@@ -2298,6 +2316,11 @@ $(function() {
         $("#sel_themes").val(currentTheme);
       });
     }
+  }
+
+  function setConfNGWords() {
+    if (!appConfig.ngWords) return;
+    ta_confNGWords.val(appConfig.ngWords.join("\n"));
   }
 
   // save appConfig to localStorage
