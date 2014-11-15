@@ -116,6 +116,11 @@ div#tools #btn_settings {
   content: url("/img/setting24.png");
   -webkit-filter:invert();
 }
+div#tools #rng_adjust2pane {
+  background-color:transparent;
+  border:1px solid gray;
+}
+
 
 /* click and reverse background for bbslist and threadlist */
 .selected {

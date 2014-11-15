@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.10.0
+ * @version 0.11.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -154,6 +154,8 @@ $(function() {
   // for appearing history urls on Back & Forward button's long press.
   var pressTimer;
 
+  // 2PaneDivider's X position (percent)
+  var pos_divider = 50;
 
   //
   // -- UI controls
@@ -168,6 +170,7 @@ $(function() {
   var btn_arrowDnTList = $("#btn_arrowDnTList");
   var btn_showPaneWrite = $("#btn_showPaneWrite");
   var btn_addBm = $("#btn_addBm");
+  var rng_adjust2pane = $("#rng_adjust2pane");
   var readmore = $("#readmore");
   var readhere = $("#readhere");
   var btn_jumpToReadhere = $("#btn_jumpToReadhere");
@@ -1052,7 +1055,7 @@ $(function() {
         res.uid ? uid = res.uid : uid = "";
         res.be ? be = res.be : be = "";
         res.content ? content = res.content : content = "";
-        
+
         if (res.ng) {
           // if contains NG words, then abooooon!
           htmlBuf += '<div class="res" id="resnum' + num + '"></div>\n';
@@ -1856,6 +1859,10 @@ $(function() {
       scrollTop: st + ot - 120
     }, 100);
   });
+  rng_adjust2pane.on("input change",function() {
+    pos_divider = $(this).val();
+    redraw();
+  });
 
   //
   // -- layouts
@@ -1882,15 +1889,25 @@ $(function() {
 
     //
     // #tlist and #thread width setting
-    var half_w = ww / 2;
-    var tlist_w = half_w - 66;
+    var tlist_w = ww * pos_divider / 100; // for left pane
+    var thread_w = ww - tlist_w - 46; // for right pane
     tlist[0].style.width = tlist_w + "px";
     tlist_header[0].style.width = (tlist_w - 20) + "px";
     var ttitle_col_w = tlist_w - (124); // = tlist_w - (.rescnt + .newcnt)
     $("#tlist_row_wrapper .ttitle").width(ttitle_col_w);
     thread[0].style.right = "0px";
-    thread[0].style.width = half_w + 20 + "px";
-    thread_title[0].style.width = half_w + 20 + "px";
+    thread[0].style.width = thread_title[0].style.width = thread_w + "px";
+    // when width of the pane <= 0, hide itself.
+    if (tlist_w <= 0) {
+      tlist[0].style.display = "none";
+    } else {
+      tlist[0].style.display = "block";
+    }
+    if (thread_w <= 0) {
+      thread[0].style.display = "none";
+    } else {
+      thread[0].style.display = "block";
+    }
   }
 
   $document.on("mouseenter", ".refpop", function() {

@@ -542,6 +542,17 @@ div#tools #btn_settings {
   padding: 6px 10px 0px 6px;
   cursor: pointer;
 }
+div#tools #rng_adjust2pane {
+  padding:0px;
+  width:38px;
+  cursor:move;
+  -webkit-appearance:none;
+  appearance:none;
+  height:100%;
+  background-color:transparent;
+  border-radius:2px;
+  border:1px solid gray;
+}
 
 /* url history menus */
 #menu_historyURLs {
