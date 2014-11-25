@@ -206,6 +206,9 @@ div#thread .res_wrapper {
 .restool .btn_reply {
   content: url("/img/reply18.png");
 }
+.restool .btn_readhere {
+  content: url("/img/readhere_black18.png");
+}
 
 div#blist_wrapper {
   position: fixed;
@@ -542,7 +545,7 @@ div#tools #btn_settings {
   padding: 6px 10px 0px 6px;
   cursor: pointer;
 }
-div#tools #rng_adjust2pane {
+div#tools #rng_divider {
   padding:0px;
   width:38px;
   cursor:move;
@@ -681,10 +684,26 @@ div#tools #rng_adjust2pane {
 div#readhere {
   background-color: #9afa9a;
   color: #232323;
+  min-height: 20px;
   padding: 10px;
   margin: 0px 0px 20px 0px;
-  text-align: center;
   box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.9);
+}
+div#btn_closeReadhere {
+  font-size:1.2rem;
+  font-weight: bold;
+  float: left;
+  cursor:pointer;
+}
+div#readhere > .text {
+  float: left;
+  text-align: center;
+  margin: 0px 0px 0px 30px;
+}
+hr#fetchline {
+  border: 1px solid #60c060;
+  margin: 0px 0px 20px 0px;
+  display: none;
 }
 div#readmore {
   cursor: pointer;

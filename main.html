@@ -43,7 +43,7 @@
       <div id="btn_addBm" class="btn star_on24 grayout" title="お気に入りに登録"></div>
     </div>
     <div class="tool">
-      <input id="rng_adjust2pane" type="range" min="0" max="100" title="スレ一覧とスレの仕切り位置を調整">
+      <input id="rng_divider" type="range" min="0" max="100" title="スレ一覧とスレの仕切り位置を調整">
     </div>
     <div id="btn_settings"></div>
   </div><!-- tools -->
@@ -147,7 +147,7 @@
       <div class="header">
         <div class="row">
           <div class="col ttitle">スレタイ</div>
-          <div class="col newcnt">新着</div>
+          <div class="col newcnt">未読</div>
           <div class="col rescnt">ﾚｽ数</div>
         </div>
       </div>
@@ -193,7 +193,12 @@
     <h2 id="thread_title" data-url=""></h2>
     <div id="res_wrapper" class="res_wrapper">      
     </div><!--/ res_wrapper -->
-    <div id="readhere" data-resnum="">-- ここまで読んだ --</div>
+    <div id="readhere" data-resnum="">
+      <div id="btn_closeReadhere" title="「ここまで読んだ」を削除">×</div>
+      <div class="text">-- ここまで読んだ --</div>
+      <div style="clear:both;"></div>
+    </div>
+    <hr id="fetchline">
     <div id="readmore" data-url="">もっと読む</div>
     <div id="lbl_kakolog" style="display:none;">これは過去ログ倉庫のスレッドです</div>
   </div>

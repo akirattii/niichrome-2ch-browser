@@ -116,7 +116,7 @@ div#tools #btn_settings {
   content: url("/img/setting24.png");
   -webkit-filter:invert();
 }
-div#tools #rng_adjust2pane {
+div#tools #rng_divider {
   background-color:transparent;
   border:1px solid gray;
 }
@@ -137,6 +137,9 @@ div#readhere {
   background-color: #3a9a5a;
   color: #232323;
   box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.9);
+}
+hr#fetchline {
+  border: 1px solid #3a9a5a;
 }
 div#readmore {
   color: #1292AF;

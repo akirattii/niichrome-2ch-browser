@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.11.0
+ * @version 0.12.2
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -54,6 +54,7 @@ $(function() {
     fontSize: 16, // px
     theme: 'default',
     ngWords: undefined, // NG word list {string[]}
+    dividerPos: 50 // 2PaneDivider's X position (percent)
   };
 
   // this app's config
@@ -72,6 +73,8 @@ $(function() {
     applyFontSize(appConfig.fontSize);
     // theme 
     applyTheme(appConfig.theme);
+    // adjust divider range
+    rng_divider.val(appConfig.dividerPos);
   });
 
   //
@@ -154,9 +157,6 @@ $(function() {
   // for appearing history urls on Back & Forward button's long press.
   var pressTimer;
 
-  // 2PaneDivider's X position (percent)
-  var pos_divider = 50;
-
   //
   // -- UI controls
   //
@@ -170,9 +170,11 @@ $(function() {
   var btn_arrowDnTList = $("#btn_arrowDnTList");
   var btn_showPaneWrite = $("#btn_showPaneWrite");
   var btn_addBm = $("#btn_addBm");
-  var rng_adjust2pane = $("#rng_adjust2pane");
+  var rng_divider = $("#rng_divider");
   var readmore = $("#readmore");
   var readhere = $("#readhere");
+  var btn_closeReadhere = $("#btn_closeReadhere");
+  var fetchline = $("#fetchline");
   var btn_jumpToReadhere = $("#btn_jumpToReadhere");
   var lbl_kakolog = $("#lbl_kakolog");
   var thread = $("#thread");
@@ -609,7 +611,7 @@ $(function() {
           btn_bmlist.trigger("click");
         } else {
           // when thread's or others' url.
-          viewResponses(url, null, true);
+          viewResponses(url, null, true, false);
         }
       }
     }
@@ -797,7 +799,7 @@ $(function() {
     if (nowloading) return;
     var row = $(this); // a selected row on threadList
     var url = row.data("url");
-    viewResponses(url, row, true);
+    viewResponses(url, row, true, false);
   });
 
   /**
@@ -807,8 +809,10 @@ $(function() {
    *    selected row in threadList. null is also OK.
    * @param {bool} historyUpdate
    *    default is "false"
+   * @param {bool} isReadmoreClicked
+   *    default is "false"
    */
-  function viewResponses(url, row, historyUpdate) {
+  function viewResponses(url, row, historyUpdate, isReadmoreClicked) {
       startLoading(url, row);
       // If URL contains "headline.2ch.net", read data of ".dat" instead of "read.cgi".
       if (util2ch.isHeadlineURL(url)) {
@@ -818,12 +822,13 @@ $(function() {
         url = util2ch.readCGIURLToDatURL(url);
       }
       txt_url.val(url);
-      var readhereurl = readhere.data("url");
+      var thread_title_url = thread_title.data("url");
       if (!historyUpdate) historyUpdate = false;
+      if (!isReadmoreClicked) isReadmoreClicked = false;
       console.log("url:", url);
       // get resnum of readhere
       getReadhereFromStore(url, function(resnum) {
-        var startIdx = resnum; // starting resnum to display
+        var startIdx = 0; // starting res index.
         // load res.
         util2ch.getResponses(url, appConfig.ngWords, function(data, type) {
           console.log("type:", type, " data:", data);
@@ -858,7 +863,11 @@ $(function() {
             prepareWriteForm(url);
           }
           // make the buttons of readhere, arrowUp and arrowDn enable.
-          btn_jumpToReadhere.removeClass("disabled");
+          if (resnum) {
+            btn_jumpToReadhere.removeClass("disabled");
+          } else {
+            btn_jumpToReadhere.addClass("disabled");
+          }
           btn_arrowUp.removeClass("disabled");
           btn_arrowDn.removeClass("disabled");
           // back & forward buttons disability
@@ -875,9 +884,12 @@ $(function() {
           }
           // close res write webview if opened.
           pane_wv[0].style.visibility = "hidden";
-          // if first visit of thread, clear responses.
-          if (!resnum || readhereurl != url) {
-            // $("#res_wrapper").empty();
+
+          if (isReadmoreClicked) {
+            // if it comes by clicking readmore button, set lastResnum as startIdx
+            startIdx = getLastResnumOfThreadPane();
+          } else if (!resnum || thread_title_url != url) {
+            // unless by clicking readmore button nor any thread with readhere, clear responses.
             startIdx = 0;
             if (resnum === undefined) {
               resnum = 0; // init resnum for getting all res.
@@ -887,11 +899,15 @@ $(function() {
           }
           // draw responses.
           var lastResnum = drawResponses(responses, startIdx);
-          if (lastResnum < 0) showErrorMessage("datが存在しない or dat落ち or 鯖落ちです");
-          readhere
-            .data("resnum", lastResnum)
-            .data("url", url)
-            .remove().insertAfter($("#resnum" + resnum)); // move readhere div to prev of readmore div
+          if (lastResnum < 0) {
+            showErrorMessage("datが存在しない or dat落ち or 鯖落ちです");
+          } else if (isReadmoreClicked) {
+            fetchline.insertAfter($("#resnum" + startIdx)).show();
+          } else {
+            fetchline.hide();
+          }
+          // insert Readhere element after the last read res
+          if (resnum >= 1) insertReadhereElem(resnum);
           // set lastResnum as ThreadTitle's data
           thread_title.data("resnum", lastResnum);
           // make previous selected row's style to "unselected"
@@ -912,16 +928,18 @@ $(function() {
             // update the text of ".rescnt" col of the selected row
             selectedRow.find(".rescnt").text(lastResnum);
             // zero-init the text of ".newcnt" col of the selected row
-            selectedRow.find(".newcnt").text("0");
+            var newcnt = "";
+            if (resnum) newcnt = lastResnum - resnum;
+            selectedRow.find(".newcnt").text(newcnt);
           }
-          // update readhere's resnum
-          saveReadhereToStore(url, lastResnum);
           // change readhere's visibility
-          if (resnum === 0) {
-            readhere.css("display", "none");
+          if (isReadmoreClicked) {
+            scrollToTheRes($("#resnum" + startIdx));
+          } else if (resnum === 0) {
+            readhere.hide();
             btn_jumpToReadhere.addClass("disabled");
           } else {
-            readhere.css("display", "block");
+            readhere.show();
             btn_jumpToReadhere
               .removeClass("disabled")
               .trigger("click");
@@ -941,6 +959,22 @@ $(function() {
         }
       });
     } // viewResponses
+
+  // insert Readhere element after the res
+  function insertReadhereElem(resnum) {
+    readhere
+      .data("resnum", resnum)
+      .insertAfter($("#resnum" + resnum)); // move readhere div to prev of readmore div
+  }
+
+  btn_closeReadhere.click(function() {
+    var url = thread_title.data("url");
+    removeReadhereFromStore(url);
+    var row = getTListRowByURL(url);
+    row.find(".newcnt").text("");
+    readhere.hide();
+    btn_jumpToReadhere.addClass("disabled");
+  });
 
   $document.on("mouseenter", "#tlist .body .row", function() {
     // if it is "bmlist"(bookmarkList), makes bookmark removable
@@ -1044,6 +1078,9 @@ $(function() {
     var res;
     var num, handle, email, date, uid, be, content;
     if (!startIdx) startIdx = 0;
+    // evacuate readhere & fetchline element
+    readhere.insertAfter($("#res_wrapper"));
+    fetchline.insertAfter($("#res_wrapper"));
     for (var len = responses.length, i = 0; i < len; i++) {
       // start to build html from specified index of responses
       if (startIdx <= i) {
@@ -1072,6 +1109,7 @@ $(function() {
             ' <div class="content">' + res.content + '</div>\n' +
             ' <div class="restool">\n' +
             '  <div class="btn btn_reply" title="返信">&nbsp;</div>\n' +
+            '  <div class="btn btn_readhere" title="ここまで読んだ">&nbsp;</div>\n' +
             '  <div style="clear:both"></div>\n' +
             ' </div>\n' +
             '</div>\n';
@@ -1542,7 +1580,7 @@ $(function() {
 
   function execReadmore() {
     var url = readmore.data("url");
-    viewResponses(url, null, true);
+    viewResponses(url, null, true, true);
   }
 
   function reloadTList() {
@@ -1745,7 +1783,7 @@ $(function() {
   // jump from history
   function goFromHistory(url) {
     if (url) {
-      viewResponses(url, null, false);
+      viewResponses(url, null, false, false);
     }
   }
 
@@ -1760,7 +1798,7 @@ $(function() {
       url = baf.forwardURL.url;
     }
     if (url) {
-      viewResponses(url, null, false);
+      viewResponses(url, null, false, false);
     }
   }
 
@@ -1853,16 +1891,22 @@ $(function() {
     }, 100);
   });
   btn_jumpToReadhere.click(function() {
-    var ot = readhere.offset().top;
+    if ($(this).hasClass("disabled")) return;
+    var resElem = readhere.prev();
+    scrollToTheRes(resElem);
+  });
+  rng_divider.on("input change", function() {
+    appConfig.dividerPos = $(this).val();
+    redraw();
+  });
+
+  function scrollToTheRes(resElem) {
+    var ot = resElem.offset().top;
     var st = thread.scrollTop();
     thread.animate({
       scrollTop: st + ot - 120
     }, 100);
-  });
-  rng_adjust2pane.on("input change",function() {
-    pos_divider = $(this).val();
-    redraw();
-  });
+  }
 
   //
   // -- layouts
@@ -1889,7 +1933,7 @@ $(function() {
 
     //
     // #tlist and #thread width setting
-    var tlist_w = ww * pos_divider / 100; // for left pane
+    var tlist_w = ww * appConfig.dividerPos / 100; // for left pane
     var thread_w = ww - tlist_w - 46; // for right pane
     tlist[0].style.width = tlist_w + "px";
     tlist_header[0].style.width = (tlist_w - 20) + "px";
@@ -1991,7 +2035,9 @@ $(function() {
       res_clone = res.clone()
         .attr("id", null); // prevents any troubles of double ID;
       if (res_clone[0]) {
-        // display the responses disappeared by filtering
+        // remove unwanted elements. 
+        res_clone.find(".btn_readhere").remove();
+        // display also any responses disappeared by filtering
         res_clone[0].style.display = "block";
         html += res_clone[0].outerHTML;
         res_clone = undefined;
@@ -2051,19 +2097,23 @@ $(function() {
 
   // save readhere info to store
   function saveReadhereToStore(daturl, resnum) {
-    console.log("saveReadhereToStore", daturl, resnum);
-    var data = {
-      url: daturl,
-      res: resnum
-    };
-    idbutil.update("readheres", data);
-    // get the bookmark from store
-    getBookmark(daturl, function(bm) {
-      // update the bookmark 
-      if (!bm) return;
-      bm.res = resnum;
-      idbutil.update("bookmarks", bm);
-    });
+      console.log("saveReadhereToStore", daturl, resnum);
+      var data = {
+        url: daturl,
+        res: resnum
+      };
+      idbutil.update("readheres", data);
+      // get the bookmark from store
+      getBookmark(daturl, function(bm) {
+        // update the bookmark 
+        if (!bm) return;
+        bm.res = resnum;
+        idbutil.update("bookmarks", bm);
+      });
+    }
+    // remove readhere from store
+  function removeReadhereFromStore(daturl) {
+    idbutil.remove("readheres", daturl);
   }
 
   // get bookmarks from store
@@ -2169,6 +2219,33 @@ $(function() {
       msg: repmsg
     }]);
   });
+  // readhere button click
+  $document.on("click", ".restool .btn_readhere", function() {
+    var resdiv = $(this).parent().parent();
+    var url = thread_title.data("url");
+    var lastResnum = getLastResnumOfThreadPane();
+    var curResnum = parseInt(resdiv.find(".num").text());
+    var newcnt = lastResnum - curResnum;
+    // insert readhere element
+    readhere.insertAfter(resdiv).show();
+    btn_jumpToReadhere.removeClass("disabled");
+    // save the last resnum into readhere's store
+    saveReadhereToStore(url, curResnum);
+    // update also rescnt col in the thread list
+    var newcnt = lastResnum - curResnum;
+    var selectedRow = tlist_row_wrapper.find("[data-url='" + url + "']");
+    if (selectedRow[0]) {
+      // update the text of ".rescnt" col of the selected row
+      selectedRow.find(".rescnt").text(lastResnum);
+      // zero-init the text of ".newcnt" col of the selected row
+      selectedRow.find(".newcnt").text(newcnt);
+    }
+  });
+
+  function getLastResnumOfThreadPane() {
+    var lastResnum = $(".res[id]").last().attr("id").split("resnum")[1];
+    return parseInt(lastResnum);
+  }
 
   /**
    * create replying message for the specific res
