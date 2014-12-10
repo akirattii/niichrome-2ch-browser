@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.12.2
+ * @version 0.13.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -273,6 +273,29 @@ $(function() {
       execReadmore();
     }
   });
+
+  //
+  // -- Message passing from background
+  //
+  chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      if (request.command == "searchByGoogle") {
+        // *** open new window for Google search
+        window.open("https://www.google.co.jp/search?q=" + request.text);
+        sendResponse({
+          status: "OK"
+        });
+      } else if (request.command == "searchBy2ch") {
+        // *** search by finding service of 2ch
+        var e = new Event("keydown");
+        e.keyCode = 13; // set Enter key to the event
+        txt_url.val(request.text).trigger("keydown", e);
+      } else if (request.command == "addNG") {
+        // *** add as NG word
+        if (!appConfig.ngWords) appConfig.ngWords = [];
+        appConfig.ngWords.push(request.text);
+      }
+    });
 
   //
   // -- window clicked
