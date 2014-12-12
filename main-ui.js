@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.13.3
+ * @version 0.13.4
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -649,13 +649,13 @@ $(function() {
   // -- write pane
   //
 
-  btn_showPaneWrite.click(function(e, data) { // data = { from:, mail:, msg: }
+  btn_showPaneWrite.click(function(e, data) { // data format: { from:, mail:, msg: }
     console.log("btn_showPaneWrite");
     if ($(this).hasClass("disabled")) return;
     pane_wv[0].style.visibility = "visible";
     // insert css
     wv[0].insertCSS({
-      code: "div > div,iframe,dl,a,hr { display: none; } " +
+      code: "div div, span > br, iframe, dl, a, hr { display: none; } " +
         "form { display: block; } " +
         "h1 { padding: 12px 2px 12px 2px; } "
     });
@@ -668,11 +668,15 @@ $(function() {
       if (data.mail) mail = data.mail;
       if (data.msg) msg = data.msg;
     }
+    // set focus to the webview
+    wv.focus();
     // execute script
     wv[0].executeScript({
       code: "var ipt_from = document.getElementsByName('FROM')[0]; ipt_from.value = '" + from + "';" +
         "var ipt_mail = document.getElementsByName('mail')[0]; ipt_mail.value = '" + mail + "';" +
-        "var ta_msg = document.getElementsByName('MESSAGE')[0]; ta_msg.value = '" + msg + "';"
+        "var ta_msg = document.getElementsByName('MESSAGE')[0]; ta_msg.value = '" + msg + "';" +
+        "ta_msg.setAttribute('rows', '15');" +
+        "ta_msg.select();"
     });
   });
 
@@ -685,7 +689,7 @@ $(function() {
     wv[0].addEventListener("loadcommit", function() {
       // insert css
       wv[0].insertCSS({
-        code: "div > div,iframe,dl,a,hr { display: none; } " +
+        code: "div div, span > br, iframe, dl, a, hr { display: none; } " +
           "form { display: block; } " +
           "h1 { padding: 12px 2px 12px 2px; } "
       });
