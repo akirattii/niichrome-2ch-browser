@@ -688,12 +688,7 @@ div#readhere {
   padding: 10px;
   margin: 0px 0px 20px 0px;
   box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.9);
-}
-div#btn_closeReadhere {
-  font-size:1.2rem;
-  font-weight: bold;
-  float: left;
-  cursor:pointer;
+  cursor: pointer;
 }
 div#readhere > .text {
   float: left;

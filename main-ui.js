@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.13.0
+ * @version 0.13.3
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -173,7 +173,6 @@ $(function() {
   var rng_divider = $("#rng_divider");
   var readmore = $("#readmore");
   var readhere = $("#readhere");
-  var btn_closeReadhere = $("#btn_closeReadhere");
   var fetchline = $("#fetchline");
   var btn_jumpToReadhere = $("#btn_jumpToReadhere");
   var lbl_kakolog = $("#lbl_kakolog");
@@ -293,7 +292,13 @@ $(function() {
       } else if (request.command == "addNG") {
         // *** add as NG word
         if (!appConfig.ngWords) appConfig.ngWords = [];
-        appConfig.ngWords.push(request.text);
+        var ngWords = appConfig.ngWords;
+        var ngWord = request.text;
+        // double check
+        if($.inArray(ngWord, ngWords) >= 0) return;
+        ngWords.push(ngWord);
+        // set cloned array to fire the change event for object.observe
+        appConfig.ngWords = ngWords.concat(); 
       }
     });
 
@@ -990,7 +995,7 @@ $(function() {
       .insertAfter($("#resnum" + resnum)); // move readhere div to prev of readmore div
   }
 
-  btn_closeReadhere.click(function() {
+  $document.on("click", "#readhere", function() {
     var url = thread_title.data("url");
     removeReadhereFromStore(url);
     var row = getTListRowByURL(url);
