@@ -1,7 +1,7 @@
 ﻿/**
  * niichrome 2ch browser
  *
- * @version 0.13.0
+ * @version 0.13.5
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -47,8 +47,14 @@ function onCMClickHandler(info) {
     searchByGoogle(info.selectionText);
   } else if (info.menuItemId == "menu_searchBy2ch") {
     searchBy2ch(info.selectionText);
-  }else if (info.menuItemId == "menu_addNG") {
+  } else if (info.menuItemId == "menu_addNG") {
     addNG(info.selectionText);
+  } else if (info.menuItemId == "menu_filter") {
+    filter(info.selectionText);
+  } else if (info.menuItemId == "menu_findbar") {
+    findbar(info.selectionText);
+  } else if (info.menuItemId == "menu_copylink") {
+    copylink(info.linkUrl);
   }
 }
 
@@ -70,6 +76,20 @@ chrome.runtime.onInstalled.addListener(function() {
     "id": "menu_searchBy2ch"
   });
 
+  // contextmenu for filtering
+  chrome.contextMenus.create({
+    "title": "「%s」を抽出",
+    "contexts": ["selection"], // shows on text-selected
+    "id": "menu_filter"
+  });
+
+  // contextmenu for filtering
+  chrome.contextMenus.create({
+    "title": "「%s」をスレ内検索",
+    "contexts": ["selection"], // shows on text-selected
+    "id": "menu_findbar"
+  });
+
   // separator for addNG
   chrome.contextMenus.create({
     "type": "separator",
@@ -82,6 +102,13 @@ chrome.runtime.onInstalled.addListener(function() {
     "title": "「%s」をNGワード登録",
     "contexts": ["selection"], // shows on text-selected
     "id": "menu_addNG"
+  });
+
+  // contextmenu for copying url of link
+  chrome.contextMenus.create({
+    "title": "URLをコピー",
+    "contexts": ["link"], // shows on text-selected
+    "id": "menu_copylink"
   });
 
 });
@@ -105,6 +132,30 @@ function searchBy2ch(text) {
 function addNG(text) {
   var p = {
     command: "addNG",
+    text: text.trim()
+  };
+  sendMessage(p);
+}
+
+function filter(text) {
+  var p = {
+    command: "filter",
+    text: text.trim()
+  };
+  sendMessage(p);
+}
+
+function findbar(text) {
+  var p = {
+    command: "findbar",
+    text: text.trim()
+  };
+  sendMessage(p);
+}
+
+function copylink(text) {
+  var p = {
+    command: "copylink",
     text: text.trim()
   };
   sendMessage(p);

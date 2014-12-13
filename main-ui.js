@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.13.4
+ * @version 0.13.5
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -162,6 +162,7 @@ $(function() {
   //
   var $window = $(window);
   var $document = $(document);
+  var ta_clipboard = $("#ta_clipboard");
   var btn_arrowBack = $("#btn_arrowBack");
   var btn_arrowForward = $("#btn_arrowForward");
   var btn_arrowUp = $("#btn_arrowUp");
@@ -295,12 +296,29 @@ $(function() {
         var ngWords = appConfig.ngWords;
         var ngWord = request.text;
         // double check
-        if($.inArray(ngWord, ngWords) >= 0) return;
+        if ($.inArray(ngWord, ngWords) >= 0) return;
         ngWords.push(ngWord);
         // set cloned array to fire the change event for object.observe
-        appConfig.ngWords = ngWords.concat(); 
+        appConfig.ngWords = ngWords.concat();
+      } else if (request.command == "filter") {
+        // *** filtering
+        txt_filter.val(request.text)
+          .select()
+          .trigger("keydown");
+      } else if (request.command == "findbar") {
+        // *** findbar
+        btn_settingFind.val(request.text)
+          .trigger("click");
+      } else if (request.command == "copylink") {
+        // *** copy link
+        copyToClipboard(request.text);
       }
     });
+
+  function copyToClipboard(text) {
+    ta_clipboard.text(text).select();
+    document.execCommand("copy");
+  }
 
   //
   // -- window clicked
@@ -1716,7 +1734,7 @@ $(function() {
   });
   // settings - "スレ内検索"
   btn_settingFind.click(function(e) {
-    findbar.show();
+    findbar.show(window.getSelection().toString());
   });
   // settings - "文字サイズ拡大"
   btn_settingSizeUp.click(function(e) {
