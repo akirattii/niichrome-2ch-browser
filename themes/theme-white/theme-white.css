@@ -177,6 +177,9 @@ div#lbl_kakolog {
   -webkit-transform: rotate(90deg);
   -webkit-filter:invert();
 }
+.readherefilter24 {
+  -webkit-filter:invert();
+}
 .readhere24 {
   -webkit-filter:invert();
 }

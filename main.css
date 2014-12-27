@@ -199,6 +199,7 @@ div#thread .res_wrapper {
   border-radius: 2px;
   float: right;
   margin: 0px 2px 0px 0px;
+  padding: 0px 2px 0px 2px;
 }
 .restool > .btn:hover {
   background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#aaaaaa));
@@ -658,8 +659,11 @@ div#tools #rng_divider {
   content: url("img/arrow24.png");
   -webkit-transform: rotate(90deg);
 }
+.readherefilter24 {
+  content: url("img/readherefilter24.png");
+}
 .readhere24 {
-  content: url("img/readhere24.png"); 
+  content: url("img/readhere24.png");
 }
 .write24 {
   content: url("img/write24.png"); 

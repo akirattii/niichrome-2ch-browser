@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.13.6
+ * @version 0.14.1
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -182,6 +182,7 @@ $(function() {
   // var tlist_body = $("#tlist .body");
   var blist = $("#blist");
   var blist_toggle_bar = $('#blist_toggle_bar');
+  var btn_readherefilter = $("#btn_readherefilter");
   var btn_reloadTList = $("#btn_reloadTList");
   var btn_reloadBList = $("#btn_reloadBList");
   var blist_wrapper = $("#blist_wrapper");
@@ -1021,7 +1022,7 @@ $(function() {
     var url = thread_title.data("url");
     removeReadhereFromStore(url);
     var row = getTListRowByURL(url);
-    row.find(".newcnt").text("");
+    if (row) row.find(".newcnt").text("");
     readhere.hide();
     btn_jumpToReadhere.addClass("disabled");
   });
@@ -1620,6 +1621,22 @@ $(function() {
     }
   });
 
+  btn_readherefilter.click(function(e) {
+    var elems;
+    var elem;
+    if ($(this).hasClass("grayout")) {
+      $(this).removeClass("grayout");
+      // do filtering readhered thread.
+      elems = $("#tlist_row_wrapper .body .row .col.newcnt:empty").parent();
+      elems.hide();
+    } else {
+      // cancel filtering
+      $(this).addClass("grayout");
+      elems = $("#tlist_row_wrapper .body .row");
+      elems.show();
+    }
+  });
+
   function isBookmarkView() {
     if (bbs_title.data("url") == cmd.bookmarks) {
       return true;
@@ -1651,6 +1668,8 @@ $(function() {
     startLoading();
     el.removeClass("reload24");
     el.addClass("loading_mini");
+    //
+    btn_readherefilter.addClass("grayout");
     // loading thread list of the clicked bbs.
     util2ch.getThreadList(url, function(list) {
       // console.log("ThreadList:", list);
