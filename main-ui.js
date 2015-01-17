@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.14.1
+ * @version 0.15.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -182,6 +182,7 @@ $(function() {
   // var tlist_body = $("#tlist .body");
   var blist = $("#blist");
   var blist_toggle_bar = $('#blist_toggle_bar');
+  var btn_addBBSBm = $("#btn_addBBSBm");
   var btn_readherefilter = $("#btn_readherefilter");
   var btn_reloadTList = $("#btn_reloadTList");
   var btn_reloadBList = $("#btn_reloadBList");
@@ -523,11 +524,12 @@ $(function() {
 
   btn_bmlist.on("click", function() {
     console.log("btn_bmlist click");
+    var url = cmd.bookmarks;
     toggleBBSList(false);
     // make the threadList reloading button disabled, because bookmarkList is unreloadable.
     // btn_reloadTList.hide();
     setBBSInfo({
-      url: cmd.bookmarks,
+      url: url,
       bbs: "お気に入り"
     });
     getAllBookmarks(function(list) {
@@ -535,6 +537,7 @@ $(function() {
       drawThreadList(list);
       setResCountAndNewCountOnBM();
     });
+    changeBmStarStyle(url, btn_addBBSBm);
   });
 
   // get and set the latest rescounts and newcounts of bookmarked threads.
@@ -840,7 +843,7 @@ $(function() {
     removeBookmark(url);
     row.remove();
     if (thread_title.data("url") == url) {
-      styleBmStar(false);
+      styleBmStar(btn_addBm, false);
     }
     e.stopPropagation(); // stop all events after this.
   });
@@ -850,7 +853,14 @@ $(function() {
     if (nowloading) return;
     var row = $(this); // a selected row on threadList
     var url = row.data("url");
-    viewResponses(url, row, true, false);
+    if (util2ch.isBBSURL(url) || util2ch.isDig2chURL(url) || isCommand(url)) {
+      // if the url of bbs|dig2ch|command, set url to txt_url and trigger enterkey down.
+      e.keyCode = 13; // set Enter key to the event
+      txt_url.val(url).trigger("keydown", e);
+    } else {
+      // else regards the url as thread's one
+      viewResponses(url, row, true, false);
+    }
   });
 
   /**
@@ -1001,15 +1011,26 @@ $(function() {
           stopLoading();
         }); // util2ch.getResponses
       });
-      // check this thread whether bookmarked or not
-      getBookmark(url, function(data) {
-        if (!data) {
-          styleBmStar(false);
-        } else {
-          styleBmStar(true);
-        }
-      });
+      changeBmStarStyle(url, btn_addBm);
     } // viewResponses
+
+  /**
+   * toggle the bookmark button ON if the url will be bookmarked.
+   * @param {string} url which might be bookmarked.
+   * @param {dom} bookmark button element
+   */
+  function changeBmStarStyle(url, bmbtn) {
+    // check if this thread/BBS is bookmarked or not
+    getBookmark(url, function(data) {
+      if (!data) {
+        // unless bookmarked url, toggle OFF.
+        styleBmStar(bmbtn, false);
+      } else {
+        // toggle ON.
+        styleBmStar(bmbtn, true);
+      }
+    });
+  }
 
   // insert Readhere element after the res
   function insertReadhereElem(resnum) {
@@ -1077,6 +1098,7 @@ $(function() {
     for (var len = list.length, i = 0; i < len; i++) {
       json = list[i];
       url = util2ch.datURLToReadCGIURL(json.url); // dat's url to read.cgi's url
+      if (!url) url = json.url;
       title = json.title;
       if (!isBookmarkView()) {
         res = json.res;
@@ -1610,6 +1632,10 @@ $(function() {
     execReadmore();
   });
 
+  btn_addBBSBm.click(function(e) {
+    toggleBmStar($(this), true);
+  });
+
   btn_reloadTList.click(function(e) {
     if (nowloading) return;
     console.log("btn_reloadTList url:", $(this).data("url"));
@@ -1670,6 +1696,8 @@ $(function() {
     el.addClass("loading_mini");
     //
     btn_readherefilter.addClass("grayout");
+    // 
+    changeBmStarStyle(url, btn_addBBSBm);
     // loading thread list of the clicked bbs.
     util2ch.getThreadList(url, function(list) {
       // console.log("ThreadList:", list);
@@ -1875,33 +1903,41 @@ $(function() {
   // Toggle bm star.
 
   btn_addBm.click(function(e) {
-    toggleBmStar();
+    toggleBmStar($(this), false);
   });
 
-  function toggleBmStar() {
-    var url = thread_title.data("url");
-    var title = thread_title.data("title");
-    var tlist_url = bbs_title.data("url");
-    var resnum = thread_title.data("resnum");
+  function toggleBmStar(btn_elem, isBBSBm) {
+    var url, title, tlist_url, resnum;
+    if (isBBSBm) { // when bbs bookmark...
+      url = bbs_title.data("url");
+      title = bbs_title.text();
+      tlist_url = bbs_title.data("url");
+      resnum = undefined;
+    } else { // when thread bookmark
+      url = thread_title.data("url");
+      title = thread_title.data("title");
+      tlist_url = bbs_title.data("url");
+      resnum = thread_title.data("resnum");
+    }
     if (!url || !title) {
       return;
     }
-    if (btn_addBm.attr("class") == "btn star_on24") {
+    if (btn_elem.attr("class") == "btn star_on24" || btn_elem.attr("class") == "icon star_on24") {
       // remove from bookmark.
       removeBookmark(url);
-      // if bookmarks pane is displayed, remove the row from there.
+      // if bookmarks pane is displayed, remove the row of the bookmarked url from there.
       if (tlist_url == cmd.bookmarks) {
         removeFromTListPane(url);
       }
-      styleBmStar(false);
+      styleBmStar(btn_elem, false);
     } else {
       // add to bookmark.
       saveBookmark(url, title, resnum);
-      // if bookmarks pane is displayed, add the row to there.
+      // if bookmarks pane is displayed, add the row of the bookmarked url to there.
       if (tlist_url == cmd.bookmarks) {
         addToTListPane();
       }
-      styleBmStar(true);
+      styleBmStar(btn_elem, true);
     }
   }
 
@@ -1937,11 +1973,11 @@ $(function() {
   }
 
   // flg=true: "star_on", flg=false: "star_on disabled".
-  function styleBmStar(flg) {
+  function styleBmStar(btn_elem, flg) {
     if (flg) {
-      btn_addBm.removeClass("grayout").prop("title", "お気に入りから削除");
+      btn_elem.removeClass("grayout").prop("title", "お気に入りから削除");
     } else {
-      btn_addBm.addClass("grayout").prop("title", "お気に入りに登録");
+      btn_elem.addClass("grayout").prop("title", "お気に入りに登録");
     }
   }
 
