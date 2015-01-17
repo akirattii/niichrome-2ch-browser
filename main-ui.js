@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.15.0
+ * @version 0.15.1
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -1164,7 +1164,7 @@ $(function() {
         res.date ? date = res.date : date = "";
         res.uid ? uid = res.uid : uid = "";
         res.be ? be = res.be : be = "";
-        res.content ? content = res.content : content = "";
+        res.content ? content = res.content.replace(/<script[^>]*>/gi,'') : content = ""; // for [email protected]
 
         if (res.ng) {
           // if contains NG words, then abooooon!
@@ -1179,7 +1179,7 @@ $(function() {
             '  <span class="uid">' + uid + '</span>\n' +
             '  <span class="be">' + be + '</span>\n' +
             ' </div>\n' +
-            ' <div class="content">' + res.content + '</div>\n' +
+            ' <div class="content">' + content + '</div>\n' +
             ' <div class="restool">\n' +
             '  <div class="btn btn_reply" title="返信">&nbsp;</div>\n' +
             '  <div class="btn btn_readhere" title="ここまで読んだ">&nbsp;</div>\n' +
