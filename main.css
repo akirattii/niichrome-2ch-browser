@@ -7,7 +7,7 @@ html, body {
   height: 100%;
   min-height: 100%;
   background-color: #121212;
-  color: #ffffff;
+  color: #cfcfcf;
 }
 
 
@@ -57,6 +57,9 @@ div#tlist #btn_reloadTList {
   top: 88px;
   background-color: transparent;
   padding-left: 6px;
+}
+#tlist_row_wrapper .body {
+  margin-bottom: 28px; /* for adsbar_dogear */
 }
 #tlist_row_wrapper .body .row {
   cursor: pointer;
@@ -111,7 +114,7 @@ div#thread {
   padding: 0px 10px 0px 20px;
   min-height: 100px;
   height: 100px;
-  background-color: black;
+  background-color: #181818;
   -webkit-user-select: text; /* for enabling text selection */
 }
 div#thread #thread_title {
@@ -123,7 +126,7 @@ div#thread #thread_title {
   width: 100%;
   font-size: 1.1em;
   word-wrap: break-word;
-  background-color: rgba(0,0,0,0.6);
+  background-color: rgba(30,30,30,0.8);
   border-bottom: 1px solid #5f5f5f;
   /*color: #aaff36;*/
   color: #ccff56;
@@ -174,12 +177,18 @@ div#thread .res_wrapper {
   padding: 0px 2px 0px 2px;
   cursor: pointer;
 }
+.res_wrapper .res .res_header .host {
+  color: gray;
+  font-size: 0.7em;
+  padding: 0px 2px 0px 2px;
+  cursor: pointer;
+}
 .res_wrapper .res .content {
   padding: 8px 2px 4px 20px;
   font-size: 1.1em;
   line-height: 1.2em;
   font-family: 'ＭＳ Ｐゴシック','ＭＳＰゴシック','Takao Pゴシック','TakaoPGothic','IPAMonaPGothic',monospace;
-  color: #ffffff;
+  color: #cfcfcf;
 }
 .res_wrapper .res .content a {
   color: #52D2EF;
@@ -240,7 +249,7 @@ div#blist {
   z-index: 9999;
 }
 div#blist #blist_header {
-  padding: 14px 4px 2px 0px;
+  padding: 14px 4px 20px 0px;
   height: 36px;
 }
 div#blist #btn_reloadBList {
@@ -269,6 +278,9 @@ div#blist #btn_blistUpdate {
   position: absolute;
   right: 20px;
   top: 46px;
+}
+div#blist .cate:last-child {
+  padding-bottom: 28px; /* for adsbar_dogear */
 }
 div#blist .cate ul {
   display: none;
@@ -304,7 +316,7 @@ div#blist_toggle_bar {
   z-index: 99999;
 }
 
-/* webview for writing res */
+/* webview for writing form */
 #pane_wv {
   width: 600px;
   height: 400px;
@@ -314,6 +326,7 @@ div#blist_toggle_bar {
   border-radius: 6px 6px 0px 0px;
   border: 1px solid #aaaaaa;
   background-color:#535353;
+  box-shadow: 0px 0px 10px #222;
   visibility: hidden;
   z-index: 999999;
 }
@@ -334,6 +347,43 @@ div#blist_toggle_bar {
   width: 600px; /* same to #pane_wv's width */
   height: 380px; /* #pane_wv's height - #btn_closeWv's height */
 }
+
+
+/* webview for ads bar */
+div#pane_wv_adsbar {
+  position: fixed;
+  left: 0px;
+  bottom: 0px;
+  padding: 0px;
+  background-color: transparent;
+  z-index: 99999;
+  /* follows banner size */ 
+  width: 340px;
+  height: 302px;
+}
+div#adsbar_dogear {
+  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
+  border-radius: 0px 6px 0px 0px;
+  position: relative;
+  left: 0px;
+  top: 0px;
+  background-color: #ffffff;
+  color: black;
+  text-align: center;
+  padding: 3px;
+  max-width: 80px;
+  height: 22px;
+}
+div#pane_wv_adsbar #wv_adsbar {
+  box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
+  position: relative;
+  left: 0px;
+  top: 0px;
+  /* follows banner size */
+  width: 336px;
+  height: 280px;
+}
+
 
 #pane_confBg {
   display: none;
@@ -674,7 +724,7 @@ div#tools #rng_divider {
 .refpop {
   max-width: 600px;
   max-height: 480px;
-  background-color:#1f1f1f;
+  background-color:#2c2c2c;
   border:1px solid gray;
   position: fixed;
   box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);

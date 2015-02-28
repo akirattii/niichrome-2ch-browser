@@ -1,5 +1,5 @@
 /* 
-  Theme 'gray' for niichrome 2ch browser 
+  Theme 'lightgray' for niichrome 2ch browser 
 */
 
 * {
@@ -10,16 +10,16 @@ html, body {
   font-size: 16px;
   height: 100%;
   min-height: 100%;
-  background-color: #dfdfdf;
-  color: #232323;
+  background-color: #ececec;
+  color: #3b3b3b;
 }
 
 /* thread list */ 
 div#tlist {
-  background-color: #cfcfcf;
+  background-color: #f4f4f4;
 }
 #tlist_header {
-  background-color: rgba(200,200,200,0.8);
+  background-color: rgba(240,240,240,0.8);
   color: #434343;
 }
 #tlist_row_wrapper .body .row:hover .col {
@@ -37,13 +37,13 @@ div#tlist {
 
 
 div#thread {
-  color: #000000;
-  background-color: #bfbfbf;
+  color: #3b3b3b;
+  background-color: #f8f8f8;
 }
 div#thread #thread_title {
-  background-color: rgba(210,210,210,0.9);
-  border-bottom: 1px solid #afafaf;
-  color: #305FF1;
+  background-color: rgba(240,240,240,0.8);
+  border-bottom: 1px solid #ececec;
+  color: #0248E2;
   padding-left: 12px;
 }
 /* response */
@@ -54,25 +54,25 @@ div#thread .res_wrapper {
   color: #696969;
 }
 .res_wrapper .res .res_header .handle {
-  color: #167912;
+  color: #469942;
 }
 .res_wrapper .res .res_header .date {
-  color: #5a5a5a;
+  color: #8a8a8a;
 }
 .res_wrapper .res .res_header .uid {
-  color: #5F7F07;
+  color: #9faf68;
 }
 .res_wrapper .res .res_header .be {
   color: #8a8a8a;
 }
 .res_wrapper .res .res_header .email {
-  color: #FA6F8C;
+  color: #CAAFCF;
 }
 .res_wrapper .res .res_header .host {
   color: gray;
 }
 .res_wrapper .res .content {
-  color: #303030;
+  color: #3b3b3b;
 }
 .res_wrapper .res .content a {
   color: #0248E2;
@@ -116,7 +116,7 @@ div#blist_toggle_bar {
 }
 
 div#tools {
-  background-color: #afafaf;
+  background-color: #e5e5e5;
   border-bottom: 1px solid #cccccc;
 }
 div#tools #btn_settings {
@@ -135,21 +135,21 @@ div#tools #rng_divider {
 }
 
 .refpop {
-  background-color:#e0e0e0;
+  background-color:#efefef;
   border:1px solid gray;
   box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.4);
 }
 
 div#readhere {
-  background-color: #3a9a5a;
-  color: #232323;
+  background-color: #9afa9a;
+  color: #4c4c4c;
   box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.9);
 }
 hr#fetchline {
   border: 1px solid #3a9a5a;
 }
 div#readmore {
-  color: #1292AF;
+  color: #5080d8;
 }
 div#lbl_kakolog {
   background-color: #ff8c8c;
@@ -214,11 +214,11 @@ div#lbl_kakolog {
 }
 
 ::-webkit-scrollbar-track {
-  background-color: #cacaca;
+  background-color: #E7E7E7;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #248aa2;
+  background-color: #cfcfcf;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #44aac2;
+  background-color: #c0c0c0;
 }

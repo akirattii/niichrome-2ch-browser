@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 0.15.1
+ * @version 1.0.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -239,6 +239,10 @@ $(function() {
   var btn_settingConfig = $("#btn_settingConfig");
   var btn_settingAbout = $("#btn_settingAbout");
   var btn_settingQuit = $("#btn_settingQuit");
+  var pane_wv_adsbar = $("#pane_wv_adsbar");
+  var wv_adsbar = $("#wv_adsbar");
+  var adsbar_dogear = $("#adsbar_dogear");
+
 
   txt_url.focus();
 
@@ -268,11 +272,15 @@ $(function() {
 
   $window.on("message", function(e) {
     var data = e.originalEvent.data;
-    //console.log("window onmessage:", data);
+    console.log("window onmessage:", data);
     // If successed to write, close webview's pane.
-    if (data && data.title == "書きこみました。") {
-      pane_wv[0].style.visibility = "hidden";
-      execReadmore();
+    if (data.title.trim() == "書きこみました。") {
+      if (pane_wv[0].style.visibility != "hidden") {
+        pane_wv[0].style.visibility = "hidden";
+        execReadmore();
+      }
+    } else {
+      return;
     }
   });
 
@@ -443,6 +451,8 @@ $(function() {
   $document.on("click", "#blist .cate1", function() {
     var url = $(this).data("url");
     var bbs = $(this).text();
+    url = util2ch.complementSlash(url); // add "/" to string hip.
+    url = optimizeXpicURL(url);
     console.log("cate1 click:", url);
     // check if it's adult contents or not.
     if (util2ch.isAdultContents(url)) {
@@ -517,6 +527,7 @@ $(function() {
     } else {
       marginLeft = "0px";
     }
+    // toggle bbslist
     blist_wrapper.stop().animate({
       'marginLeft': marginLeft
     }, 200);
@@ -638,21 +649,23 @@ $(function() {
       // eg.: read.cgi/xxxxx/l50 → read.cgi/xxxxx/
       url = util2ch.prettifyReadCGIURL(url);
 
+      // optimize url for xpic.sc
+      url = optimizeXpicURL(url);
+
       if (!isCommand(url) &&
         !util2ch.isBBSURL(url) &&
         !util2ch.isReadCGIURL(url) &&
+        !util2ch.isMachiReadCGIURL(url) &&
         !util2ch.isDatURL(url)) {
         // If url is neither commands nor 2ch's URL, it means keywords to search.
-        // url = util2ch.getFind2chURL(url);
-        url = util2ch.getDig2chURL(url);
+        url = util2ch.getFind2chURL(url);
       }
       $(this).val(url);
-
 
       if (InputValidator.txt_url()) {
         console.log("txt_url input data is valid");
         $(this).data("url", url);
-        if (util2ch.isBBSURL(url) || util2ch.isDig2chURL(url)) {
+        if (util2ch.isBBSURL(url) || util2ch.isFind2chURL(url)) {
           // when BBS's url
           btn_reloadTList.data("url", url);
           reloadTList();
@@ -667,6 +680,7 @@ $(function() {
     }
   });
 
+
   //
   // -- write pane
   //
@@ -674,32 +688,61 @@ $(function() {
   btn_showPaneWrite.click(function(e, data) { // data format: { from:, mail:, msg: }
     console.log("btn_showPaneWrite");
     if ($(this).hasClass("disabled")) return;
-    pane_wv[0].style.visibility = "visible";
     // insert css
-    wv[0].insertCSS({
-      code: "div div, span > br, iframe, dl, a, hr { display: none; } " +
-        "form { display: block; } " +
-        "h1 { padding: 12px 2px 12px 2px; } "
-    });
-    // preset anything into write form's input.
-    var from = "";
+    insertWriteFormCSS();
+    // preset anything into writeform's input
+    // var from = "";
     var mail = "sage";
     var msg = "";
     if (data) {
-      if (data.from) from = data.from;
+      // if (data.from) from = data.from;
       if (data.mail) mail = data.mail;
       if (data.msg) msg = data.msg;
+    }
+    // hidden params for writeform
+    var url = thread_title.data("url");
+    var bbsinfo = util2ch.getBBSInfo(url);
+    var bbs = bbsinfo.bbs;
+    var key = bbsinfo.thread;
+    var time = Math.floor(new Date().getTime() / 1000) - 86400;
+    // keyname of each hidden param
+    var keyname_from = "FROM";
+    var keyname_mail = "mail";
+    var keyname_message = "MESSAGE";
+    var keyname_bbs = "bbs";
+    var keyname_key = "key";
+    var keyname_time = "time";
+    if (util2ch.isMachiReadCGIURL(url)) { // *** when machibbs...
+      keyname_from = "FROM";
+      keyname_mail = "MAIL";
+      keyname_message = "MESSAGE";
+      keyname_bbs = "BBS";
+      keyname_key = "KEY";
+      keyname_time = "TIME";
     }
     // set focus to the webview
     wv.focus();
     // execute script
     wv[0].executeScript({
-      code: "var ipt_from = document.getElementsByName('FROM')[0]; ipt_from.value = '" + from + "';" +
-        "var ipt_mail = document.getElementsByName('mail')[0]; ipt_mail.value = '" + mail + "';" +
-        "var ta_msg = document.getElementsByName('MESSAGE')[0]; ta_msg.value = '" + msg + "';" +
-        "ta_msg.setAttribute('rows', '15');" +
-        "ta_msg.select();"
+      code:
+      // "var ipt_from = document.getElementsByName('" + keyname_from + "')[0];"+
+      // "if(ipt_from) ipt_from.value = '" + from + "';" +
+        "var ipt_mail = document.getElementsByName('" + keyname_mail + "')[0];" +
+        "if(ipt_mail) ipt_mail.value = '" + mail + "';" +
+        "var ta_msg = document.getElementsByName('" + keyname_message + "')[0];" +
+        "if(ta_msg) ta_msg.value = '" + msg + "';" +
+        "var ipt_bbs = document.getElementsByName('" + keyname_bbs + "')[0];" +
+        "if(ipt_bbs) ipt_bbs.value = '" + bbs + "';" +
+        "var ipt_key = document.getElementsByName('" + keyname_key + "')[0];" +
+        "if(ipt_key) ipt_key.value = '" + key + "';" +
+        "var ipt_time = document.getElementsByName('" + keyname_time + "')[0];" +
+        "if(ipt_time) ipt_time.value = '" + time + "';" +
+        "if(ta_msg){" +
+        "  ta_msg.setAttribute('rows', '15');" + // textarea
+        "  ta_msg.select();" +
+        "}"
     });
+    pane_wv[0].style.visibility = "visible";
   });
 
   btn_closeWv.click(function(e) {
@@ -708,38 +751,8 @@ $(function() {
   });
 
   function initWriteForm() {
-    wv[0].addEventListener("loadcommit", function() {
-      // insert css
-      wv[0].insertCSS({
-        code: "div div, span > br, iframe, dl, a, hr { display: none; } " +
-          "form { display: block; } " +
-          "h1 { padding: 12px 2px 12px 2px; } "
-      });
-      // execute script
-      wv[0].executeScript({
-        code: "window.addEventListener('message', function(e){" +
-          "  console.log('Received:', e.data);" +
-          "  if(e.data.command == 'getTitle'){" +
-          "    console.log('Sending title...');" +
-          "    e.source.postMessage({ title: document.title }, e.origin);" +
-          "    if(document.title == e.data.ttitle) document.getElementById('backBtn').style.display = 'none';" +
-          "  }" +
-          "});" +
-          "var backBtn = document.getElementById('backBtn');" +
-          "if (!backBtn) {" +
-          "  backBtn = document.createElement('div');" +
-          "  backBtn.setAttribute('id', 'backBtn');" +
-          "  backBtn.innerText = '< Back';" +
-          "  backBtn.setAttribute('onclick', 'history.back()');" +
-          "  backBtn.style.cssText = 'display:block;cursor:pointer;padding:10px 4px 10px 4px;background-color:rgba(0,0,0,0.8);border-radius:6px;color:white;position:fixed;bottom:2px;right:2px;';" +
-          "  document.body.appendChild(backBtn);" +
-          "}"
-      });
-      // post "getTitle" command to webview
-      wv[0].contentWindow.postMessage({
-        command: 'getTitle',
-        ttitle: thread_title.text()
-      }, '*');
+      console.log("initWriteForm");
+
       // block evil external sites
       wv[0].request.onBeforeRequest.addListener(
         function(details) {
@@ -747,11 +760,121 @@ $(function() {
             cancel: true
           };
         }, {
-          //urls: ["*://*.microad.jp/*"], 
-          urls: ["<all_urls>"],
-          types: ["sub_frame", "stylesheet", "script", "image", "object", "xmlhttprequest", "other"]
+          urls: [
+            "*://*.microad.jp/*",
+            "*://*.adlantis.jp/*"
+          ],
+          // urls: ["<all_urls>"],
+          types: [
+            "sub_frame",
+            "stylesheet",
+            "script",
+            "image",
+            "object",
+            "xmlhttprequest",
+            "other"
+          ]
         }, ["blocking"]); // block evil external sites
 
+      //
+      // -- webview loadcommit
+      wv[0].addEventListener("loadcommit", function() {
+        console.log("webview loadcommit");
+        // insert css
+        insertWriteFormCSS();
+        // execute script
+        wv[0].executeScript({
+          code: "console.log('writeForm webview loadcommit');" +
+            // remove side_ad of machi.to because it bothers to set mouse pointer on input.
+            "var sideAd = document.getElementById('side_ad');" +
+            "if (sideAd) sideAd.parentElement.removeChild(sideAd);" + 
+            // remove 2ch cookie "READJS" for "bbs.cgi mode" POST
+            "function setJSModeOff() {" +
+            // "  console.log('befor document.cookie', document.cookie);" +
+            "  var maxAge = 365*24*60*60;" +
+            "  var date  = new Date();" +
+            "  date.setTime(date.getTime() + maxAge*1000);" +
+            "  var expires = date.toUTCString();" +
+            "  document.cookie = 'READJS=off; version=1; path=/; domain=.2ch.sc; max-age=' + maxAge + '; expires=' + expires + '; ';" +
+            // "  console.log('after document.cookie', document.cookie);" +
+            "}" +
+            "setJSModeOff();" + // always set READJS=off as "read.cgi mode".
+            // On messaging "getTitle" command, returns the title to app's window.
+            "var appWindow, appOrigin;" +
+            "window.addEventListener('message', function(e){" +
+            "  console.log('Received:', e.data);" +
+            "  appWindow = e.source;" +
+            "  appOrigin = e.origin;" +
+            "  if(e.data.command == 'getTitle'){" +
+            "    console.log('Reterning title...', document.title);" +
+            "    appWindow.postMessage({ title: document.title }, appOrigin);" +
+            "    if(document.title == e.data.ttitle) document.getElementById('backBtn').style.display = 'none';" +
+            "  }" +
+            "});" +
+            // remake postForm for "bbs.cgi mode" POST
+            "var postForm = document.getElementById('postForm');" +
+            "console.log('postForm', postForm);" +
+            "if(postForm) {" +
+            "  postForm.method = 'POST';" +
+            "  postForm.action = '../test/bbs.cgi?guid=ON';" +
+            "}" +
+            // create custom back button 
+            "var backBtn = document.getElementById('backBtn');" +
+            "if (!backBtn) {" +
+            "  backBtn = document.createElement('div');" +
+            "  backBtn.setAttribute('id', 'backBtn');" +
+            "  backBtn.innerText = '< Back';" +
+            "  backBtn.setAttribute('onclick', 'history.back()');" +
+            "  backBtn.style.cssText = 'z-index:999999;display:block;cursor:pointer;padding:10px 4px 10px 4px;background-color:rgba(0,0,0,0.8);border-radius:6px;color:white;position:fixed;top:2px;right:2px;';" +
+            "  document.body.appendChild(backBtn);" +
+            "}"
+        });
+        // posts "getTitle" command to writeForm's webview
+        // IMPORTANT: needs enough time using setTimeout to complete to render html&script by the above executeScript()
+        setTimeout(function() {
+          requestTitleToWriteForm();
+        }, 400);
+      }); // wv[0].addEventListener
+    } // initWriteForm
+
+  function requestTitleToWriteForm() {
+    wv[0].contentWindow.postMessage({
+      command: 'getTitle',
+      ttitle: thread_title.text()
+    }, '*');
+  }
+
+  function insertWriteFormCSS() {
+    var css;
+    var isMachi = false;
+    var isXpic = false;
+    var url = wv[0].src;
+    if (util2ch.isMachiReadCGIURL(url)) isMachi = true;
+    if (util2ch.isXpicReadCGIURL(url)) isXpic = true;
+    // create css for making unnecessary elems unvisible
+    if (isMachi) { // ** when machibbs
+      css = "#contents > a, hr { display:none; }" +
+        "#contents { margin:0px; margin-right:0px; width:100%; }" +
+        "dl > font { padding: 6px; }" +
+        "dl > dt { padding: 6px; -webkit-margin-start:0px; font-size:10px; }" +
+        "dl > dd { -webkit-margin-start:0px; font-size:10px; }" +
+        "textarea{ width: 98%; margin: 4px 0px; font-size: 16px; }"
+    } else if (isXpic) { // ** when xpic
+      // style for xpic.sc
+      css = "body > :not(h1), hr {display: none;}" +
+        "body > div { display: block; }" +
+        ".thread-box-links { display: none; }";
+    } else { // ** when normal 2ch thread
+      css = "body > div, a, hr, form:last-child { display:none; }" +
+        "body > h1 { padding: 10px; 4px; }" +
+        "dl > font { padding: 6px; }" +
+        "dl > dt { padding: 6px; -webkit-margin-start:0px; font-size:10px; }" +
+        "dl > dd { -webkit-margin-start:0px; font-size:10px; }" +
+        "dd > a { display:block; }" +
+        "textarea{ width: 98%; margin: 4px 0px; font-size: 16px; }"
+    }
+    wv[0].insertCSS({
+      code: css
     });
   }
 
@@ -759,9 +882,31 @@ $(function() {
     console.log("prepareWriteForm");
     // convert to read.cgi's url
     var url = txt_url.data("url");
-    url = util2ch.datURLToReadCGIURL(url) + "-1n";
+    if (util2ch.isDatURL(url)) {
+      url = util2ch.datURLToReadCGIURL(url) + "1"; // url of only first res displayed
+    } else { // when machibbs's url
+      url += "1";
+    }
     wv[0].src = url;
   }
+
+  //
+  // -- ads bar
+  //
+  pane_wv_adsbar.on("mouseleave", function(e) {
+    var h = wv_adsbar.height();
+    $(this).animate({
+      bottom: -h
+    }, 'fast');
+  }).on("mouseenter", function(e) {
+    $(this).animate({
+      bottom: 0
+    }, 'fast');
+  });
+
+  wv_adsbar[0].addEventListener("newwindow", function(e) {
+    window.open(e.targetUrl);
+  })
 
   //
   // -- validator for input controls
@@ -853,6 +998,7 @@ $(function() {
     if (nowloading) return;
     var row = $(this); // a selected row on threadList
     var url = row.data("url");
+    url = util2ch.prettifyReadCGIURL(url);
     if (util2ch.isBBSURL(url) || util2ch.isDig2chURL(url) || isCommand(url)) {
       // if the url of bbs|dig2ch|command, set url to txt_url and trigger enterkey down.
       e.keyCode = 13; // set Enter key to the event
@@ -875,13 +1021,13 @@ $(function() {
    */
   function viewResponses(url, row, historyUpdate, isReadmoreClicked) {
       startLoading(url, row);
-      // If URL contains "headline.2ch.net", read data of ".dat" instead of "read.cgi".
-      if (util2ch.isHeadlineURL(url)) {
-        if (!row) {
-          row = getTListRowByURL(util2ch.datURLToReadCGIURL(url));
-        }
-        url = util2ch.readCGIURLToDatURL(url);
-      }
+      // FIXME: If URL contains "headline.2ch.net", read data of ".dat" instead of "read.cgi".
+      // if (util2ch.isHeadlineURL(url)) {
+      //   if (!row) {
+      //     row = getTListRowByURL(util2ch.datURLToReadCGIURL(url));
+      //   }
+      //   url = util2ch.readCGIURLToDatURL(url);
+      // }
       txt_url.val(url);
       var thread_title_url = thread_title.data("url");
       if (!historyUpdate) historyUpdate = false;
@@ -890,15 +1036,22 @@ $(function() {
       // get resnum of readhere
       getReadhereFromStore(url, function(resnum) {
         var startIdx = 0; // starting res index.
-        // load res.
-        util2ch.getResponses(url, appConfig.ngWords, function(data, type) {
+        // get url for getting responses.
+        var daturl;
+        if (!util2ch.isMachiReadCGIURL(url)) {
+          daturl = util2ch.readCGIURLToDatURL(url);
+        } else { // when url of machibbs's readcgi
+          daturl = url;
+        }
+        // get res.
+        util2ch.getResponses(daturl, appConfig.ngWords, function(data, type) {
           console.log("type:", type, " data:", data);
           var responses = data.responses;
           // If type="html", get threadTitle from data.title. Else from selected row's "title" attr.
           var title;
           var prevURL = thread_title.data("url");
           if (type == "dat") {
-            if (row) title = row.find(".ttitle").attr("title");
+            responses ? title = responses[0].title : title = "";
           } else { // "html" or "kako"
             title = data.title;
           }
@@ -1149,7 +1302,7 @@ $(function() {
     console.log("drawResponses");
     var htmlBuf = "";
     var res;
-    var num, handle, email, date, uid, be, content;
+    var num, handle, email, date, uid, be, content, host;
     if (!startIdx) startIdx = 0;
     // evacuate readhere & fetchline element
     readhere.insertAfter($("#res_wrapper"));
@@ -1164,7 +1317,8 @@ $(function() {
         res.date ? date = res.date : date = "";
         res.uid ? uid = res.uid : uid = "";
         res.be ? be = res.be : be = "";
-        res.content ? content = res.content.replace(/<script[^>]*>/gi,'') : content = ""; // for [email protected]
+        res.host ? host = res.host : host = ""; // machi.to only
+        res.content ? content = res.content.replace(/<script[^>]*>/gi, '') : content = ""; // for [email protected]
 
         if (res.ng) {
           // if contains NG words, then abooooon!
@@ -1178,6 +1332,7 @@ $(function() {
             '  <span class="date">' + date + '</span>\n' +
             '  <span class="uid">' + uid + '</span>\n' +
             '  <span class="be">' + be + '</span>\n' +
+            '  <span class="host">' + host + '</span>\n' +
             ' </div>\n' +
             ' <div class="content">' + content + '</div>\n' +
             ' <div class="restool">\n' +
@@ -1245,6 +1400,14 @@ $(function() {
     var value = $(this).text();
     showRefpop({
       key: "uid",
+      value: value
+    }, e);
+  });
+  $document.on('click', ".res .host", function(e) {
+    console.log("host:", $(this).text());
+    var value = $(this).text();
+    showRefpop({
+      key: "host",
       value: value
     }, e);
   });
@@ -1684,8 +1847,8 @@ $(function() {
     var bbs;
     var bbsrow = getBBSRowByURL(url);
     if (bbsrow) bbs = bbsrow.text();
-    if (util2ch.isDig2chURL(url)) {
-      bbs = "「" + util2ch.getKeywordFromDig2chURL(url) + "」関連スレ";
+    if (util2ch.isFind2chURL(url)) {
+      bbs = "「" + util2ch.getKeywordFromFind2chURL(url) + "」関連スレ";
     }
     // set bbs title. It's re-set again after the below process for getting threadList
     bbs_title.text(bbs);
@@ -1719,32 +1882,61 @@ $(function() {
     });
   }
 
-
+  // FIXME: 
   function makeBList(bbsmenu) {
+
     var parent = blist;
     var tpl = blist_tpl;
-    var cur_tpl;
-    var cur_cate0Name;
+    var nextCate;
+    var item;
+    var nextItem;
+    var cateElem;
+    var isFirstLoop = true;
+
+    function _createCateElem(categoryName) {
+      var elem = tpl.clone().removeClass("tpl").attr("id", null);
+      elem.find(".cate0").text(categoryName);
+      return elem;
+    }
+
+    function _appendBBSToCateElem(item, categoryElem) {
+      var li = $("<li class='cate1'></li>")
+        .data("url", item.url)
+        .text(item.cate1);
+      categoryElem.find("ul").append(li);
+    }
 
     // First, clear current bbs list.
     parent.find(".cate").remove();
 
     for (var len = bbsmenu.length, i = 0; i < len; i++) {
-      if (!bbsmenu[i].cate0) {
+      item = bbsmenu[i];
+      if (i + 1 < len) {
+        nextItem = bbsmenu[i + 1];
+      }
+      if (!item || !item.cate0) {
         continue;
       }
-      if (cur_cate0Name != bbsmenu[i].cate0 || i == len - 1) {
-        if (cur_tpl) parent.append(cur_tpl);
-        // clone new template "cate"
-        cur_tpl = tpl.clone()
-          .removeClass("tpl").attr("id", null);
+
+      if (isFirstLoop) { // ** when first step of loop
+        nextCate = item.cate0;
+        // create a category element
+        cateElem = _createCateElem(item.cate0);
+        isFirstLoop = false;
+      } else if (i === len - 1) { // ** when last step of loop
+        // create the bbs emelent, then append it to the category element.
+        _appendBBSToCateElem(item, cateElem);
+        parent.append(cateElem);
+        continue;
       }
-      cur_tpl.find(".cate0").text(bbsmenu[i].cate0);
-      var li = $("<li class='cate1'></li>")
-        .data("url", bbsmenu[i].url)
-        .text(bbsmenu[i].cate1);
-      cur_tpl.find("ul").append(li);
-      cur_cate0Name = bbsmenu[i].cate0;
+
+      _appendBBSToCateElem(item, cateElem);
+      nextCate = bbsmenu[i + 1].cate0;
+      if (item.cate0 != nextCate) { // ** when just before category change.
+        parent.append(cateElem);
+        // create a category element
+        cateElem = _createCateElem(nextItem.cate0);
+      }
     }
   }
 
@@ -2013,6 +2205,25 @@ $(function() {
     }, 100);
   }
 
+
+  //
+  // -- xpic.sc
+  //
+
+  /**
+   * if "http://xpic.sc/" or "http://xpic.sc", replace to "xpic.sc/b/"
+   * else return the param's url as it is
+   */
+  function optimizeXpicURL(url) {
+    if (util2ch.isXpicBBSRootURL(url)) {
+      url = util2ch.complementSlash(url);
+      url += "b/";
+      return url;
+    } else {
+      return url;
+    }
+  }
+  
   //
   // -- layouts
   //
@@ -2256,23 +2467,6 @@ $(function() {
     idbutil.remove("bookmarks", daturl);
   }
 
-  // // get a snapshot of the bbs from snapshots store
-  // function getSS(bbsurl, cb) {
-  //   idbutil.get("snapshots", bbsurl, function(data) {
-  //     console.log("snapshot of " + bbsurl, data);
-  //     if (data) {
-  //       cb(data.ss);
-  //     } else {
-  //       cb();
-  //     }
-  //   });
-  // }
-  // // save a snapshot of the bbs to snapshots store
-  // function saveSS(bbsurl, item) {
-  //   console.log("saveSS.");
-  //   idbutil.update("snapshots", item);
-  // }
-
 
   /**
    * adjust popup window's position.
@@ -2319,7 +2513,7 @@ $(function() {
   $document.on("click", ".restool .btn_reply", function() {
     var repmsg = createReplyMessage($(this).parent().parent());
     btn_showPaneWrite.trigger("click", [{
-      from: "",
+      // from: "",
       email: "sage",
       msg: repmsg
     }]);

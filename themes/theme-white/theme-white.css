@@ -68,6 +68,9 @@ div#thread .res_wrapper {
 .res_wrapper .res .res_header .email {
   color: #CAAFCF;
 }
+.res_wrapper .res .res_header .host {
+  color: gray;
+}
 .res_wrapper .res .content {
   color: #232323;
 }
@@ -106,6 +109,10 @@ div#blist .cate1:hover {
 div#blist_toggle_bar {
   background-image: url(/img/mesh8.png);
   -webkit-filter:invert();
+}
+
+#pane_wv {
+  color: #cccccc;
 }
 
 div#tools {
