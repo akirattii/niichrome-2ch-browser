@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.1.3
+ * @version 1.1.4
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -1108,7 +1108,7 @@ $(function() {
 
           if (isReadmoreClicked) {
             // if it comes by clicking readmore button, set lastResnum as startIdx
-            startIdx = getLastResnumOfThreadPane();
+            startIdx = getLastResIdxOfThreadPane() + 1;
           } else if (!resnum || thread_title_url != url) {
             // unless by clicking readmore button nor any thread with readhere, clear responses.
             startIdx = 0;
@@ -1357,13 +1357,12 @@ $(function() {
     }
     $("#res_wrapper").html(htmlBuf);
     // return last resnum.
-    var lastResnum = responses.length - 1;
+    var lastResnum = responses[responses.length - 1].num;
     if (lastResnum < 0) {
       // FIXME: deal with kakolog.
       console.log("Maybe this thead's gone to kakolog storage...");
-      return lastResnum;
     }
-    return responses[lastResnum].num;
+    return lastResnum;
   }
 
 
@@ -2511,13 +2510,14 @@ $(function() {
 
   function getLastResnumOfThreadPane() {
     var lastResnum;
-    if (util2ch.isMachiReadCGIURL(txt_url.data("url")))
-      // if machi.to url, returns res counts as last resnum because of dealing with "abone" removal
-      lastResnum = $(".res[id]").length;
-    else
-      // unless machi.to
-      lastResnum = $(".res[id]").last().attr("id").split("resnum")[1];
+    lastResnum = $(".res[id]").last().attr("id").split("resnum")[1];
     return parseInt(lastResnum);
+  }
+
+  function getLastResIdxOfThreadPane() {
+    var lastResIdxum;
+    lastResIdx = $(".res[id]").length - 1;
+    return parseInt(lastResIdx);
   }
 
   /**
