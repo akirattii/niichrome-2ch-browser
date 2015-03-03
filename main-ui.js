@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.0.0
+ * @version 1.1.3
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -154,17 +154,13 @@ $(function() {
   // adult contents confirmed flag
   var adultConfirmed = false;
 
-  // for appearing history urls on Back & Forward button's long press.
-  var pressTimer;
-
   //
   // -- UI controls
   //
   var $window = $(window);
   var $document = $(document);
   var ta_clipboard = $("#ta_clipboard");
-  var btn_arrowBack = $("#btn_arrowBack");
-  var btn_arrowForward = $("#btn_arrowForward");
+  var btn_history = $("#btn_history");
   var btn_arrowUp = $("#btn_arrowUp");
   var btn_arrowDn = $("#btn_arrowDn");
   var btn_arrowUpTList = $("#btn_arrowUpTList");
@@ -273,8 +269,10 @@ $(function() {
   $window.on("message", function(e) {
     var data = e.originalEvent.data;
     console.log("window onmessage:", data);
+    var url = thread_title.data("url");
     // If successed to write, close webview's pane.
-    if (data.title.trim() == "書きこみました。") {
+    if ((util2ch.isMachiReadCGIURL(url) && data.title.trim() == thread_title.text().trim()) 
+      || data.title.trim() == "書きこみました。") {
       if (pane_wv[0].style.visibility != "hidden") {
         pane_wv[0].style.visibility = "hidden";
         execReadmore();
@@ -376,12 +374,12 @@ $(function() {
         case 39: // Alt+Right
           event.preventDefault();
           console.log('Alt+Right');
-          btn_arrowForward.trigger("click");
+          // btn_arrowForward.trigger("click");
           break;
         case 37: // Alt+Left
           event.preventDefault();
           console.log('Alt+Left');
-          btn_arrowBack.trigger("click");
+          // btn_arrowBack.trigger("click");
           break;
       }
     } else if (event.ctrlKey || event.metaKey) { // with "Ctrl" key
@@ -414,6 +412,10 @@ $(function() {
             // Ctrl+F
             btn_settingFind.trigger("click");
           }
+          break;
+        case 72: // Ctrl+H
+          event.preventDefault();
+          btn_history.trigger("click");
           break;
         case 66: // Ctrl+B
           event.preventDefault();
@@ -782,12 +784,10 @@ $(function() {
         console.log("webview loadcommit");
         // insert css
         insertWriteFormCSS();
-        // execute script
+        // execute script on document_start
         wv[0].executeScript({
-          code: "console.log('writeForm webview loadcommit');" +
-            // remove side_ad of machi.to because it bothers to set mouse pointer on input.
-            "var sideAd = document.getElementById('side_ad');" +
-            "if (sideAd) sideAd.parentElement.removeChild(sideAd);" + 
+          runAt: 'document_start',
+          code: "console.log('writeForm webview loadcommit document_start');" +
             // remove 2ch cookie "READJS" for "bbs.cgi mode" POST
             "function setJSModeOff() {" +
             // "  console.log('befor document.cookie', document.cookie);" +
@@ -811,13 +811,6 @@ $(function() {
             "    if(document.title == e.data.ttitle) document.getElementById('backBtn').style.display = 'none';" +
             "  }" +
             "});" +
-            // remake postForm for "bbs.cgi mode" POST
-            "var postForm = document.getElementById('postForm');" +
-            "console.log('postForm', postForm);" +
-            "if(postForm) {" +
-            "  postForm.method = 'POST';" +
-            "  postForm.action = '../test/bbs.cgi?guid=ON';" +
-            "}" +
             // create custom back button 
             "var backBtn = document.getElementById('backBtn');" +
             "if (!backBtn) {" +
@@ -829,11 +822,26 @@ $(function() {
             "  document.body.appendChild(backBtn);" +
             "}"
         });
+        // execute script on document_end
+        wv[0].executeScript({
+          runAt: 'document_end',
+          code: "console.log('writeForm webview loadcommit document_end');" +
+            // remove side_ad of machi.to because it bothers to set mouse pointer on input.
+            "var sideAd = document.getElementById('side_ad');" +
+            "if (sideAd) sideAd.parentElement.removeChild(sideAd);" + 
+            // remake postForm for "bbs.cgi mode" POST
+            "var postForm = document.getElementById('postForm');" +
+            "console.log('postForm', postForm);" +
+            "if(postForm) {" +
+            "  postForm.method = 'POST';" +
+            "  postForm.action = '../test/bbs.cgi?guid=ON';" +
+            "}"
+        });
         // posts "getTitle" command to writeForm's webview
         // IMPORTANT: needs enough time using setTimeout to complete to render html&script by the above executeScript()
         setTimeout(function() {
           requestTitleToWriteForm();
-        }, 400);
+        }, 200);
       }); // wv[0].addEventListener
     } // initWriteForm
 
@@ -1049,6 +1057,9 @@ $(function() {
           var responses = data.responses;
           // If type="html", get threadTitle from data.title. Else from selected row's "title" attr.
           var title;
+          // the res ID for starting to fetch. This uses on readmore clicked.
+          // it's required because #resnum's index is not always same as #resnum's id
+          var fetchStartResId;
           var prevURL = thread_title.data("url");
           if (type == "dat") {
             responses ? title = responses[0].title : title = "";
@@ -1057,7 +1068,7 @@ $(function() {
           }
           // access history update
           if (historyUpdate) {
-            util2ch.updateHistory(url, title, prevURL);
+            util2ch.updateHistory(url, title);
           }
           //
           setThreadInfo({
@@ -1084,18 +1095,14 @@ $(function() {
           }
           btn_arrowUp.removeClass("disabled");
           btn_arrowDn.removeClass("disabled");
-          // back & forward buttons disability
-          var baf = util2ch.getBackAndForwardURL(url);
-          if (baf.backURL) {
-            btn_arrowBack.removeClass("disabled");
+          
+          // history button toggle style
+          if (util2ch.getHistory().length >= 1) {
+            btn_history.removeClass("disabled");
           } else {
-            btn_arrowBack.addClass("disabled");
+            btn_history.addClass("disabled");
           }
-          if (baf.forwardURL) {
-            btn_arrowForward.removeClass("disabled");
-          } else {
-            btn_arrowForward.addClass("disabled");
-          }
+
           // close res write webview if opened.
           pane_wv[0].style.visibility = "hidden";
 
@@ -1116,7 +1123,8 @@ $(function() {
           if (lastResnum < 0) {
             showErrorMessage("datが存在しない or dat落ち or 鯖落ちです");
           } else if (isReadmoreClicked) {
-            fetchline.insertAfter($("#resnum" + startIdx)).show();
+            fetchStartResId = $(".res[id]").get(startIdx - 1).id;
+            fetchline.insertAfter($("#" + fetchStartResId)).show();
           } else {
             fetchline.hide();
           }
@@ -1148,7 +1156,7 @@ $(function() {
           }
           // change readhere's visibility
           if (isReadmoreClicked) {
-            scrollToTheRes($("#resnum" + startIdx));
+            scrollToTheRes($("#" + fetchStartResId));
           } else if (resnum === 0) {
             readhere.hide();
             btn_jumpToReadhere.addClass("disabled");
@@ -2005,54 +2013,27 @@ $(function() {
     });
   });
 
-  // Back button
-  btn_arrowBack.click(function(e) {
-    console.log("btn_arrowBack");
+  // History button
+  btn_history.click(function(e){
+    console.log("btn_history");
     if ($(this).hasClass("disabled")) return;
-    goBackOrForward(true); // go back
-  });
-  // show "Back" history on long press.
-  btn_arrowBack.mouseup(function() {
-    clearTimeout(pressTimer)
-    return false;
-  }).mousedown(function(e) {
-    pressTimer = window.setTimeout(function() {
-      popupHistoryMenus(e, false); // popup "back" history.
-    }, 500);
-    return false;
+    popupHistoryMenus(e);
   });
 
-  // Forward button
-  btn_arrowForward.click(function(e) {
-    console.log("btn_arrowForward");
-    if ($(this).hasClass("disabled")) return;
-    goBackOrForward(false); // go forward
-  });
-  // show "Forward" history on long press.
-  btn_arrowForward.mouseup(function() {
-    clearTimeout(pressTimer)
-    return false;
-  }).mousedown(function(e) {
-    pressTimer = window.setTimeout(function() {
-      popupHistoryMenus(e, true); // popup "forward" history.
-    }, 1000);
-    return false;
-  });
-
-  function popupHistoryMenus(evt, isForward) {
-    // set back history 
+  function popupHistoryMenus(evt) {
+    var history = util2ch.getHistory();
     var curURL = txt_url.data("url");
-    var history;
-    if (isForward) {
-      history = util2ch.getHistoryURLs(curURL).forwardHistory;
-    } else {
-      history = util2ch.getHistoryURLs(curURL).backHistory;
-    }
+    var curIdx = util2ch.getIdxInHistory(curURL);
+    if (!history) return;
     var df = $(document.createDocumentFragment());
     for (var i = 0, len = history.length; i < len; i++) {
       var row = $('<div class="row" data-url="' + history[i].url + '"">' + history[i].title + '</div>');
+      if (curIdx === i) {
+        row.addClass("current");
+      }
       df.append(row);
     }
+    // show
     menu_historyURLs
       .empty()
       .append(df)
@@ -2061,6 +2042,8 @@ $(function() {
         top: evt.clientY - 2,
         left: evt.clientX - 2
       });
+    // prevent to make this pane disappeared by firing window click event (see hideIfUnhovered())
+    evt.stopPropagation();
   }
 
   $document.on("click", "#menu_historyURLs .row", function(e) {
@@ -2071,21 +2054,6 @@ $(function() {
 
   // jump from history
   function goFromHistory(url) {
-    if (url) {
-      viewResponses(url, null, false, false);
-    }
-  }
-
-  function goBackOrForward(back) {
-    var curURL = thread_title.data("url");
-    if (!curURL) return;
-    var baf = util2ch.getBackAndForwardURL(curURL);
-    var url;
-    if (back && baf.backURL && baf.backURL.url) {
-      url = baf.backURL.url;
-    } else if (!back && baf.forwardURL && baf.forwardURL.url) {
-      url = baf.forwardURL.url;
-    }
     if (url) {
       viewResponses(url, null, false, false);
     }
@@ -2542,7 +2510,13 @@ $(function() {
   });
 
   function getLastResnumOfThreadPane() {
-    var lastResnum = $(".res[id]").last().attr("id").split("resnum")[1];
+    var lastResnum;
+    if (util2ch.isMachiReadCGIURL(txt_url.data("url")))
+      // if machi.to url, returns res counts as last resnum because of dealing with "abone" removal
+      lastResnum = $(".res[id]").length;
+    else
+      // unless machi.to
+      lastResnum = $(".res[id]").last().attr("id").split("resnum")[1];
     return parseInt(lastResnum);
   }
 

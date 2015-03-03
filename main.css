@@ -625,6 +625,9 @@ div#tools #rng_divider {
   cursor: pointer;
   font-size: 0.9rem;
 }
+#menu_historyURLs .row.current {
+  font-weight: bold;
+}
 #menu_historyURLs .row:hover {
   background-color: #229be8;
   color: white;
@@ -701,13 +704,8 @@ div#tools #rng_divider {
   content: url("img/arrow24.png");
   -webkit-transform: rotate(180deg);
 }
-.arrow_back24 {
-  content: url("img/arrow24.png");
-  -webkit-transform: rotate(270deg);
-}
-.arrow_forward24 {
-  content: url("img/arrow24.png");
-  -webkit-transform: rotate(90deg);
+.history24 {
+  content: url("img/history24.png");
 }
 .readherefilter24 {
   content: url("img/readherefilter24.png");

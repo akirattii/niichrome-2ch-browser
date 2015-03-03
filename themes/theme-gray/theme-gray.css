@@ -174,12 +174,7 @@ div#lbl_kakolog {
   -webkit-transform: rotate(180deg);
   -webkit-filter:invert();
 }
-.arrow_back24 {
-  -webkit-transform: rotate(270deg);
-  -webkit-filter:invert();
-}
-.arrow_forward24 {
-  -webkit-transform: rotate(90deg);
+.history24 {
   -webkit-filter:invert();
 }
 .readherefilter24 {
