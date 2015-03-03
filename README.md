@@ -1,5 +1,5 @@
 # niichrome 2ch browser
 
-**niichrome 2ch browser** is highly functional 2ch.net browser for Chrome and Chrome OS. 
+**niichrome 2ch browser** is highly functional 2ch browser for Chrome and Chrome OS. 
 
 You can install on [Chrome Web Store](https://chrome.google.com/webstore/detail/niichrome-2ch%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6/iabgdknpefinjdmfacfgkpfiiglbdhnc).
