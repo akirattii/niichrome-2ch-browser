@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.1.4
+ * @version 1.2.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -42,6 +42,7 @@ $(function() {
   var util2ch = niichrome.util2ch();
   var idbutil = niichrome.idbutil("niichromedb", 1);
   var amazonutil = niichrome.amazonutil();
+  var gdriveutil = niichrome.gdriveutil();
   var findbar = niichrome.findbar("#findbar", "#thread", {
     toggleSpeed: 100,
     scrollMargin: 260
@@ -231,6 +232,8 @@ $(function() {
   var btn_settingBM = $("#btn_settingBM");
   var btn_settingSizeUp = $("#btn_settingSizeUp");
   var btn_settingSizeDn = $("#btn_settingSizeDn");
+  var btn_settingCloudSave = $("#btn_settingCloudSave");
+  var btn_settingCloudLoad = $("#btn_settingCloudLoad");
   var btn_settingFind = $("#btn_settingFind");
   var btn_settingConfig = $("#btn_settingConfig");
   var btn_settingAbout = $("#btn_settingAbout");
@@ -271,8 +274,7 @@ $(function() {
     console.log("window onmessage:", data);
     var url = thread_title.data("url");
     // If successed to write, close webview's pane.
-    if ((util2ch.isMachiReadCGIURL(url) && data.title.trim() == thread_title.text().trim()) 
-      || data.title.trim() == "書きこみました。") {
+    if ((util2ch.isMachiReadCGIURL(url) && data.title.trim() == thread_title.text().trim()) || data.title.trim() == "書きこみました。") {
       if (pane_wv[0].style.visibility != "hidden") {
         pane_wv[0].style.visibility = "hidden";
         execReadmore();
@@ -828,7 +830,7 @@ $(function() {
           code: "console.log('writeForm webview loadcommit document_end');" +
             // remove side_ad of machi.to because it bothers to set mouse pointer on input.
             "var sideAd = document.getElementById('side_ad');" +
-            "if (sideAd) sideAd.parentElement.removeChild(sideAd);" + 
+            "if (sideAd) sideAd.parentElement.removeChild(sideAd);" +
             // remake postForm for "bbs.cgi mode" POST
             "var postForm = document.getElementById('postForm');" +
             "console.log('postForm', postForm);" +
@@ -1095,7 +1097,7 @@ $(function() {
           }
           btn_arrowUp.removeClass("disabled");
           btn_arrowDn.removeClass("disabled");
-          
+
           // history button toggle style
           if (util2ch.getHistory().length >= 1) {
             btn_history.removeClass("disabled");
@@ -1990,6 +1992,47 @@ $(function() {
   btn_settingSizeDn.click(function(e) {
     tickFontSize(-1);
   });
+
+  // settings - "クラウドに保存"
+  btn_settingCloudSave.click(function(e) {
+    console.log("btn_settingCloudSave");
+    // get auth then upload the json 
+    gdriveutil.auth(true, function() {
+      console.log("accessToken", gdriveutil.getToken());
+      // export the store as json from indexeddb
+      var storename = "bookmarks";
+      var storenameLabel = "ブックマーク";
+      idbutil.export(storename, "update", "prev", function(jsonstr) {
+        // save to cloud
+        saveJSONToCloud(jsonstr, storename + ".json", function(resp) {
+          console.log("upload json completed. storename=", storename, "resp=", resp);
+          showMessage(storenameLabel + "をクラウド保存しました");
+        }, function() {
+          console.log("upload json error. storename=", storename);
+          showErrorMessage(storenameLabel + "のクラウド保存に失敗しました");
+        }); // saveJSONToCloud
+      }); // export
+    }); // auth
+  });
+
+  // settings - "クラウドからロード"
+  btn_settingCloudLoad.click(function(e) {
+    console.log("btn_settingCloudLoad");
+    var storename = "bookmarks";
+    var storenameLabel = "ブックマーク";
+    // get auth then download the json
+    gdriveutil.auth(true, function() {
+      console.log("accessToken", gdriveutil.getToken());
+      loadJSONFromCloud(storename + ".json", function() {
+        console.log("loadJSONFromCloud completed. storename=", storename);
+        showMessage(storenameLabel + "をクラウドからロードしました");
+      }, function() {
+        console.log("loadJSONFromCloud error. storename=", storename);
+        showErrorMessage(storenameLabel + "のクラウドからのロードに失敗しました");
+      }); // loadJSONFromCloud
+    }); // auth
+  });
+
   // settings - "設定"
   btn_settingConfig.click(function(e) {
     openConfPane();
@@ -2013,7 +2056,7 @@ $(function() {
   });
 
   // History button
-  btn_history.click(function(e){
+  btn_history.click(function(e) {
     console.log("btn_history");
     if ($(this).hasClass("disabled")) return;
     popupHistoryMenus(e);
@@ -2190,7 +2233,76 @@ $(function() {
       return url;
     }
   }
-  
+
+
+  //
+  // -- cloud save/load
+  //
+
+  function createCloudQuery(filename, mimeType) {
+    var params = [];
+    var ret = "";
+    if (filename) params.push("title='" + filename + "'");
+    if (mimeType) params.push("mimeType='" + mimeType + "'");
+    if (params.length >= 1) ret = params.join(" and ");
+    return ret;
+  }
+
+  function saveJSONToCloud(jsonstr, filename, onComplete, onError) {
+    // TODO:
+    var mimeType = "application/json";
+    console.log("jsonstr", jsonstr);
+    // TODO: upload
+    var file = new Blob([jsonstr], {
+      type: mimeType
+    });
+    var q = createCloudQuery(filename, mimeType);
+    gdriveutil.getFile(q, function(items) {
+      var opts = {
+        // chunkSize: 0,
+        metadata: {
+          title: filename,
+          mimeType: mimeType,
+          parents: [{
+            'id': 'appfolder' // need to get appfolder's file
+          }]
+        },
+        file: file
+      };
+      if (items && items.length >= 1) {
+        var item = items[0];
+        opts.fileId = item.id;
+      }
+      gdriveutil.upload(opts, onComplete, onError);
+    }); // getFile
+  }
+
+  function loadJSONFromCloud(filename, onComplete, onError) {
+    // TODO:
+    var mimeType = "application/json";
+    var q = createCloudQuery(filename, mimeType);
+    gdriveutil.getFile(q, function(items) {
+      if (items && items.length >= 1) {
+        var item = items[0];
+        gdriveutil.download(item.downloadUrl, function(resp) {
+          console.log("resp=", resp);
+          // TODO: import to indexeddb
+          var storename = filename.slice(0, -".json".length);
+          idbutil.import(storename, resp, function() {
+            console.log("import has done. storename=", storename);
+            onComplete && onComplete();
+          }, function() {
+            console.warn("import error. storename=", storename);
+            onError && onError();
+          }); // import
+        }); // download
+      }
+    }, function(resp) {
+      console.log("error: resp=", resp);
+      onError && onError();
+    }); // getFile
+  }
+
   //
   // -- layouts
   //
@@ -2255,8 +2367,11 @@ $(function() {
   });
   $document.on("keydown", "body", function(e) {
     console.log("body keydown.", e.keyCode);
-    if (e.keyCode == 27) { // ESC key
-      removeRefpops();
+    if (e.keyCode == 27) { // *** ESC key down
+      removeRefpops(); // hide refpop
+      menu_historyURLs.hide(); // hide history pane
+      pane_settings.hide(); // hide settings menu
+      closeConfPane(); // hide conf pane
       stopLoading();
     }
   });
@@ -2694,7 +2809,7 @@ $(function() {
   function saveAppConfig() {
     console.log("saveAppConfig");
     var appConfigStr = JSON.stringify(appConfig);
-    chrome.storage.local.set({
+    chrome.storage.sync.set({
       'appConfig': appConfigStr
     }, function() {
       console.log('appConfig has been saved to localStorage. Stringified appConfig: ', appConfigStr);
@@ -2704,7 +2819,7 @@ $(function() {
   // load appConfig from localStorage
   function loadAppConfig(cb) {
     console.log("loadAppConfig");
-    chrome.storage.local.get("appConfig", function(items) {
+    chrome.storage.sync.get("appConfig", function(items) {
       var appConfigStrInStorage = items.appConfig;
       var appConfigInStorage;
       console.log("appConfig in storage:", appConfigInStorage);
@@ -2724,7 +2839,7 @@ $(function() {
   // clear appConfig in localStorage
   function clearAppConfig() {
     console.log("clearAppConfig");
-    chrome.storage.local.remove("appConfig", function() {
+    chrome.storage.sync.remove("appConfig", function() {
       console.log("Cleared appConfig in localStorage.");
     });
   }

@@ -1,7 +1,7 @@
 /**
  * niichrome-idbutil
  *
- * @version 0.3.0
+ * @version 0.2.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -44,101 +44,41 @@
     var db = null;
 
     function upgrade(o, thisDB) {
-        var storename = null;
-        var store = null;
-        if (!o.storename || !o.keyPath || o.autoIncrement == undefined) {
-          console.error("'storename', 'keyPath', 'autoIncrement' are required.");
-          return;
-        } else {
-          storename = o.storename;
-        }
-        if (!thisDB.objectStoreNames.contains(storename)) {
-          // set keyPath 
-          store = thisDB.createObjectStore(storename, {
-            keyPath: o.keyPath,
-            autoIncrement: o.autoIncrement
+      var storename = null;
+      var store = null;
+      if (!o.storename || !o.keyPath || o.autoIncrement == undefined) {
+        console.error("'storename', 'keyPath', 'autoIncrement' are required.");
+        return;
+      } else {
+        storename = o.storename;
+      }
+      if (!thisDB.objectStoreNames.contains(storename)) {
+        // set keyPath 
+        store = thisDB.createObjectStore(storename, {
+          keyPath: o.keyPath,
+          autoIncrement: o.autoIncrement
+        });
+      }
+      // set unique indices
+      if (o.uniques) {
+        var cols = o.uniques;
+        for (var len = cols.length, i = 0; i < len; i++) {
+          store.createIndex(cols[i], cols[i], {
+            unique: true
           });
         }
-        // set unique indices
-        if (o.uniques) {
-          var cols = o.uniques;
-          for (var len = cols.length, i = 0; i < len; i++) {
-            store.createIndex(cols[i], cols[i], {
-              unique: true
-            });
-          }
+      }
+      // set non-unique indices
+      if (o.nonuniques) {
+        var cols = o.nonuniques;
+        for (var len = cols.length, i = 0; i < len; i++) {
+          store.createIndex(cols[i], cols[i], {
+            unique: false
+          });
         }
-        // set non-unique indices
-        if (o.nonuniques) {
-          var cols = o.nonuniques;
-          for (var len = cols.length, i = 0; i < len; i++) {
-            store.createIndex(cols[i], cols[i], {
-              unique: false
-            });
-          }
-        }
+      }
 
-      } //-- upgrade
-
-    var _list = function(storename, col, range, direction, successHandler) {
-      if (!storename || !col) {
-        console.error("'storename', 'col' required.");
-        return;
-      }
-      var direction_enums = ['next', 'nextunique', 'prev', 'prevunique'];
-      if (!direction || (direction_enums.indexOf(direction) > -1) == false) {
-        direction = "next";
-      }
-      var tx = db.transaction([storename], "readwrite");
-      var store = tx.objectStore(storename);
-      var cursor = null;
-      if (!range) {
-        // Get everything in the store;
-        range = IDBKeyRange.lowerBound(0);
-      }
-      cursor = store.index(col).openCursor(range, direction);
-      var list = [];
-      cursor.onsuccess = function(e) {
-        var res = e.target.result;
-        if (!res) {
-          successHandler(list);
-          return;
-        }
-        list.push(res.value);
-        res.
-        continue();
-      };
     }
-
-    var _listAll = function(storename, col, direction, successHandler) {
-      _list(storename, col, null, direction, successHandler);
-    }
-
-    var _batchUpdate = function(storename, items, successHandler, errorHandler) {
-        if (!storename || !items) {
-          console.error("'storename', 'items' : These parameters must not be empty!");
-          return;
-        }
-        // console.log("batchUpdating...", items);
-        var tx = db.transaction([storename], "readwrite");
-        var store = tx.objectStore(storename);
-        var req;
-        var i = 0;
-        putNext()
-
-        function putNext() {
-          if (i < items.length) {
-            // // console.log("item", items[i]);
-            req = store.put(items[i])
-            req.onsuccess = putNext;
-            if (errorHandler) req.onerror = errorHandler;
-            ++i;
-          } else { // complete
-            // console.log("batchUpdate completed");
-            if (successHandler) successHandler();
-          }
-        }
-      } // -- batchUpdate
 
     return {
       /**
@@ -227,10 +167,33 @@
        *  required<br>
        */
       list: function(storename, col, range, direction, successHandler) {
-        _list(storename, col, range, direction, successHandler);
-      },
-      listAll: function(storename, col, direction, successHandler) {
-        _listAll(storename, col, direction, successHandler);
+        if (!storename || !col) {
+          console.error("'storename', 'col' required.");
+          return;
+        }
+        var direction_enums = ['next', 'nextunique', 'prev', 'prevunique'];
+        if (!direction || (direction_enums.indexOf(direction) > -1) == false) {
+          direction = "next";
+        }
+        var tx = db.transaction([storename], "readwrite");
+        var store = tx.objectStore(storename);
+        var cursor = null;
+        if (!range) {
+          // Get everything in the store;
+          range = IDBKeyRange.lowerBound(0);
+        }
+        cursor = store.index(col).openCursor(range, direction);
+        var list = [];
+        cursor.onsuccess = function(e) {
+          var res = e.target.result;
+          if (!res) {
+            successHandler(list);
+            return;
+          }
+          list.push(res.value);
+          res.
+          continue ();
+        };
       },
       /**
        * update an item if it already exists, otherwise add it as new.
@@ -263,7 +226,29 @@
        * @param {function} errorHandler
        */
       batchUpdate: function(storename, items, successHandler, errorHandler) {
-        _batchUpdate(storename, items, successHandler, errorHandler);
+        if (!storename || !items) {
+          console.error("'storename', 'items' : These parameters must not be empty!");
+          return;
+        }
+        // console.log("batchUpdating...", items);
+        var tx = db.transaction([storename], "readwrite");
+        var store = tx.objectStore(storename);
+        var req;
+        var i = 0;
+        putNext()
+
+        function putNext() {
+          if (i < items.length) {
+            // // console.log("item", items[i]);
+            req = store.put(items[i])
+            req.onsuccess = putNext;
+            if (errorHandler) req.onerror = errorHandler;
+            ++i;
+          } else { // complete
+            // console.log("batchUpdate completed");
+            if (successHandler) successHandler();
+          }
+        }
       },
       /**
        * remove an object
@@ -287,30 +272,6 @@
         req.onerror = function(e) {
           if (errorHandler) errorHandler(e);
         };
-      },
-      /**
-       * export store as json string
-       * @param {string} storename required
-       * @param {string} col required. uses for direction
-       * @param {function} direction
-       * @param {function} successHandler function(jsonstr){...}
-       */
-      export: function(storename, col, direction, successHandler) {
-        _listAll(storename, col, direction, function(list) {
-          var jsonstr = JSON.stringify(list);
-          successHandler(jsonstr);
-        });
-      },
-      /**
-       * import store from json string
-       * @param {string} storename required
-       * @param {string} jsonstr required
-       * @param {function} successHandler function(){...}
-       * @param {function} errorHandler function(){...}
-       */
-      import: function(storename, jsonstr, successHandler, errorHandler) {
-        var items = JSON.parse(jsonstr);
-        _batchUpdate(storename, items, successHandler, errorHandler);
       },
       /**
        * clear objectStore

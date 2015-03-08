@@ -2,7 +2,7 @@
   "name": "niichrome 2chブラウザ",
   "short_name": "niichrome",
   "description": "Chromeアプリ版２ちゃんねるブラウザ",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "manifest_version": 2,
   "minimum_chrome_version": "37",
   "app": {
@@ -13,7 +13,19 @@
   "icons": {
     "128": "128.png"
   },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApxP6G7nURvROouXJy1pXfEv2W0I9WLCM5RTngQOAne6gI3dnwZzbeObVdigUatyMCscWaAx1bCXTRUA2f9DXw7TAgF+8kUHaZdrNc8NzikkCl6gszii+iYprntLEhS1WAAa3ekCQG1NN0QXtluhD0H9okoXkVMGL4ig9BVezQfCbEv5MNFMAxJdynni8LzTWjdkFKSRwtjZmkt4p2tTg3iq9KZFteRTSejC0zYoUhtmU6PQ5319MtfMQsDKs2/ZcKqHQbWLwZ4vpF4Uxjbl5AGkpZ0MGykkzqfo6Dsacy/DzB+12PbXODw4TOPadqFBc5TNybdoj/Vm+Wr4PvtCv2QIDAQAB",
+  "oauth2": {
+    "client_id": "677406045400-00b52krvgbgbovlrkevlqo41rq0n48dc.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.appdata"
+    ]
+  },
   "permissions": [
+    "identity",
+    "https://ssl.gstatic.com/",
+    "https://www.googleapis.com/",
+    "https://docs.google.com/",
+    "https://accounts.google.com/",
     "contextMenus",
     "webview",
     "<all_urls>",
