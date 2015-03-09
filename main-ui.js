@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -1996,41 +1996,47 @@ $(function() {
   // settings - "クラウドに保存"
   btn_settingCloudSave.click(function(e) {
     console.log("btn_settingCloudSave");
-    // get auth then upload the json 
-    gdriveutil.auth(true, function() {
-      console.log("accessToken", gdriveutil.getToken());
-      // export the store as json from indexeddb
-      var storename = "bookmarks";
-      var storenameLabel = "ブックマーク";
-      idbutil.export(storename, "update", "prev", function(jsonstr) {
-        // save to cloud
-        saveJSONToCloud(jsonstr, storename + ".json", function(resp) {
-          console.log("upload json completed. storename=", storename, "resp=", resp);
-          showMessage(storenameLabel + "をクラウド保存しました");
-        }, function() {
-          console.log("upload json error. storename=", storename);
-          showErrorMessage(storenameLabel + "のクラウド保存に失敗しました");
-        }); // saveJSONToCloud
-      }); // export
-    }); // auth
+    var msg = "お気に入り一覧などの環境をクラウドにアップロードしますか？" +
+      "<br>※回線状況やデータ量次第では少し時間が掛かる場合もあります";
+    showDialogYN(msg, function() {
+      // *** YES button clicked
+      saveBookmarksToCloud(function(){ // save bookmarks to cloud
+        saveReadheresToCloud(function(){ // save readheres to cloud
+          showMessage("成功：お気に入りなどをクラウドに保存しました", false);
+        }, function(){
+          showErrorMessage("<font color='red'>エラー：「ここまで読んだ」をクラウド保存できませんでした</font>", false);
+        }); // saveReadheresToCloud
+      }, function() {
+        showErrorMessage("<font color='red'>エラー：クラウド保存に失敗しました</font>", false);
+      }); // saveBookmarksToCloud
+      pane_dialogYN_wrapper.hide();
+    }, function() {
+      // *** NO button clicked
+      pane_dialogYN_wrapper.hide();
+    }); // showDialogYN
   });
 
   // settings - "クラウドからロード"
   btn_settingCloudLoad.click(function(e) {
     console.log("btn_settingCloudLoad");
-    var storename = "bookmarks";
-    var storenameLabel = "ブックマーク";
-    // get auth then download the json
-    gdriveutil.auth(true, function() {
-      console.log("accessToken", gdriveutil.getToken());
-      loadJSONFromCloud(storename + ".json", function() {
-        console.log("loadJSONFromCloud completed. storename=", storename);
-        showMessage(storenameLabel + "をクラウドからロードしました");
+    var msg = "お気に入り一覧などの環境をクラウドからダウンロードしますか？" +
+      "<br>※回線状況やデータ量次第では少し時間が掛かる場合もあります";
+    showDialogYN(msg, function() {
+      // *** YES button clicked
+      loadFromCloud("bookmarks", function() { // load bookmarks from cloud
+        loadFromCloud("readheres", function(){ // load readheres from cloud
+          showMessage("成功：お気に入りなどをクラウドから読み込みました", false);
+        }, function() {
+          showErrorMessage("<font color='red'>エラー：「ここまで読んだ」のクラウド読込に失敗しました</font>", false);
+        }); // loadFromCloud "readheres"
       }, function() {
-        console.log("loadJSONFromCloud error. storename=", storename);
-        showErrorMessage(storenameLabel + "のクラウドからのロードに失敗しました");
-      }); // loadJSONFromCloud
-    }); // auth
+        showErrorMessage("<font color='red'>エラー：クラウド読込に失敗しました</font>", false);
+      }); // loadFromCloud "bookmarks"
+      pane_dialogYN_wrapper.hide();
+    }, function() {
+      // *** NO button clicked
+      pane_dialogYN_wrapper.hide();
+    }); // showDialogYN
   });
 
   // settings - "設定"
@@ -2246,6 +2252,61 @@ $(function() {
     if (mimeType) params.push("mimeType='" + mimeType + "'");
     if (params.length >= 1) ret = params.join(" and ");
     return ret;
+  }
+
+  function saveBookmarksToCloud(onSuccess, onError) {
+    var storename = "bookmarks";
+    var label = "お気に入り";
+    // get auth then upload the json 
+    gdriveutil.auth(true, function() {
+      console.log("accessToken", gdriveutil.getToken());
+      //
+      // -- export "bookmarks" store as json from indexeddb
+      idbutil.export(storename, "update", "prev", function(jsonstr) {
+        // save json to cloud
+        saveJSONToCloud(jsonstr, storename + ".json", function(resp) {
+          console.log("upload json completed. storename=", storename, " resp=", resp);
+          onSuccess && onSuccess();
+        }, function() {
+          console.log("upload json error. storename=", storename);
+          onError && onError();
+        }); // saveJSONToCloud
+      }); // export
+    }); // auth
+  }
+
+  function saveReadheresToCloud(onSuccess, onError) {
+    var storename = "readheres";
+    // get auth then upload the json 
+    gdriveutil.auth(true, function() {
+      console.log("accessToken", gdriveutil.getToken());
+      // -- export "redheres" store as json from indexeddb
+      idbutil.export(storename, null, null, function(jsonstr) {
+        // save json to cloud
+        saveJSONToCloud(jsonstr, storename + ".json", function(resp) {
+          console.log("upload json completed. storename=", storename, "resp=", resp);
+          onSuccess && onSuccess();
+        }, function() {
+          console.log("upload json error. storename=", storename);
+          onError && onError();
+        }); // saveJSONToCloud
+      }); // export
+    }); // auth
+  }
+
+  function loadFromCloud(storename, onSuccess, onError) {
+    // get auth then download the json
+    gdriveutil.auth(true, function() {
+      console.log("accessToken", gdriveutil.getToken());
+      // load json from cloud
+      loadJSONFromCloud(storename + ".json", function() {
+        console.log("loadJSONFromCloud completed. storename=", storename);
+        onSuccess && onSuccess();
+      }, function() {
+        console.log("loadJSONFromCloud error. storename=", storename);
+        onError && onError();
+      }); // loadJSONFromCloud
+    }); // auth
   }
 
   function saveJSONToCloud(jsonstr, filename, onComplete, onError) {
