@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.2.1
+ * @version 1.3.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -55,7 +55,8 @@ $(function() {
     fontSize: 16, // px
     theme: 'default',
     ngWords: undefined, // NG word list {string[]}
-    dividerPos: 50 // 2PaneDivider's X position (percent)
+    dividerPos: 50, // 2PaneDivider's X position (percent)
+    autoImgLoad: 0 // auto-load images within res_content. 0:off 1:on
   };
 
   // this app's config
@@ -83,24 +84,6 @@ $(function() {
   //
   idbutil.openDB([
     /* -- stores -- */
-
-    /*
-      [snapshots]
-      Used for storeing thread list (url & resnum) of each bbs.
-      Props:
-        url(key):
-          bbs's url or command (eg.'bookmarks')
-          eg. "http://hoge.com/bbs1/"
-        ss:
-          pair of dat's URL and resNum 
-          eg. { "http://hoge.com/bbs1/dat/222.dat": 123, "http://hoge.com/bbs1/dat/222.dat": 345 ... }
-    */
-    // {
-    //   storename: 'snapshots',
-    //   keyPath: 'url',
-    //   autoIncrement: false
-    // },
-
     /* 
       [readheres]
       Res number of the thread read by user.
@@ -115,7 +98,6 @@ $(function() {
       keyPath: 'url',
       autoIncrement: false
     },
-
     /* 
       [bookmarks]
       User's bookmark.
@@ -219,6 +201,8 @@ $(function() {
   var txt_confFontSize = $("#txt_confFontSize");
   var btn_confClearReadheres = $("#btn_confClearReadheres");
   var ta_confNGWords = $("#ta_confNGWords");
+  var rdo_autoImgLoad_on = $("#rdo_autoImgLoad_on");
+  var rdo_autoImgLoad_off = $("#rdo_autoImgLoad_off");
   var body = $("body");
   var menu_historyURLs = $("#menu_historyURLs");
   var dlg_adultCheck = $("#dlg_adultCheck");
@@ -1420,7 +1404,7 @@ $(function() {
       value: value
     }, e);
   });
-  // clicking a link with href
+  // click a link with href
   $document.on('click', ".content a", function(e) {
     var href = $(this).attr("href");
     console.log("href=", href);
@@ -1448,6 +1432,17 @@ $(function() {
       // jump
       $(this).attr("target", "_blank");
       return true;
+    }
+  });
+  // a link of image enter in the viewport
+  $document.on("inview", ".content a", function(event, isInView, visiblePartX, visiblePartY) {
+    if (appConfig.autoImgLoad !== 1) return;
+    if (isInView) {
+      // if an image link is in the viewport, load the image automatically.
+      var url = $(this).attr("href");
+      if (isImageLink(url) || amazonutil.isValidURL(url)) {
+        $(this).trigger("click");
+      }
     }
   });
 
@@ -1627,6 +1622,7 @@ $(function() {
 
   function isImageLink(url) {
     console.log("isImageLink");
+    if (!url) return false;
     if (url.match(/\.(png|gif|jpg|jpeg)$/i)) {
       return true;
     } else {
@@ -2000,10 +1996,10 @@ $(function() {
       "<br>※回線状況やデータ量次第では少し時間が掛かる場合もあります";
     showDialogYN(msg, function() {
       // *** YES button clicked
-      saveBookmarksToCloud(function(){ // save bookmarks to cloud
-        saveReadheresToCloud(function(){ // save readheres to cloud
+      saveBookmarksToCloud(function() { // save bookmarks to cloud
+        saveReadheresToCloud(function() { // save readheres to cloud
           showMessage("成功：お気に入りなどをクラウドに保存しました", false);
-        }, function(){
+        }, function() {
           showErrorMessage("<font color='red'>エラー：「ここまで読んだ」をクラウド保存できませんでした</font>", false);
         }); // saveReadheresToCloud
       }, function() {
@@ -2024,7 +2020,7 @@ $(function() {
     showDialogYN(msg, function() {
       // *** YES button clicked
       loadFromCloud("bookmarks", function() { // load bookmarks from cloud
-        loadFromCloud("readheres", function(){ // load readheres from cloud
+        loadFromCloud("readheres", function() { // load readheres from cloud
           showMessage("成功：お気に入りなどをクラウドから読み込みました", false);
         }, function() {
           showErrorMessage("<font color='red'>エラー：「ここまで読んだ」のクラウド読込に失敗しました</font>", false);
@@ -2310,10 +2306,8 @@ $(function() {
   }
 
   function saveJSONToCloud(jsonstr, filename, onComplete, onError) {
-    // TODO:
     var mimeType = "application/json";
     console.log("jsonstr", jsonstr);
-    // TODO: upload
     var file = new Blob([jsonstr], {
       type: mimeType
     });
@@ -2339,7 +2333,6 @@ $(function() {
   }
 
   function loadJSONFromCloud(filename, onComplete, onError) {
-    // TODO:
     var mimeType = "application/json";
     var q = createCloudQuery(filename, mimeType);
     gdriveutil.getFile(q, function(items) {
@@ -2347,7 +2340,7 @@ $(function() {
         var item = items[0];
         gdriveutil.download(item.downloadUrl, function(resp) {
           console.log("resp=", resp);
-          // TODO: import to indexeddb
+          // import to indexeddb
           var storename = filename.slice(0, -".json".length);
           idbutil.import(storename, resp, function() {
             console.log("import has done. storename=", storename);
@@ -2783,6 +2776,15 @@ $(function() {
     appConfig.ngWords = val.split("\n");
   });
 
+  $('input[type=radio][name=rdo_autoImgLoad]').on("change", function() {
+    var val = $(this).val();
+    if (!val) {
+      appConfig.autoImgLoad = 0;
+      return;
+    }
+    appConfig.autoImgLoad = parseInt(val);
+  });
+
   function getThemes(onSuccess, onError) {
     var ret = [];
     chrome.runtime.getPackageDirectoryEntry(function(root) {
@@ -2828,6 +2830,8 @@ $(function() {
     setConfThemeOptions();
     // NG words
     setConfNGWords();
+    // img auto-loading
+    setConfAutoImgLoad();
   }
 
   function closeConfPane() {
@@ -2864,6 +2868,13 @@ $(function() {
   function setConfNGWords() {
     if (!appConfig.ngWords) return;
     ta_confNGWords.val(appConfig.ngWords.join("\n"));
+  }
+
+  function setConfAutoImgLoad() {
+    var autoImgLoad = appConfig.autoImgLoad;
+    if (autoImgLoad === undefined) return;
+    if (autoImgLoad === 1) rdo_autoImgLoad_on.prop("checked", true);
+    if (autoImgLoad === 0) rdo_autoImgLoad_off.prop("checked", true);
   }
 
   // save appConfig to localStorage

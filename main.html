@@ -55,23 +55,30 @@
         <div id="conf_font">
           <h3>フォント</h3>
           サイズ: <input type="number" id="txt_confFontSize" min="8" max="30"> px
-        </div><!-- conf_themes -->
+        </div><!-- conf_font -->
         <div id="conf_themes">
           <h3>テーマ</h3>
           <select id="sel_themes">
             <option value="default">デフォルト</option>
           </select>
         </div><!-- conf_themes -->
+        <div id="conf_autoImgLoad">
+          <h3>画像の自動表示</h3>
+          <label><input value="1" id="rdo_autoImgLoad_on" name="rdo_autoImgLoad" type="radio">ON</label>
+          <label><input value="0" id="rdo_autoImgLoad_off" name="rdo_autoImgLoad" type="radio">OFF</label>
+          <br>
+          <span class="confDescription">ONにするとレス内の画像リンクを自動で表示します</span>
+        </div><!-- conf_autoImgLoading -->
         <div id="conf_history">
           <h3>履歴</h3>
           <button id="btn_confClearReadheres">「ここまで読んだ」履歴をクリア</button><br>
           <span class="confDescription">※「お気に入り」スレ以外の「ここまで読んだ」履歴を削除し空きストレージを増やします</span>
-        </div><!-- conf_themes -->
+        </div><!-- conf_history -->
         <div id="conf_ngword">
           <h3>NGワード</h3>
           <textarea id="ta_confNGWords" placeholder="NGにしたい文字列(ハンドル、ID等)"></textarea><br>
           <span class="confDescription">※NGワードは改行区切りで複数入力可能</span>
-        </div><!-- conf_themes -->
+        </div><!-- conf_ngword -->
 
       </div><!-- pane_conf -->
     </div><!-- pane_confWrapper -->
@@ -262,6 +269,7 @@
 <script src="lib/js/niichrome-gdriveutil.js"></script>
 <script src="lib/js/jquery-2.1.0.min.js"></script>
 <script src="lib/js/jquery-ui-1.10.4.custom.min.js"></script>
+<script src="lib/js/jquery.inview.min.js"></script>
 <script src="lib/js/draggable.js"></script>
 <script src="lib/js/encoding.min.js"></script>
 <script src="lib/js/niichrome-findbar.js"></script>
