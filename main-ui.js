@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.3.0
+ * @version 1.3.1
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -1015,13 +1015,6 @@ $(function() {
    */
   function viewResponses(url, row, historyUpdate, isReadmoreClicked) {
       startLoading(url, row);
-      // FIXME: If URL contains "headline.2ch.net", read data of ".dat" instead of "read.cgi".
-      // if (util2ch.isHeadlineURL(url)) {
-      //   if (!row) {
-      //     row = getTListRowByURL(util2ch.datURLToReadCGIURL(url));
-      //   }
-      //   url = util2ch.readCGIURLToDatURL(url);
-      // }
       txt_url.val(url);
       var thread_title_url = thread_title.data("url");
       if (!historyUpdate) historyUpdate = false;
@@ -1061,6 +1054,8 @@ $(function() {
             url: url,
             title: title
           });
+          // effect of thread_title appearance
+          thread_title.effect("slide", {}, 400);
           // if type="kako", disabled btn_write & readmore
           if (type == "kako") {
             btn_showPaneWrite.addClass("disabled");
@@ -1408,12 +1403,12 @@ $(function() {
   $document.on('click', ".content a", function(e) {
     var href = $(this).attr("href");
     console.log("href=", href);
-    if (util2ch.isReadCGIURL(href)) {
+    if (util2ch.isReadCGIURL(href) || util2ch.isMachiReadCGIURL(href)) {
       e.keyCode = 13; // set Enter key to the event
       txt_url.val(href).trigger("keydown", e);
       return;
     }
-    if (!href) return false; // if anchor link, return to exit.
+    if (!href) return false; // if res's anchor link, return to exit.
     // check whether image link or others
     if (isImageLink(href)) {
       // view image's thumbnail.
