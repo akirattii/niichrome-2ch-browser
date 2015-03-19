@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.3.1
+ * @version 1.3.2
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -77,6 +77,8 @@ $(function() {
     applyTheme(appConfig.theme);
     // adjust divider range
     rng_divider.val(appConfig.dividerPos);
+    // apply AutoImgLoad
+    applyAutoImgLoad(appConfig.autoImgLoad);
   });
 
   //
@@ -1429,17 +1431,31 @@ $(function() {
       return true;
     }
   });
-  // a link of image enter in the viewport
-  $document.on("inview", ".content a", function(event, isInView, visiblePartX, visiblePartY) {
-    if (appConfig.autoImgLoad !== 1) return;
-    if (isInView) {
-      // if an image link is in the viewport, load the image automatically.
-      var url = $(this).attr("href");
-      if (isImageLink(url) || amazonutil.isValidURL(url)) {
-        $(this).trigger("click");
+
+  /**
+   * add inviewListenr for image auto-loading
+   * For best performance, remove this listener when not using image auto-loading
+   */
+  function addAutoImgLoadInviewListener() {
+    // a link of image enter in the viewport
+    $document.on("inview", ".content a", function(event, isInView, visiblePartX, visiblePartY) {
+      if (appConfig.autoImgLoad !== 1) return;
+      if (isInView) {
+        // if an image link is in the viewport, load the image automatically.
+        var url = $(this).attr("href");
+        if (isImageLink(url) || amazonutil.isValidURL(url)) {
+          $(this).trigger("click");
+        }
       }
-    }
-  });
+    });
+  }
+  /**
+   * remove inviewListenr for image auto-loading
+   */
+  function removeAutoImgLoadInviewListener() {
+    // a link of image enter in the viewport
+    $document.off("inview", ".content a");
+  }
 
   function popThumb(url, elem) {
     console.log("popThumb");
@@ -1717,13 +1733,14 @@ $(function() {
    * @param {int} fontSize up/down tick
    */
   function tickFontSize(upDown) {
-      if (!upDown) upDown = 0;
-      var fontSize = appConfig.fontSize;
-      var newFontSize = fontSize + upDown;
-      applyFontSize(newFontSize + "px");
-      appConfig.fontSize = newFontSize;
-    }
-    // apply specific fontSize
+    if (!upDown) upDown = 0;
+    var fontSize = appConfig.fontSize;
+    var newFontSize = fontSize + upDown;
+    applyFontSize(newFontSize + "px");
+    appConfig.fontSize = newFontSize;
+  }
+
+  // apply specific fontSize
   function applyFontSize(fontSize) {
     $("body").css("font-size", fontSize);
   }
@@ -2775,10 +2792,19 @@ $(function() {
     var val = $(this).val();
     if (!val) {
       appConfig.autoImgLoad = 0;
-      return;
     }
     appConfig.autoImgLoad = parseInt(val);
+    // apply to the elements
+    applyAutoImgLoad(appConfig.autoImgLoad);
   });
+
+  function applyAutoImgLoad(flag) {
+    if (flag === 1) {
+      addAutoImgLoadInviewListener();
+    } else {
+      removeAutoImgLoadInviewListener();
+    }
+  }
 
   function getThemes(onSuccess, onError) {
     var ret = [];
