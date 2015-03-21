@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.3.2
+ * @version 1.3.3
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -362,12 +362,14 @@ $(function() {
         case 39: // Alt+Right
           event.preventDefault();
           console.log('Alt+Right');
-          // btn_arrowForward.trigger("click");
+          // go forward
+          goBackFromHistory(-1);
           break;
         case 37: // Alt+Left
           event.preventDefault();
           console.log('Alt+Left');
-          // btn_arrowBack.trigger("click");
+          // go back 
+          goBackFromHistory(1);
           break;
       }
     } else if (event.ctrlKey || event.metaKey) { // with "Ctrl" key
@@ -2003,19 +2005,24 @@ $(function() {
 
   // settings - "クラウドに保存"
   btn_settingCloudSave.click(function(e) {
+    if($(this).hasClass("disabled")) return;
     console.log("btn_settingCloudSave");
     var msg = "お気に入り一覧などの環境をクラウドにアップロードしますか？" +
       "<br>※回線状況やデータ量次第では少し時間が掛かる場合もあります";
     showDialogYN(msg, function() {
       // *** YES button clicked
+      makeCloudMenuDisabled(true);// TODO: make menu disabled
       saveBookmarksToCloud(function() { // save bookmarks to cloud
         saveReadheresToCloud(function() { // save readheres to cloud
           showMessage("成功：お気に入りなどをクラウドに保存しました", false);
+          makeCloudMenuDisabled(false);
         }, function() {
           showErrorMessage("<font color='red'>エラー：「ここまで読んだ」をクラウド保存できませんでした</font>", false);
+          makeCloudMenuDisabled(false);
         }); // saveReadheresToCloud
       }, function() {
         showErrorMessage("<font color='red'>エラー：クラウド保存に失敗しました</font>", false);
+        makeCloudMenuDisabled(false);
       }); // saveBookmarksToCloud
       pane_dialogYN_wrapper.hide();
     }, function() {
@@ -2026,19 +2033,24 @@ $(function() {
 
   // settings - "クラウドからロード"
   btn_settingCloudLoad.click(function(e) {
+    if($(this).hasClass("disabled")) return;
     console.log("btn_settingCloudLoad");
     var msg = "お気に入り一覧などの環境をクラウドからダウンロードしますか？" +
       "<br>※回線状況やデータ量次第では少し時間が掛かる場合もあります";
     showDialogYN(msg, function() {
       // *** YES button clicked
+      makeCloudMenuDisabled(true); // TODO: make menu disabled
       loadFromCloud("bookmarks", function() { // load bookmarks from cloud
         loadFromCloud("readheres", function() { // load readheres from cloud
           showMessage("成功：お気に入りなどをクラウドから読み込みました", false);
+          makeCloudMenuDisabled(false);
         }, function() {
           showErrorMessage("<font color='red'>エラー：「ここまで読んだ」のクラウド読込に失敗しました</font>", false);
+          makeCloudMenuDisabled(false);
         }); // loadFromCloud "readheres"
       }, function() {
         showErrorMessage("<font color='red'>エラー：クラウド読込に失敗しました</font>", false);
+        makeCloudMenuDisabled(false);
       }); // loadFromCloud "bookmarks"
       pane_dialogYN_wrapper.hide();
     }, function() {
@@ -2046,6 +2058,18 @@ $(function() {
       pane_dialogYN_wrapper.hide();
     }); // showDialogYN
   });
+
+  // make the cloudLoad/Save menu buttons disabled/enabled.
+  function makeCloudMenuDisabled(bool) {
+    if (bool === undefined) bool = true;
+    if (bool === true) {
+      btn_settingCloudLoad.addClass("disabled");
+      btn_settingCloudSave.addClass("disabled"); 
+    } else {
+      btn_settingCloudLoad.removeClass("disabled");
+      btn_settingCloudSave.removeClass("disabled");
+    }
+  }
 
   // settings - "設定"
   btn_settingConfig.click(function(e) {
@@ -2076,30 +2100,34 @@ $(function() {
     popupHistoryMenus(e);
   });
 
-  function popupHistoryMenus(evt) {
+  function popupHistoryMenus(evt, callback) {
     var history = util2ch.getHistory();
     var curURL = txt_url.data("url");
     var curIdx = util2ch.getIdxInHistory(curURL);
     if (!history) return;
     var df = $(document.createDocumentFragment());
     for (var i = 0, len = history.length; i < len; i++) {
-      var row = $('<div class="row" data-url="' + history[i].url + '"">' + history[i].title + '</div>');
+      var row = $('<div class="row" data-url="' + history[i].url + '">' + history[i].title + '</div>');
       if (curIdx === i) {
         row.addClass("current");
       }
       df.append(row);
     }
-    // show
+    // create menu element
     menu_historyURLs
       .empty()
-      .append(df)
-      .show()
-      .offset({
-        top: evt.clientY - 2,
-        left: evt.clientX - 2
-      });
-    // prevent to make this pane disappeared by firing window click event (see hideIfUnhovered())
-    evt.stopPropagation();
+      .append(df);
+    // show
+    if (evt) {
+      menu_historyURLs.show()
+        .offset({
+          top: evt.clientY - 2,
+          left: evt.clientX - 2
+        });
+      // prevent to make this pane disappeared by firing window click event (see hideIfUnhovered())
+      evt.stopPropagation();
+    }
+    callback && callback();
   }
 
   $document.on("click", "#menu_historyURLs .row", function(e) {
@@ -2108,8 +2136,30 @@ $(function() {
     menu_historyURLs.hide();
   });
 
+  /**
+   * go back history from menu_historyUrls
+   * @param {int} step 
+   *  Back step counts from current URL in history
+   *  If step <= -1, it does not means "back" but "forward" 
+   */
+  function goBackFromHistory(step) {
+    // create menu element
+    popupHistoryMenus(null, function(){
+      var curIdx = menu_historyURLs.find(".row.current").index();
+      var maxIdx = menu_historyURLs.find(".row").length - 1;
+      var targetIdx = curIdx + step;
+      if (targetIdx > maxIdx || targetIdx <= -1) return;
+      var targetHist = $("#menu_historyURLs .row:eq(" + targetIdx + ")");
+      var url = targetHist.data("url");
+      goFromHistory(url);
+    }); 
+  }
+
   // jump from history
   function goFromHistory(url) {
+    // set marker to the current history url
+    menu_historyURLs.find("div").removeClass("current");
+    menu_historyURLs.find("div[data-url='" + url + "']").addClass("current");
     if (url) {
       viewResponses(url, null, false, false);
     }
@@ -2117,7 +2167,6 @@ $(function() {
 
 
   // Toggle bm star.
-
   btn_addBm.click(function(e) {
     toggleBmStar($(this), false);
   });
