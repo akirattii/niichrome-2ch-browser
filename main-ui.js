@@ -2440,9 +2440,9 @@ $(function() {
     // #tlist and #thread height setting
     var properTblHeight = wh - tlist_row_wrapper.offset().top;
     tlist_row_wrapper[0].style.maxHeight = properTblHeight + "px";
-    var properThreadHeight = wh;
-    thread[0].style.minHeight = properThreadHeight + "px";
-    thread[0].style.height = properThreadHeight + "px";
+    // var properThreadHeight = wh;
+    // thread[0].style.minHeight = properThreadHeight + "px";
+    // thread[0].style.height = properThreadHeight + "px";
 
     //
     // #tlist and #thread width setting

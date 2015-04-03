@@ -16,13 +16,13 @@ html, body {
 
 div#tlist {
   position: fixed;
-  top: 0px;
+  top: 38px;
   left: 0px;
   width: 44%;
   min-width: 300px;
   background-color: #141414;
-  min-height: 100%;
-  height: 100%;
+  min-height: calc(100% - 38px);
+  height: calc(100% - 38px);
   box-shadow: 2px 2px 8px 2px 
   border-left: 1px solid gray;
   padding-left: 16px;
@@ -54,7 +54,7 @@ div#tlist #btn_reloadTList {
 }
 #tlist_row_wrapper {
   position: relative;
-  top: 88px;
+  top: 48px;
   background-color: transparent;
   padding-left: 6px;
 }
@@ -108,12 +108,12 @@ div#tlist #btn_reloadTList {
 div#thread {
   color: #efefef;
   position: fixed;
-  top: 0px;
+  top: 38px;
   /*left: 48%;*/
   overflow: auto;
   padding: 0px 10px 0px 20px;
-  min-height: 100px;
-  height: 100px;
+  min-height: calc(100% - 38px);
+  height: calc(100% - 38px);
   background-color: #181818;
   -webkit-user-select: text; /* for enabling text selection */
 }
@@ -137,7 +137,7 @@ div#thread #thread_title {
 div#thread .res_wrapper {
   background-color: transparent;
   min-width: 300px;
-  margin: 120px 0px 0px 0px;
+  margin: 100px 0px 0px 0px;
 }
 .res_wrapper .res {
 }
@@ -556,7 +556,7 @@ div#tools {
   position: fixed;
   top: 0px;
   left: 0px;
-  width: calc(100% - 40px);
+  width: 100%;
   min-width: auto;
   height: 36px;
   padding-left: 30px;
@@ -592,7 +592,7 @@ div#tools .tool #txt_filter {
 div#tools #btn_settings {
   content: url("img/setting24.png");
   position: fixed;
-  right: 10px;
+  right: 0px;
   padding: 6px 6px 0px 6px;
   cursor: pointer;
 }
