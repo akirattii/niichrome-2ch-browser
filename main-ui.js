@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.3.3
+ * @version 1.3.5
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -1407,7 +1407,10 @@ $(function() {
   $document.on('click', ".content a", function(e) {
     var href = $(this).attr("href");
     console.log("href=", href);
-    if (util2ch.isReadCGIURL(href) || util2ch.isMachiReadCGIURL(href)) {
+    href = util2ch.replace2chNetDomainToSc(href); // replace domain "2ch.net" to "2ch.sc" when 2ch.net's url
+    if (util2ch.isReadCGIURL(href) ||
+      util2ch.isMachiReadCGIURL(href) ||
+      util2ch.is2chBBSURL(href)) {
       e.keyCode = 13; // set Enter key to the event
       txt_url.val(href).trigger("keydown", e);
       return;
@@ -1439,21 +1442,21 @@ $(function() {
    * For best performance, remove this listener when not using image auto-loading
    */
   function addAutoImgLoadInviewListener() {
-    // a link of image enter in the viewport
-    $document.on("inview", ".content a", function(event, isInView, visiblePartX, visiblePartY) {
-      if (appConfig.autoImgLoad !== 1) return;
-      if (isInView) {
-        // if an image link is in the viewport, load the image automatically.
-        var url = $(this).attr("href");
-        if (isImageLink(url) || amazonutil.isValidURL(url)) {
-          $(this).trigger("click");
+      // a link of image enter in the viewport
+      $document.on("inview", ".content a", function(event, isInView, visiblePartX, visiblePartY) {
+        if (appConfig.autoImgLoad !== 1) return;
+        if (isInView) {
+          // if an image link is in the viewport, load the image automatically.
+          var url = $(this).attr("href");
+          if (isImageLink(url) || amazonutil.isValidURL(url)) {
+            $(this).trigger("click");
+          }
         }
-      }
-    });
-  }
-  /**
-   * remove inviewListenr for image auto-loading
-   */
+      });
+    }
+    /**
+     * remove inviewListenr for image auto-loading
+     */
   function removeAutoImgLoadInviewListener() {
     // a link of image enter in the viewport
     $document.off("inview", ".content a");
@@ -2005,13 +2008,13 @@ $(function() {
 
   // settings - "クラウドに保存"
   btn_settingCloudSave.click(function(e) {
-    if($(this).hasClass("disabled")) return;
+    if ($(this).hasClass("disabled")) return;
     console.log("btn_settingCloudSave");
     var msg = "お気に入り一覧などの環境をクラウドにアップロードしますか？" +
       "<br>※回線状況やデータ量次第では少し時間が掛かる場合もあります";
     showDialogYN(msg, function() {
       // *** YES button clicked
-      makeCloudMenuDisabled(true);// TODO: make menu disabled
+      makeCloudMenuDisabled(true); // TODO: make menu disabled
       saveBookmarksToCloud(function() { // save bookmarks to cloud
         saveReadheresToCloud(function() { // save readheres to cloud
           showMessage("成功：お気に入りなどをクラウドに保存しました", false);
@@ -2033,7 +2036,7 @@ $(function() {
 
   // settings - "クラウドからロード"
   btn_settingCloudLoad.click(function(e) {
-    if($(this).hasClass("disabled")) return;
+    if ($(this).hasClass("disabled")) return;
     console.log("btn_settingCloudLoad");
     var msg = "お気に入り一覧などの環境をクラウドからダウンロードしますか？" +
       "<br>※回線状況やデータ量次第では少し時間が掛かる場合もあります";
@@ -2064,7 +2067,7 @@ $(function() {
     if (bool === undefined) bool = true;
     if (bool === true) {
       btn_settingCloudLoad.addClass("disabled");
-      btn_settingCloudSave.addClass("disabled"); 
+      btn_settingCloudSave.addClass("disabled");
     } else {
       btn_settingCloudLoad.removeClass("disabled");
       btn_settingCloudSave.removeClass("disabled");
@@ -2138,13 +2141,13 @@ $(function() {
 
   /**
    * go back history from menu_historyUrls
-   * @param {int} step 
+   * @param {int} step
    *  Back step counts from current URL in history
-   *  If step <= -1, it does not means "back" but "forward" 
+   *  If step <= -1, it does not means "back" but "forward"
    */
   function goBackFromHistory(step) {
     // create menu element
-    popupHistoryMenus(null, function(){
+    popupHistoryMenus(null, function() {
       var curIdx = menu_historyURLs.find(".row.current").index();
       var maxIdx = menu_historyURLs.find(".row").length - 1;
       var targetIdx = curIdx + step;
@@ -2152,7 +2155,7 @@ $(function() {
       var targetHist = $("#menu_historyURLs .row:eq(" + targetIdx + ")");
       var url = targetHist.data("url");
       goFromHistory(url);
-    }); 
+    });
   }
 
   // jump from history

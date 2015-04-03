@@ -556,7 +556,7 @@ div#tools {
   position: fixed;
   top: 0px;
   left: 0px;
-  width: 100%;
+  width: calc(100% - 40px);
   min-width: auto;
   height: 36px;
   padding-left: 30px;
@@ -592,8 +592,8 @@ div#tools .tool #txt_filter {
 div#tools #btn_settings {
   content: url("img/setting24.png");
   position: fixed;
-  right: 0px;
-  padding: 6px 10px 0px 6px;
+  right: 10px;
+  padding: 6px 6px 0px 6px;
   cursor: pointer;
 }
 div#tools #rng_divider {
