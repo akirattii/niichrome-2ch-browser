@@ -109,26 +109,22 @@ div#thread {
   color: #efefef;
   position: fixed;
   top: 38px;
-  /*left: 48%;*/
   overflow: auto;
   padding: 0px 10px 0px 20px;
-  min-height: calc(100% - 38px);
-  height: calc(100% - 38px);
+  min-height: calc(100% - 48px);
+  height: calc(100% - 48px);
   background-color: #181818;
   -webkit-user-select: text; /* for enabling text selection */
 }
 div#thread #thread_title {
-  /*float: left;*/
   position: fixed;
   top: 0px;
   margin: 36px 0px 0px 0px;
-  padding: 14px 0px 14px 0px;
-  width: 100%;
+  padding: 14px 0px 14px 10px;
   font-size: 1.1em;
   word-wrap: break-word;
   background-color: rgba(30,30,30,0.8);
   border-bottom: 1px solid #5f5f5f;
-  /*color: #aaff36;*/
   color: #ccff56;
 }
 

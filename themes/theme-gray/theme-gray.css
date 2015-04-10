@@ -44,7 +44,6 @@ div#thread #thread_title {
   background-color: rgba(210,210,210,0.9);
   border-bottom: 1px solid #afafaf;
   color: #305FF1;
-  padding-left: 12px;
 }
 /* response */
 div#thread .res_wrapper {

@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.3.5
+ * @version 1.3.7
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -2453,7 +2453,9 @@ $(function() {
     var ttitle_col_w = tlist_w - (124); // = tlist_w - (.rescnt + .newcnt)
     $("#tlist_row_wrapper .ttitle").width(ttitle_col_w);
     thread[0].style.right = "0px";
-    thread[0].style.width = thread_title[0].style.width = thread_w + "px";
+    thread[0].style.width = thread_w + "px";
+    thread_title[0].style.right = "10px"; // following scrollbar width
+    thread_title[0].style.width = thread_w + "px";
     // when width of the pane <= 0, hide itself.
     if (tlist_w <= 0) {
       tlist[0].style.display = "none";
