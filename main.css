@@ -111,8 +111,8 @@ div#thread {
   top: 38px;
   overflow: auto;
   padding: 0px 10px 0px 20px;
-  min-height: calc(100% - 48px);
-  height: calc(100% - 48px);
+  min-height: calc(100% - 38px);
+  height: calc(100% - 38px);
   background-color: #181818;
   -webkit-user-select: text; /* for enabling text selection */
 }
