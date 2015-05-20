@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.3.7
+ * @version 1.4.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -165,6 +165,7 @@ $(function() {
   var blist_toggle_bar = $('#blist_toggle_bar');
   var btn_addBBSBm = $("#btn_addBBSBm");
   var btn_readherefilter = $("#btn_readherefilter");
+  var btn_sortByMomentum = $("#btn_sortByMomentum");
   var btn_reloadTList = $("#btn_reloadTList");
   var btn_reloadBList = $("#btn_reloadBList");
   var blist_wrapper = $("#blist_wrapper");
@@ -1240,7 +1241,7 @@ $(function() {
 
     var target = $("#tlist .body");
     var html = "";
-    var json, url, title, res;
+    var json, url, title, res, momentum, index;
     for (var len = list.length, i = 0; i < len; i++) {
       json = list[i];
       url = util2ch.datURLToReadCGIURL(json.url); // dat's url to read.cgi's url
@@ -1251,7 +1252,9 @@ $(function() {
       } else {
         res = "";
       }
-      html += '<div data-url="' + url + '" class="row">\n' +
+      momentum = json.momentum;
+      index = json.index;
+      html += '<div data-url="' + url + '" data-momentum="' + momentum + '" data-index="' + index + '" class="row">\n' +
         '<div class="col ttitle" title="' + title.replace(/"/g, '&quot;') + '" style="width:' + ttitle_col_w + 'px">' + title + '</div>\n' +
         '<div class="col newcnt"></div>\n' +
         '<div class="col rescnt">' + res + '</div>\n' +
@@ -1848,6 +1851,37 @@ $(function() {
     }
   });
 
+  btn_sortByMomentum.click(function(e) {
+    // sort thread list by momentum
+    console.log("btn_sortByMomentum");
+    var newList;
+
+    function getSortedThreadList(list, attrName, desc) {
+      return list.sort(function(a, b) {
+        var va = parseFloat(a.getAttribute(attrName));
+        var vb = parseFloat(b.getAttribute(attrName));
+        if (desc)
+          return vb - va;
+        else
+          return va - vb;
+      });
+    }
+
+    var list = $('#tlist_row_wrapper .body .row');
+
+    if ($(this).hasClass("grayout")) {
+      $(this).removeClass("grayout");
+      // sort by momentum DESC
+      newList = getSortedThreadList(list, "data-momentum", true);
+    } else {
+      $(this).addClass("grayout");
+      // sort thread list by index ASC (restore sort)
+      newList = getSortedThreadList(list, "data-index");
+    }
+
+    $('#tlist_row_wrapper .body').append(newList);
+  });
+
   function isBookmarkView() {
     if (bbs_title.data("url") == cmd.bookmarks) {
       return true;
@@ -1881,6 +1915,7 @@ $(function() {
     el.addClass("loading_mini");
     //
     btn_readherefilter.addClass("grayout");
+    btn_sortByMomentum.addClass("grayout");
     // 
     changeBmStarStyle(url, btn_addBBSBm);
     // loading thread list of the clicked bbs.
@@ -2014,7 +2049,7 @@ $(function() {
       "<br>※回線状況やデータ量次第では少し時間が掛かる場合もあります";
     showDialogYN(msg, function() {
       // *** YES button clicked
-      makeCloudMenuDisabled(true); // TODO: make menu disabled
+      makeCloudMenuDisabled(true); // make menu disabled
       saveBookmarksToCloud(function() { // save bookmarks to cloud
         saveReadheresToCloud(function() { // save readheres to cloud
           showMessage("成功：お気に入りなどをクラウドに保存しました", false);
@@ -2042,7 +2077,7 @@ $(function() {
       "<br>※回線状況やデータ量次第では少し時間が掛かる場合もあります";
     showDialogYN(msg, function() {
       // *** YES button clicked
-      makeCloudMenuDisabled(true); // TODO: make menu disabled
+      makeCloudMenuDisabled(true); // make menu disabled
       loadFromCloud("bookmarks", function() { // load bookmarks from cloud
         loadFromCloud("readheres", function() { // load readheres from cloud
           showMessage("成功：お気に入りなどをクラウドから読み込みました", false);

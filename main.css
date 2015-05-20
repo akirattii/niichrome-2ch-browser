@@ -7,7 +7,7 @@ html, body {
   height: 100%;
   min-height: 100%;
   background-color: #121212;
-  color: #cfcfcf;
+  color: #cfcfcf; /* #cfcfcf;*/
 }
 
 
@@ -184,7 +184,7 @@ div#thread .res_wrapper {
   font-size: 1.1em;
   line-height: 1.2em;
   font-family: 'ＭＳ Ｐゴシック','ＭＳＰゴシック','Takao Pゴシック','TakaoPGothic','IPAMonaPGothic',monospace;
-  color: #cfcfcf;
+  color: #c8c8c2;
 }
 .res_wrapper .res .content a {
   color: #52D2EF;
@@ -705,6 +705,9 @@ div#tools #rng_divider {
 }
 .readherefilter24 {
   content: url("img/readherefilter24.png");
+}
+.sortByMomentum24 {
+  content: url("img/sortByMomentum24.png");
 }
 .readhere24 {
   content: url("img/readhere24.png");
