@@ -80,6 +80,8 @@ $(function() {
     rng_divider.val(appConfig.dividerPos);
     // apply AutoImgLoad
     applyAutoImgLoad(appConfig.autoImgLoad);
+    // apply appInWindow
+    applyAppInWindow(appConfig.appInWindow);
   });
 
   //
