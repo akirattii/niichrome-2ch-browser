@@ -29,10 +29,18 @@
  */
 
 chrome.app.runtime.onLaunched.addListener(function() {
-  chrome.app.window.create('main.html', {
-    'bounds': {
-      'width': 400,
-      'height': 500
+  chrome.storage.sync.get(null, function(items){
+    if(items["appInWindow"]){
+      chrome.app.window.create('main.html', {
+        'bounds': {
+          'width': 400,
+          'height': 500
+          }
+        }, function(createdWindow){
+          createdWindow.maximize();
+        });
+    }else{
+      window.open('main.html', "_blank");
     }
   });
 });

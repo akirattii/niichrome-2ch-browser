@@ -36,7 +36,7 @@ $(function() {
 
   // fullscreen mode
   // chrome.app.window.current().fullscreen();
-  chrome.app.window.current().maximize();
+  // chrome.app.window.current().maximize();
 
   var request = niichrome.request();
   var util2ch = niichrome.util2ch();
@@ -56,7 +56,8 @@ $(function() {
     theme: 'default',
     ngWords: undefined, // NG word list {string[]}
     dividerPos: 50, // 2PaneDivider's X position (percent)
-    autoImgLoad: 0 // auto-load images within res_content. 0:off 1:on
+    autoImgLoad: 0, // auto-load images within res_content. 0:off 1:on
+    appInWindow: 1 // start application in new window
   };
 
   // this app's config
@@ -206,6 +207,8 @@ $(function() {
   var ta_confNGWords = $("#ta_confNGWords");
   var rdo_autoImgLoad_on = $("#rdo_autoImgLoad_on");
   var rdo_autoImgLoad_off = $("#rdo_autoImgLoad_off");
+  var rdo_appInWindow_on = $("#rdo_appInWindow_on");
+  var rdo_appInWindow_off = $("#rdo_appInWindow_off");
   var body = $("body");
   var menu_historyURLs = $("#menu_historyURLs");
   var dlg_adultCheck = $("#dlg_adultCheck");
@@ -2877,6 +2880,19 @@ $(function() {
     appConfig.ngWords = val.split("\n");
   });
 
+  $('input[type=radio][name=rdo_appInWindow').on("change", function() {
+    var val = $(this).val();
+    if (!val) {
+      appConfig.appInWindow = 1;
+    }
+    appConfig.appInWindow = parseInt(val);
+    applyAppInWindow(appConfig.appInWindow);
+  });
+
+  function applyAppInWindow(flag){
+    chrome.storage.sync.set({"appInWindow": flag});
+  }
+
   $('input[type=radio][name=rdo_autoImgLoad]').on("change", function() {
     var val = $(this).val();
     if (!val) {
@@ -2942,6 +2958,8 @@ $(function() {
     setConfNGWords();
     // img auto-loading
     setConfAutoImgLoad();
+    // start in new window
+    setConfAppInWindow();
   }
 
   function closeConfPane() {
@@ -2985,6 +3003,13 @@ $(function() {
     if (autoImgLoad === undefined) return;
     if (autoImgLoad === 1) rdo_autoImgLoad_on.prop("checked", true);
     if (autoImgLoad === 0) rdo_autoImgLoad_off.prop("checked", true);
+  }
+
+  function setConfAppInWindow(){
+    var appInWindow = appConfig.appInWindow;
+    if (appInWindow === undefined) return;
+    if (appInWindow === 1) rdo_appInWindow_on.prop("checked", true);
+    if (appInWindow === 0) rdo_appInWindow_off.prop("checked", true);
   }
 
   // save appConfig to localStorage
