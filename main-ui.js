@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.4.1
+ * @version 1.4.4
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -642,6 +642,9 @@ $(function() {
       console.log($(this).val());
       var url = $(this).val().trim();
       if (!url) return;
+
+      // 2ch.net -> 2ch.sc
+      url = util2ch.netToSc(url);
 
       // prettify read.cgi URL 
       // eg.: read.cgi/xxxxx/l50 → read.cgi/xxxxx/
