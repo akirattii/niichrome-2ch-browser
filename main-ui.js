@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.4.4
+ * @version 1.4.5
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -29,7 +29,7 @@
  */
 $(function() {
 
-  console.log = function() {};
+  // console.log = function() {};
 
   // chrome web store URL
   CWS_URL = "https://chrome.google.com/webstore/detail/niichrome-2ch%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6/iabgdknpefinjdmfacfgkpfiiglbdhnc";
@@ -71,13 +71,14 @@ $(function() {
 
   // load appConfig from the storage
   loadAppConfig(function() {
+    console.log("loadAppConfig callback", appConfig.dividerPos);
     /* apply configs to window */
     // fontSize
     applyFontSize(appConfig.fontSize);
     // theme 
     applyTheme(appConfig.theme);
     // adjust divider range
-    rng_divider.val(appConfig.dividerPos);
+    applyDividerPos(appConfig.dividerPos);
     // apply AutoImgLoad
     applyAutoImgLoad(appConfig.autoImgLoad);
     // apply appInWindow
@@ -241,6 +242,7 @@ $(function() {
   // -- window onload
   //
   window.onload = function(e) {
+    console.log("window.onload");
     lbl_version.text(chrome.runtime.getManifest().name + " v." + chrome.runtime.getManifest().version);
     readmore.hide();
     readhere.hide();
@@ -2312,7 +2314,7 @@ $(function() {
     scrollToTheRes(resElem);
   });
   rng_divider.on("input change", function() {
-    appConfig.dividerPos = $(this).val();
+    appConfig.dividerPos = parseInt($(this).val());
     redraw();
   });
 
@@ -2947,6 +2949,11 @@ $(function() {
       themepath = "themes/" + theme + "/" + theme + ".css";
     }
     $('link[rel="stylesheet"][data-custom-theme]')[0].href = themepath;
+  }
+
+  function applyDividerPos(pos) {
+    rng_divider.val(pos);
+    rng_divider.change(); // trigger "input change".
   }
 
   $("#btn_closeConfPane").click(closeConfPane);
