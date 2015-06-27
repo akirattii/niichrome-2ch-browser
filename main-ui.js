@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.4.5
+ * @version 1.4.6
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -29,7 +29,7 @@
  */
 $(function() {
 
-  // console.log = function() {};
+  console.log = function() {};
 
   // chrome web store URL
   CWS_URL = "https://chrome.google.com/webstore/detail/niichrome-2ch%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6/iabgdknpefinjdmfacfgkpfiiglbdhnc";
