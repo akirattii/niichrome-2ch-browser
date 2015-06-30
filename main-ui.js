@@ -1426,7 +1426,7 @@ $(function() {
       util2ch.is2chBBSURL(href)) {
       e.keyCode = 13; // set Enter key to the event
       txt_url.val(href).trigger("keydown", e);
-      return;
+      return false;
     }
     if (!href) return false; // if res's anchor link, return to exit.
     // check whether image link or others
