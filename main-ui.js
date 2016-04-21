@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.4.6
+ * @version 1.5.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
