@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.6.0
+ * @version 1.6.1
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -264,9 +264,9 @@ $(function() {
   //
 
   $window.on("message", function(e) {
-    var data = e.originalEvent.data;
+    let data = e.originalEvent.data;
     console.log("window onmessage:", data);
-    var url = thread_title.data("url");
+    let url = thread_title.data("url");
     // If successed to write, close webview's pane.
     if ((util2ch.isMachiReadCGIURL(url) && data.title.trim() == thread_title.text().trim()) || data.title.trim() == "書きこみました。") {
       if (pane_wv[0].style.visibility != "hidden") {
@@ -291,14 +291,14 @@ $(function() {
         });
       } else if (request.command == "searchBy2ch") {
         // *** search by finding service of 2ch
-        var e = new Event("keydown");
+        let e = new Event("keydown");
         e.keyCode = 13; // set Enter key to the event
         txt_url.val(request.text).trigger("keydown", e);
       } else if (request.command == "addNG") {
         // *** add as NG word
         if (!appConfig.ngWords) appConfig.ngWords = [];
-        var ngWords = appConfig.ngWords;
-        var ngWord = request.text;
+        let ngWords = appConfig.ngWords;
+        let ngWord = request.text;
         // double check
         if ($.inArray(ngWord, ngWords) >= 0) return;
         ngWords.push(ngWord);
@@ -340,18 +340,18 @@ $(function() {
   function hideIfUnhovered(elems, e) {
     console.log("hideIfUnhovered");
     // Unless the element is hovered, hide it.
-    var elem;
-    for (var i = 0, len = elems.length; i < len; i++) {
+    let elem;
+    for (let i = 0, len = elems.length; i < len; i++) {
       elem = elems[i];
       if (!isMouseHovered(elem, e)) elem.hide();
     }
   }
 
   function isMouseHovered(elem, evt) {
-    var vRangeStart = elem.offset().top;
-    var vRangeEnd = vRangeStart + elem.height();
-    var hRangeStart = elem.offset().left;
-    var hRangeEnd = hRangeStart + elem.width();
+    let vRangeStart = elem.offset().top;
+    let vRangeEnd = vRangeStart + elem.height();
+    let hRangeStart = elem.offset().left;
+    let hRangeEnd = hRangeStart + elem.width();
     if (vRangeStart <= evt.clientY && evt.clientY <= vRangeEnd &&
       hRangeStart <= evt.clientX && evt.clientX <= hRangeEnd) {
       return true;
@@ -449,8 +449,8 @@ $(function() {
   });
 
   $document.on("click", "#blist .cate1", function() {
-    var url = $(this).data("url");
-    var bbs = $(this).text();
+    let url = $(this).data("url");
+    let bbs = $(this).text();
     url = util2ch.complementSlash(url); // add "/" to string hip.
     url = optimizeXpicURL(url);
     console.log("cate1 click:", url);
@@ -515,7 +515,7 @@ $(function() {
 
   function toggleBBSList(flg) {
     DEFAULT_W = "184px";
-    var marginLeft;
+    let marginLeft;
     if (flg == undefined) {
       if (blist_wrapper.css("marginLeft") == DEFAULT_W) {
         marginLeft = "0px";
@@ -535,7 +535,7 @@ $(function() {
 
   btn_bmlist.on("click", function() {
     console.log("btn_bmlist click");
-    var url = cmd.bookmarks;
+    let url = cmd.bookmarks;
     toggleBBSList(false);
     // make the threadList reloading button disabled, because bookmarkList is unreloadable.
     // btn_reloadTList.hide();
@@ -553,13 +553,13 @@ $(function() {
 
   // get and set the latest rescounts and newcounts of bookmarked threads.
   function setResCountAndNewCountOnBM() {
-    var elems = $("#tlist .body > div");
-    var cnt = elems.length;
+    let elems = $("#tlist .body > div");
+    let cnt = elems.length;
     elems.each(function() {
-      var el = $(this);
-      var rescntEl = el.find(".col.rescnt");
-      var newcntEl = el.find(".col.newcnt");
-      var url = el.data("url");
+      let el = $(this);
+      let rescntEl = el.find(".col.rescnt");
+      let newcntEl = el.find(".col.newcnt");
+      let url = el.data("url");
       // get latest rescount of this thread
       util2ch.getLatestResnum(url, function(rescnt) {
         console.log(rescnt);
@@ -567,7 +567,7 @@ $(function() {
         // calc newcount and set.
         getReadhereFromStore(url, function(rescntInBM) {
           if (!rescntInBM) return;
-          var newcnt = rescnt - rescntInBM;
+          let newcnt = rescnt - rescntInBM;
           newcntEl.text(newcnt);
         });
       });
@@ -610,7 +610,7 @@ $(function() {
   btn_confClearReadheres.click(function() {
     console.log("btn_confClearReadheres click");
     // show YesNo dialog.
-    var msg = "「ここまで読んだ」履歴を<br>削除しますか？";
+    let msg = "「ここまで読んだ」履歴を<br>削除しますか？";
     showDialogYN(msg, function() {
       // YES
       idbutil.clear("readheres");
@@ -642,7 +642,7 @@ $(function() {
     console.log("txt_url keydown:", e.keyCode);
     if (e.keyCode === 13 || (xe && xe.keyCode === 13)) { // RETURN key
       console.log($(this).val());
-      var url = $(this).val().trim();
+      let url = $(this).val().trim();
       if (!url) return;
 
       // 2ch.net -> 2ch.sc
@@ -694,27 +694,27 @@ $(function() {
     // insert css
     insertWriteFormCSS();
     // preset anything into writeform's input
-    // var from = "";
-    var mail = "sage";
-    var msg = "";
+    // let from = "";
+    let mail = "sage";
+    let msg = "";
     if (data) {
       // if (data.from) from = data.from;
       if (data.mail) mail = data.mail;
       if (data.msg) msg = data.msg;
     }
     // hidden params for writeform
-    var url = thread_title.data("url");
-    var bbsinfo = util2ch.getBBSInfo(url);
-    var bbs = bbsinfo.bbs;
-    var key = bbsinfo.thread;
-    var time = Math.floor(new Date().getTime() / 1000) - 86400;
+    let url = thread_title.data("url");
+    let bbsinfo = util2ch.getBBSInfo(url);
+    let bbs = bbsinfo.bbs;
+    let key = bbsinfo.thread;
+    let time = Math.floor(new Date().getTime() / 1000) - 86400;
     // keyname of each hidden param
-    var keyname_from = "FROM";
-    var keyname_mail = "mail";
-    var keyname_message = "MESSAGE";
-    var keyname_bbs = "bbs";
-    var keyname_key = "key";
-    var keyname_time = "time";
+    let keyname_from = "FROM";
+    let keyname_mail = "mail";
+    let keyname_message = "MESSAGE";
+    let keyname_bbs = "bbs";
+    let keyname_key = "key";
+    let keyname_time = "time";
     if (util2ch.isMachiReadCGIURL(url)) { // *** when machibbs...
       keyname_from = "FROM";
       keyname_mail = "MAIL";
@@ -728,17 +728,17 @@ $(function() {
     // execute script
     wv[0].executeScript({
       code:
-      // "var ipt_from = document.getElementsByName('" + keyname_from + "')[0];"+
+      // "let ipt_from = document.getElementsByName('" + keyname_from + "')[0];"+
       // "if(ipt_from) ipt_from.value = '" + from + "';" +
-        "var ipt_mail = document.getElementsByName('" + keyname_mail + "')[0];" +
+        "let ipt_mail = document.getElementsByName('" + keyname_mail + "')[0];" +
         "if(ipt_mail) ipt_mail.value = '" + mail + "';" +
-        "var ta_msg = document.getElementsByName('" + keyname_message + "')[0];" +
+        "let ta_msg = document.getElementsByName('" + keyname_message + "')[0];" +
         "if(ta_msg) ta_msg.value = '" + msg + "';" +
-        "var ipt_bbs = document.getElementsByName('" + keyname_bbs + "')[0];" +
+        "let ipt_bbs = document.getElementsByName('" + keyname_bbs + "')[0];" +
         "if(ipt_bbs) ipt_bbs.value = '" + bbs + "';" +
-        "var ipt_key = document.getElementsByName('" + keyname_key + "')[0];" +
+        "let ipt_key = document.getElementsByName('" + keyname_key + "')[0];" +
         "if(ipt_key) ipt_key.value = '" + key + "';" +
-        "var ipt_time = document.getElementsByName('" + keyname_time + "')[0];" +
+        "let ipt_time = document.getElementsByName('" + keyname_time + "')[0];" +
         "if(ipt_time) ipt_time.value = '" + time + "';" +
         "if(ta_msg){" +
         "  ta_msg.setAttribute('rows', '15');" + // textarea
@@ -792,16 +792,16 @@ $(function() {
           // remove 2ch cookie "READJS" for "bbs.cgi mode" POST
           "function setJSModeOff() {" +
           // "  console.log('befor document.cookie', document.cookie);" +
-          "  var maxAge = 365*24*60*60;" +
-          "  var date  = new Date();" +
+          "  let maxAge = 365*24*60*60;" +
+          "  let date  = new Date();" +
           "  date.setTime(date.getTime() + maxAge*1000);" +
-          "  var expires = date.toUTCString();" +
+          "  let expires = date.toUTCString();" +
           "  document.cookie = 'READJS=off; version=1; path=/; domain=.2ch.sc; max-age=' + maxAge + '; expires=' + expires + '; ';" +
           // "  console.log('after document.cookie', document.cookie);" +
           "}" +
           "setJSModeOff();" + // always set READJS=off as "read.cgi mode".
           // On messaging "getTitle" command, returns the title to app's window.
-          "var appWindow, appOrigin;" +
+          "let appWindow, appOrigin;" +
           "window.addEventListener('message', function(e){" +
           "  console.log('Received:', e.data);" +
           "  appWindow = e.source;" +
@@ -813,7 +813,7 @@ $(function() {
           "  }" +
           "});" +
           // create custom back button 
-          "var backBtn = document.getElementById('backBtn');" +
+          "let backBtn = document.getElementById('backBtn');" +
           "if (!backBtn) {" +
           "  backBtn = document.createElement('div');" +
           "  backBtn.setAttribute('id', 'backBtn');" +
@@ -828,10 +828,10 @@ $(function() {
         runAt: 'document_end',
         code: "console.log('writeForm webview loadcommit document_end');" +
           // remove side_ad of machi.to because it bothers to set mouse pointer on input.
-          "var sideAd = document.getElementById('side_ad');" +
+          "let sideAd = document.getElementById('side_ad');" +
           "if (sideAd) sideAd.parentElement.removeChild(sideAd);" +
           // remake postForm for "bbs.cgi mode" POST
-          "var postForm = document.getElementById('postForm');" +
+          "let postForm = document.getElementById('postForm');" +
           "console.log('postForm', postForm);" +
           "if(postForm) {" +
           "  postForm.method = 'POST';" +
@@ -854,10 +854,10 @@ $(function() {
   }
 
   function insertWriteFormCSS() {
-    var css;
-    var isMachi = false;
-    var isXpic = false;
-    var url = wv[0].src;
+    let css;
+    let isMachi = false;
+    let isXpic = false;
+    let url = wv[0].src;
     if (util2ch.isMachiReadCGIURL(url)) isMachi = true;
     if (util2ch.isXpicReadCGIURL(url)) isXpic = true;
     // create css for making unnecessary elems unvisible
@@ -887,10 +887,10 @@ $(function() {
     });
   }
 
-  function prepareWriteForm(url) {
+  function prepareWriteForm() {
     console.log("prepareWriteForm");
     // convert to read.cgi's url
-    var url = txt_url.data("url");
+    let url = txt_url.data("url");
     if (util2ch.isDatURL(url)) {
       url = util2ch.datURLToReadCGIURL(url) + "1"; // url of only first res displayed
     } else { // when machibbs's url
@@ -903,7 +903,7 @@ $(function() {
   // -- ads bar
   //
   pane_wv_adsbar.on("mouseleave", function(e) {
-    var h = wv_adsbar.height();
+    let h = wv_adsbar.height();
     $(this).animate({
       bottom: -h
     }, 'fast');
@@ -924,9 +924,9 @@ $(function() {
 
     // addressBar
     txt_url: function() {
-      var el = txt_url;
+      let el = txt_url;
       el.css("background-color", "white");
-      var inputed = el.val();
+      let inputed = el.val();
       // check if it is command
       if (isCommand(inputed)) {
         return true;
@@ -948,7 +948,7 @@ $(function() {
   };
 
   function isCommand(str) {
-    for (var key in cmd) {
+    for (let key in cmd) {
       if (cmd[key] == str) return true;
     }
     return false;
@@ -992,8 +992,8 @@ $(function() {
 
   $document.on("click", "#btn_bmRemove", function(e) {
     console.log("bmRemove Clicked");
-    var row = e.currentTarget.parentNode;
-    var url = $(row).data("url");
+    let row = e.currentTarget.parentNode;
+    let url = $(row).data("url");
     removeBookmark(url);
     row.remove();
     if (thread_title.data("url") == url) {
@@ -1005,8 +1005,8 @@ $(function() {
   $document.on("click", "#tlist .body .row", function(e) {
     // return when now loading.
     if (nowloading) return;
-    var row = $(this); // a selected row on threadList
-    var url = row.data("url");
+    let row = $(this); // a selected row on threadList
+    let url = row.data("url");
     url = util2ch.prettifyReadCGIURL(url);
     if (util2ch.isBBSURL(url) || util2ch.isDig2chURL(url) || isCommand(url)) {
       // if the url of bbs|dig2ch|command, set url to txt_url and trigger enterkey down.
@@ -1031,15 +1031,15 @@ $(function() {
   function viewResponses(url, row, historyUpdate, isReadmoreClicked) {
     startLoading(url, row);
     txt_url.val(url);
-    var thread_title_url = thread_title.data("url");
+    let thread_title_url = thread_title.data("url");
     if (!historyUpdate) historyUpdate = false;
     if (!isReadmoreClicked) isReadmoreClicked = false;
     console.log("url:", url);
     // get resnum of readhere
     getReadhereFromStore(url, function(resnum) {
-      var startIdx = 0; // starting res index.
+      let startIdx = 0; // starting res index.
       // get url for getting responses.
-      var daturl;
+      let daturl;
       if (!util2ch.isMachiReadCGIURL(url)) {
         daturl = util2ch.readCGIURLToDatURL(url);
       } else { // when url of machibbs's readcgi
@@ -1048,13 +1048,13 @@ $(function() {
       // get res.
       util2ch.getResponses(daturl, appConfig.ngWords, function(data, type) {
         console.log("type:", type, " data:", data);
-        var responses = data.responses;
+        let responses = data.responses;
         // If type="html", get threadTitle from data.title. Else from selected row's "title" attr.
-        var title;
+        let title;
         // the res ID for starting to fetch. This uses on readmore clicked.
         // it's required because #resnum's index is not always same as #resnum's id
-        var fetchStartResId;
-        var prevURL = thread_title.data("url");
+        let fetchStartResId;
+        let prevURL = thread_title.data("url");
         if (type == "dat") {
           responses ? title = responses[0].title : title = "";
         } else { // "html" or "kako"
@@ -1081,7 +1081,7 @@ $(function() {
           readmore.show();
           lbl_kakolog.hide();
           // preload read.cgi for preparing to write a response.
-          prepareWriteForm(url);
+          prepareWriteForm();
         }
         // make the buttons of readhere, arrowUp and arrowDn enable.
         if (resnum) {
@@ -1115,7 +1115,7 @@ $(function() {
           }
         }
         // draw responses.
-        var lastResnum = drawResponses(responses, startIdx);
+        let lastResnum = drawResponses(responses, startIdx);
         if (lastResnum < 0) {
           showErrorMessage("datが存在しない or dat落ち or 鯖落ちです");
         } else if (isReadmoreClicked) {
@@ -1129,12 +1129,12 @@ $(function() {
         // set lastResnum as ThreadTitle's data
         thread_title.data("resnum", lastResnum);
         // make previous selected row's style to "unselected"
-        var prevSelectedRow = tlist_row_wrapper.find(".selected");
+        let prevSelectedRow = tlist_row_wrapper.find(".selected");
         if (prevSelectedRow[0]) {
           prevSelectedRow.removeClass("selected");
         }
         // make new selected row's style to "selected"
-        var selectedRow;
+        let selectedRow;
         if (row) {
           selectedRow = row;
         } else {
@@ -1146,7 +1146,7 @@ $(function() {
           // update the text of ".rescnt" col of the selected row
           selectedRow.find(".rescnt").text(lastResnum);
           // zero-init the text of ".newcnt" col of the selected row
-          var newcnt = "";
+          let newcnt = "";
           if (resnum) newcnt = lastResnum - resnum;
           selectedRow.find(".newcnt").text(newcnt);
         }
@@ -1197,9 +1197,9 @@ $(function() {
   }
 
   $document.on("click", "#readhere", function() {
-    var url = thread_title.data("url");
+    let url = thread_title.data("url");
     removeReadhereFromStore(url);
-    var row = getTListRowByURL(url);
+    let row = getTListRowByURL(url);
     if (row) row.find(".newcnt").text("");
     readhere.hide();
     btn_jumpToReadhere.addClass("disabled");
@@ -1208,14 +1208,14 @@ $(function() {
   $document.on("mouseenter", "#tlist .body .row", function() {
     // if it is "bmlist"(bookmarkList), makes bookmark removable
     console.log("mouseenter row");
-    var dataurl = bbs_title.data("url");
+    let dataurl = bbs_title.data("url");
     if (dataurl == cmd.bookmarks) {
       $(this).find(".rescnt").after(btn_bmRemove);
       btn_bmRemove.show();
     }
   });
   $document.on("mouseleave", "#tlist .body .row", function() {
-    var dataurl = txt_url.data("url");
+    let dataurl = txt_url.data("url");
     if (dataurl == cmd.bookmarks) {
       btn_bmRemove.hide();
     }
@@ -1223,7 +1223,7 @@ $(function() {
 
   // thread list header icon buttons' effect
   $("#tlist_header .icon").click(function(e) {
-    var options = {};
+    let options = {};
     $(this).effect("puff", options, 300, function(e) {
       $(this).css("display", "block");
     });
@@ -1235,8 +1235,8 @@ $(function() {
     }, 100);
   });
   btn_arrowDnTList.click(function() {
-    var target = tlist.last();
-    var h = tlist[0].scrollHeight;
+    let target = tlist.last();
+    let h = tlist[0].scrollHeight;
     tlist.animate({
       scrollTop: h
     }, 100);
@@ -1245,14 +1245,14 @@ $(function() {
 
   function drawThreadList(list, endHandler) {
     console.log("drawThreadList");
-    var bbsurl = bbs_title.data("url");
-    var ttitle_col_w = $("#tlist_row_wrapper .header .ttitle").width();
-    var isCommandURL = isCommand(bbsurl);
+    let bbsurl = bbs_title.data("url");
+    let ttitle_col_w = $("#tlist_row_wrapper .header .ttitle").width();
+    let isCommandURL = isCommand(bbsurl);
 
-    var target = $("#tlist .body");
-    var html = "";
-    var json, url, title, res, momentum, index;
-    for (var len = list.length, i = 0; i < len; i++) {
+    let target = $("#tlist .body");
+    let html = "";
+    let json, url, title, res, momentum, index;
+    for (let len = list.length, i = 0; i < len; i++) {
       json = list[i];
       url = util2ch.datURLToReadCGIURL(json.url); // dat's url to read.cgi's url
       if (!url) url = json.url;
@@ -1270,7 +1270,7 @@ $(function() {
         '<div class="col rescnt">' + res + '</div>\n' +
         '</div>';
     }
-    target.html(html).promise().done(function(){
+    target.html(html).promise().done(function() {
       // callback onEnd
       if (endHandler) endHandler();
     });
@@ -1283,11 +1283,11 @@ $(function() {
   // calc & set new count of each thread
   function setResNewCounts() {
     $("#tlist .body > div").each(function() {
-      var el = $(this);
-      var url = el.data("url");
-      var rescntEl = el.find(".col.rescnt");
-      var newcntEl = el.find(".col.newcnt");
-      var rescnt = rescntEl.text();
+      let el = $(this);
+      let url = el.data("url");
+      let rescntEl = el.find(".col.rescnt");
+      let newcntEl = el.find(".col.newcnt");
+      let rescnt = rescntEl.text();
       if ($.isNumeric(rescnt)) {
         rescnt = parseInt(rescnt);
       } else {
@@ -1295,7 +1295,7 @@ $(function() {
       }
       getReadhereFromStore(url, function(resnum) {
         if (!resnum) return;
-        var newcnt = rescnt - resnum;
+        let newcnt = rescnt - resnum;
         newcntEl.text(newcnt);
       });
     });
@@ -1352,11 +1352,15 @@ $(function() {
       }
     }
     if (startIdx != 0) {
-      htmlBuf = $("#res_wrapper").html() + htmlBuf;
+      // htmlBuf = $("#res_wrapper").html() + htmlBuf;
+      $("#res_wrapper").append(htmlBuf).promise().done(function() {
+        reddenReferedResnums(); // all refered nums' color to red
+      });
+    } else {
+      $("#res_wrapper").html(htmlBuf).promise().done(function() {
+        reddenReferedResnums(); // all refered nums' color to red
+      });
     }
-    $("#res_wrapper").html(htmlBuf).promise().done(function() {
-      reddenReferedResnums(); // all refered nums' color to red
-    });
 
     // return last resnum.
     let lastResnum = responses[responses.length - 1].num;
@@ -1424,7 +1428,7 @@ $(function() {
 
   $document.on('click', ".res .content a[data-resnum]", function(e) {
     console.log("resnum:", $(this).data("resnum"));
-    var value = $(this).data("resnum");
+    let value = $(this).data("resnum");
     showRefpop({
       key: "resnum",
       value: value
@@ -1432,7 +1436,7 @@ $(function() {
   });
   $document.on('click', ".res .res_header .num", function(e) {
     console.log("num:", $(this).text());
-    var value = $(this).text();
+    let value = $(this).text();
     showRefpop({
       key: "refered",
       value: value
@@ -1440,7 +1444,7 @@ $(function() {
   });
   $document.on('click', ".res .handle", function(e) {
     console.log("handle:", $(this).text());
-    var value = $(this).text();
+    let value = $(this).text();
     showRefpop({
       key: "handle",
       value: value
@@ -1448,7 +1452,7 @@ $(function() {
   });
   $document.on('click', ".res .email", function(e) {
     console.log("email:", $(this).text());
-    var value = $(this).text();
+    let value = $(this).text();
     showRefpop({
       key: "email",
       value: value
@@ -1456,7 +1460,7 @@ $(function() {
   });
   $document.on('click', ".res .uid", function(e) {
     console.log("uid:", $(this).text());
-    var value = $(this).text();
+    let value = $(this).text();
     showRefpop({
       key: "uid",
       value: value
@@ -1464,7 +1468,7 @@ $(function() {
   });
   $document.on('click', ".res .host", function(e) {
     console.log("host:", $(this).text());
-    var value = $(this).text();
+    let value = $(this).text();
     showRefpop({
       key: "host",
       value: value
@@ -1472,7 +1476,7 @@ $(function() {
   });
   // click a link with href
   $document.on('click', ".content a", function(e) {
-    var href = $(this).attr("href");
+    let href = $(this).attr("href");
     console.log("href=", href);
     href = util2ch.replace2chNetDomainToSc(href); // replace domain "2ch.net" to "2ch.sc" when 2ch.net's url
     if (util2ch.isReadCGIURL(href) ||
@@ -1514,7 +1518,7 @@ $(function() {
       if (appConfig.autoImgLoad !== 1) return;
       if (isInView) {
         // if an image link is in the viewport, load the image automatically.
-        var url = $(this).attr("href");
+        let url = $(this).attr("href");
         if (isImageLink(url) || amazonutil.isValidURL(url)) {
           $(this).trigger("click");
         }
@@ -1532,13 +1536,13 @@ $(function() {
   function popThumb(url, elem) {
     console.log("popThumb");
     // check if img already exists
-    var next2elem = elem.next().next(); // <a ...><br><img .../>
+    let next2elem = elem.next().next(); // <a ...><br><img .../>
     if (next2elem.is("img") && next2elem.data("url") == url) {
       console.log("this image's already loaded.");
       return;
     }
     // make an img element
-    var img = $("<br><img data-url='" + url + "' class='loading_mini' /><p class='percentComplete'></p>");
+    let img = $("<br><img data-url='" + url + "' class='loading_mini' /><p class='percentComplete'></p>");
     elem.after(img);
     // request
     request.doRequest({
@@ -1546,8 +1550,8 @@ $(function() {
       responseType: "blob",
       url: url,
       onsuccess: function(xhr) {
-        var contentType = xhr.getResponseHeader("Content-Type");
-        var percentComplete;
+        let contentType = xhr.getResponseHeader("Content-Type");
+        let percentComplete;
         // if the link's content type is "image", then load that.
         if (contentType.match(/^image\//)) {
           request.doRequest({
@@ -1559,7 +1563,7 @@ $(function() {
               img[2].textContent = percentComplete + "%";
             },
             onsuccess: function(xhr) {
-              var ourl = window.URL.createObjectURL(xhr.response);
+              let ourl = window.URL.createObjectURL(xhr.response);
               img.attr("src", ourl)
                 .addClass("thumb")
                 .attr("title", "クリックで拡大");
@@ -1577,7 +1581,7 @@ $(function() {
         }
       },
       onerror: function(xhr) {
-        var msg = xhr.status + ": " + xhr.statusText;
+        let msg = xhr.status + ": " + xhr.statusText;
         img[1].className = "imgNotFound";
         img[1].title = msg;
       }
@@ -1588,18 +1592,18 @@ $(function() {
     // popup video
     console.log("popVideo");
     // check if img already exists
-    var next2elem = elem.next().next(); // <a ...><br><webview .../>
+    let next2elem = elem.next().next(); // <a ...><br><webview .../>
     if (next2elem.is("webview") && next2elem.data("url") == url) {
       console.log("this video's already loaded.");
       return;
     }
     // convert 'http://www.youtube.com/watch?v=***' to 'http://www.youtube.com/v/***'
-    var src = getDirectVideoURL(url);
+    let src = getDirectVideoURL(url);
     // create video width // FIXME: This's uneffective for video's width adjustment.
-    var width = thread_title.width() - 24;
+    let width = thread_title.width() - 24;
     // make an video element
-    var html = "<br><webview width='" + width + "' data-url='" + url + "' src='" + src + "'></webview>" + "<br><a href='" + url + "' target='_blank' class='jumpToYoutube'>YouTubeで見る</a>";
-    var iframe = $(html);
+    let html = "<br><webview width='" + width + "' data-url='" + url + "' src='" + src + "'></webview>" + "<br><a href='" + url + "' target='_blank' class='jumpToYoutube'>YouTubeで見る</a>";
+    let iframe = $(html);
     elem.after(iframe);
   }
 
@@ -1607,12 +1611,12 @@ $(function() {
     // popup amazon pane
     console.log("popAmazon");
     // check if img already exists
-    var next2elem = elem.next().next(); // <a ...><br><div .../>
+    let next2elem = elem.next().next(); // <a ...><br><div .../>
     if (next2elem.is("div") && next2elem.data("url") == url) {
       console.log("this amazon's pane has already loaded.");
       return;
     }
-    var div = $("<br>" +
+    let div = $("<br>" +
       "<div class='amazonPane' data-url='" + url + "'>" +
       "  <img class='loading_mini'></img>" +
       "  <p class='percentComplete'></p>" +
@@ -1620,8 +1624,8 @@ $(function() {
       "  <a href='' data-jumplink='1' target='_blank'></a>" +
       "</div>");
     elem.after(div);
-    var imgElem = div.find("img");
-    var aElem = div.find("a");
+    let imgElem = div.find("img");
+    let aElem = div.find("a");
     asin = amazonutil.getASIN(url);
     if (!asin) {
       imgElem.removeClass("loading_mini");
@@ -1631,10 +1635,10 @@ $(function() {
       // make an amazon info's Pane
       div.next().data("url", url);
       // item title & price
-      var amazon_detail = item.title;
+      let amazon_detail = item.title;
       if (item.price) amazon_detail += " " + item.price;
       aElem.text(amazon_detail).attr("href", item.url);
-      var percentCompleteElem = div.find(".percentComplete");
+      let percentCompleteElem = div.find(".percentComplete");
       // warning for adult item
       if (item.warn) {
         imgElem.removeClass("loading_mini");
@@ -1642,7 +1646,7 @@ $(function() {
       }
       // review stars
       if (!isNaN(item.stars)) {
-        var stars = Math.round(item.stars * 2) / 2 * 10;
+        let stars = Math.round(item.stars * 2) / 2 * 10;
         div.find(".starlevel5")
           .addClass("star" + stars)
           .attr("title", item.stars).show();
@@ -1664,7 +1668,7 @@ $(function() {
             percentCompleteElem.text(percentComplete + "%");
           },
           onsuccess: function(xhr) {
-            var ourl = window.webkitURL.createObjectURL(xhr.response);
+            let ourl = window.webkitURL.createObjectURL(xhr.response);
             imgElem
               .attr("src", ourl)
               .addClass("thumb")
@@ -1689,7 +1693,7 @@ $(function() {
   $document.on("click", ".thumb", function(e) {
     console.log("img.thumb clicked");
     // get thread pane's width
-    var w = thread_title.width() - 24;
+    let w = thread_title.width() - 24;
     $(this).removeClass("thumb")
       .addClass("rawimg")
       .width(w)
@@ -1715,7 +1719,7 @@ $(function() {
 
   function isVideoLink(url) {
     console.log("isVideoLink");
-    var ret = getDirectVideoURL(url);
+    let ret = getDirectVideoURL(url);
     if (ret) {
       return true;
     } else {
@@ -1727,7 +1731,7 @@ $(function() {
    * get video's direct URL from youtube's one.
    */
   function getDirectVideoURL(url) {
-    var arr;
+    let arr;
     arr = url.match(/^http[s]*:\/\/www\.youtube\.com\/v\/(.+)/i);
     if (arr) {
       return url;
@@ -1786,11 +1790,11 @@ $(function() {
    * @param cls ("online" | "offline")
    */
   function toggleOnlineStat(cls) {
-    var el = onlineStat;
+    let el = onlineStat;
     if (cls) {
       el.removeClass("offline").removeClass("online").addClass(cls);
     } else {
-      var curr_cls = el[0].className;
+      let curr_cls = el[0].className;
       if (curr_cls == "offline") {
         el.removeClass("offline").addClass("online");
       } else {
@@ -1806,8 +1810,8 @@ $(function() {
    */
   function tickFontSize(upDown) {
     if (!upDown) upDown = 0;
-    var fontSize = appConfig.fontSize;
-    var newFontSize = fontSize + upDown;
+    let fontSize = appConfig.fontSize;
+    let newFontSize = fontSize + upDown;
     applyFontSize(newFontSize + "px");
     appConfig.fontSize = newFontSize;
   }
@@ -1867,7 +1871,7 @@ $(function() {
 
   function errorOnReload(reloadBtn, e) {
     console.log("error:", e);
-    var reason;
+    let reason;
     if (navigator.isOnline) {
       reason = "正しいデータを取得できませんでした";
     } else {
@@ -1900,8 +1904,8 @@ $(function() {
   });
 
   btn_readherefilter.click(function(e) {
-    var elems;
-    var elem;
+    let elems;
+    let elem;
     if ($(this).hasClass("grayout")) {
       $(this).removeClass("grayout");
       // do filtering readhered thread.
@@ -1918,12 +1922,12 @@ $(function() {
   btn_sortByMomentum.click(function(e) {
     // sort thread list by momentum
     console.log("btn_sortByMomentum");
-    var newList;
+    let newList;
 
     function getSortedThreadList(list, attrName, desc) {
       return list.sort(function(a, b) {
-        var va = parseFloat(a.getAttribute(attrName));
-        var vb = parseFloat(b.getAttribute(attrName));
+        let va = parseFloat(a.getAttribute(attrName));
+        let vb = parseFloat(b.getAttribute(attrName));
         if (desc)
           return vb - va;
         else
@@ -1931,7 +1935,7 @@ $(function() {
       });
     }
 
-    var list = $('#tlist_row_wrapper .body .row');
+    let list = $('#tlist_row_wrapper .body .row');
 
     if ($(this).hasClass("grayout")) {
       $(this).removeClass("grayout");
@@ -1955,17 +1959,17 @@ $(function() {
   }
 
   function execReadmore() {
-    var url = readmore.data("url");
+    let url = readmore.data("url");
     viewResponses(url, null, true, true);
   }
 
   function reloadTList() {
     console.log("reloadTList exec.");
-    var el = btn_reloadTList;
-    var url = el.data("url");
-    // var bbs = bbs_title.text();
-    var bbs;
-    var bbsrow = getBBSRowByURL(url);
+    let el = btn_reloadTList;
+    let url = el.data("url");
+    // let bbs = bbs_title.text();
+    let bbs;
+    let bbsrow = getBBSRowByURL(url);
     if (bbsrow) bbs = bbsrow.text();
     if (util2ch.isFind2chURL(url)) {
       bbs = "「" + util2ch.getKeywordFromFind2chURL(url) + "」関連スレ";
@@ -2006,22 +2010,22 @@ $(function() {
   // FIXME: 
   function makeBList(bbsmenu) {
 
-    var parent = blist;
-    var tpl = blist_tpl;
-    var nextCate;
-    var item;
-    var nextItem;
-    var cateElem;
-    var isFirstLoop = true;
+    let parent = blist;
+    let tpl = blist_tpl;
+    let nextCate;
+    let item;
+    let nextItem;
+    let cateElem;
+    let isFirstLoop = true;
 
     function _createCateElem(categoryName) {
-      var elem = tpl.clone().removeClass("tpl").attr("id", null);
+      let elem = tpl.clone().removeClass("tpl").attr("id", null);
       elem.find(".cate0").text(categoryName);
       return elem;
     }
 
     function _appendBBSToCateElem(item, categoryElem) {
-      var li = $("<li class='cate1'></li>")
+      let li = $("<li class='cate1'></li>")
         .data("url", item.url)
         .text(item.cate1);
       categoryElem.find("ul").append(li);
@@ -2030,7 +2034,7 @@ $(function() {
     // First, clear current bbs list.
     parent.find(".cate").remove();
 
-    for (var len = bbsmenu.length, i = 0; i < len; i++) {
+    for (let len = bbsmenu.length, i = 0; i < len; i++) {
       item = bbsmenu[i];
       if (i + 1 < len) {
         nextItem = bbsmenu[i + 1];
@@ -2070,7 +2074,7 @@ $(function() {
   btn_settings.click(function(e) {
     pane_settings.show();
     console.log("pane_settings shown");
-    var offset = {
+    let offset = {
       top: $(this).offset().top + $(this).height() + 2,
       left: $(this).offset().left - pane_settings.width() + $(this).width()
     }
@@ -2109,7 +2113,7 @@ $(function() {
   btn_settingCloudSave.click(function(e) {
     if ($(this).hasClass("disabled")) return;
     console.log("btn_settingCloudSave");
-    var msg = "お気に入り一覧などの環境をクラウドにアップロードしますか？" +
+    let msg = "お気に入り一覧などの環境をクラウドにアップロードしますか？" +
       "<br>※回線状況やデータ量次第では少し時間が掛かる場合もあります";
     showDialogYN(msg, function() {
       // *** YES button clicked
@@ -2137,7 +2141,7 @@ $(function() {
   btn_settingCloudLoad.click(function(e) {
     if ($(this).hasClass("disabled")) return;
     console.log("btn_settingCloudLoad");
-    var msg = "お気に入り一覧などの環境をクラウドからダウンロードしますか？" +
+    let msg = "お気に入り一覧などの環境をクラウドからダウンロードしますか？" +
       "<br>※回線状況やデータ量次第では少し時間が掛かる場合もあります";
     showDialogYN(msg, function() {
       // *** YES button clicked
@@ -2189,7 +2193,7 @@ $(function() {
   // tool icon buttons' effect
   $("#tools .btn").click(function(e) {
     if ($(this).hasClass("disabled")) return;
-    var options = {};
+    let options = {};
     $(this).effect("puff", options, 300, function(e) {
       $(this).css("display", "block");
     });
@@ -2203,13 +2207,13 @@ $(function() {
   });
 
   function popupHistoryMenus(evt, callback) {
-    var history = util2ch.getHistory();
-    var curURL = txt_url.data("url");
-    var curIdx = util2ch.getIdxInHistory(curURL);
+    let history = util2ch.getHistory();
+    let curURL = txt_url.data("url");
+    let curIdx = util2ch.getIdxInHistory(curURL);
     if (!history) return;
-    var df = $(document.createDocumentFragment());
-    for (var i = 0, len = history.length; i < len; i++) {
-      var row = $('<div class="row" data-url="' + history[i].url + '">' + history[i].title + '</div>');
+    let df = $(document.createDocumentFragment());
+    for (let i = 0, len = history.length; i < len; i++) {
+      let row = $('<div class="row" data-url="' + history[i].url + '">' + history[i].title + '</div>');
       if (curIdx === i) {
         row.addClass("current");
       }
@@ -2233,7 +2237,7 @@ $(function() {
   }
 
   $document.on("click", "#menu_historyURLs .row", function(e) {
-    var url = $(this).data("url");
+    let url = $(this).data("url");
     goFromHistory(url);
     menu_historyURLs.hide();
   });
@@ -2247,12 +2251,12 @@ $(function() {
   function goBackFromHistory(step) {
     // create menu element
     popupHistoryMenus(null, function() {
-      var curIdx = menu_historyURLs.find(".row.current").index();
-      var maxIdx = menu_historyURLs.find(".row").length - 1;
-      var targetIdx = curIdx + step;
+      let curIdx = menu_historyURLs.find(".row.current").index();
+      let maxIdx = menu_historyURLs.find(".row").length - 1;
+      let targetIdx = curIdx + step;
       if (targetIdx > maxIdx || targetIdx <= -1) return;
-      var targetHist = $("#menu_historyURLs .row:eq(" + targetIdx + ")");
-      var url = targetHist.data("url");
+      let targetHist = $("#menu_historyURLs .row:eq(" + targetIdx + ")");
+      let url = targetHist.data("url");
       goFromHistory(url);
     });
   }
@@ -2274,7 +2278,7 @@ $(function() {
   });
 
   function toggleBmStar(btn_elem, isBBSBm) {
-    var url, title, tlist_url, resnum;
+    let url, title, tlist_url, resnum;
     if (isBBSBm) { // when bbs bookmark...
       url = bbs_title.data("url");
       title = bbs_title.text();
@@ -2309,7 +2313,7 @@ $(function() {
   }
 
   function removeFromTListPane(url) {
-    var row = getTListRowByURL(url);
+    let row = getTListRowByURL(url);
     if (row) row.remove();
   }
 
@@ -2318,9 +2322,9 @@ $(function() {
   }
 
   function getTListRowByURL(url) {
-    var rows = $("#tlist .body .row");
-    for (var len = rows.length, i = 0; i < len; i++) {
-      var row = $(rows[i]);
+    let rows = $("#tlist .body .row");
+    for (let len = rows.length, i = 0; i < len; i++) {
+      let row = $(rows[i]);
       if (row.data("url") == url) {
         return row;
       }
@@ -2329,9 +2333,9 @@ $(function() {
   }
 
   function getBBSRowByURL(url) {
-    var rows = $("#blist .cate1");
-    for (var len = rows.length, i = 1; i < len; i++) { // starts index 1 cause index 0 is a row for template.
-      var row = $(rows[i]);
+    let rows = $("#blist .cate1");
+    for (let len = rows.length, i = 1; i < len; i++) { // starts index 1 cause index 0 is a row for template.
+      let row = $(rows[i]);
       if (row.data("url") == url) {
         return row;
       }
@@ -2356,15 +2360,15 @@ $(function() {
   });
   btn_arrowDn.click(function() {
     if ($(this).hasClass("disabled")) return;
-    var target = $("#res_wrapper .res").last();
-    var h = thread[0].scrollHeight;
+    let target = $("#res_wrapper .res").last();
+    let h = thread[0].scrollHeight;
     thread.animate({
       scrollTop: h
     }, 100);
   });
   btn_jumpToReadhere.click(function() {
     if ($(this).hasClass("disabled")) return;
-    var resElem = readhere.prev();
+    let resElem = readhere.prev();
     scrollToTheRes(resElem);
   });
   rng_divider.on("input change", function() {
@@ -2373,8 +2377,8 @@ $(function() {
   });
 
   function scrollToTheRes(resElem) {
-    var ot = resElem.offset().top;
-    var st = thread.scrollTop();
+    let ot = resElem.offset().top;
+    let st = thread.scrollTop();
     thread.animate({
       scrollTop: st + ot - 120
     }, 100);
@@ -2405,8 +2409,8 @@ $(function() {
   //
 
   function createCloudQuery(filename, mimeType) {
-    var params = [];
-    var ret = "";
+    let params = [];
+    let ret = "";
     if (filename) params.push("title='" + filename + "'");
     if (mimeType) params.push("mimeType='" + mimeType + "'");
     if (params.length >= 1) ret = params.join(" and ");
@@ -2414,8 +2418,8 @@ $(function() {
   }
 
   function saveBookmarksToCloud(onSuccess, onError) {
-    var storename = "bookmarks";
-    var label = "お気に入り";
+    let storename = "bookmarks";
+    let label = "お気に入り";
     // get auth then upload the json 
     gdriveutil.auth(true, function() {
       console.log("accessToken", gdriveutil.getToken());
@@ -2435,7 +2439,7 @@ $(function() {
   }
 
   function saveReadheresToCloud(onSuccess, onError) {
-    var storename = "readheres";
+    let storename = "readheres";
     // get auth then upload the json 
     gdriveutil.auth(true, function() {
       console.log("accessToken", gdriveutil.getToken());
@@ -2469,14 +2473,14 @@ $(function() {
   }
 
   function saveJSONToCloud(jsonstr, filename, onComplete, onError) {
-    var mimeType = "application/json";
+    let mimeType = "application/json";
     console.log("jsonstr", jsonstr);
-    var file = new Blob([jsonstr], {
+    let file = new Blob([jsonstr], {
       type: mimeType
     });
-    var q = createCloudQuery(filename, mimeType);
+    let q = createCloudQuery(filename, mimeType);
     gdriveutil.getFile(q, function(items) {
-      var opts = {
+      let opts = {
         // chunkSize: 0,
         metadata: {
           title: filename,
@@ -2488,7 +2492,7 @@ $(function() {
         file: file
       };
       if (items && items.length >= 1) {
-        var item = items[0];
+        let item = items[0];
         opts.fileId = item.id;
       }
       gdriveutil.upload(opts, onComplete, onError);
@@ -2496,15 +2500,15 @@ $(function() {
   }
 
   function loadJSONFromCloud(filename, onComplete, onError) {
-    var mimeType = "application/json";
-    var q = createCloudQuery(filename, mimeType);
+    let mimeType = "application/json";
+    let q = createCloudQuery(filename, mimeType);
     gdriveutil.getFile(q, function(items) {
       if (items && items.length >= 1) {
-        var item = items[0];
+        let item = items[0];
         gdriveutil.download(item.downloadUrl, function(resp) {
           console.log("resp=", resp);
           // import to indexeddb
-          var storename = filename.slice(0, -".json".length);
+          let storename = filename.slice(0, -".json".length);
           idbutil.import(storename, resp, function() {
             console.log("import has done. storename=", storename);
             onComplete && onComplete();
@@ -2532,24 +2536,24 @@ $(function() {
   }
 
   function redraw() {
-    var ww = $window.width();
-    var wh = $window.height();
+    let ww = $window.width();
+    let wh = $window.height();
 
     //
     // #tlist and #thread height setting
-    var properTblHeight = wh - tlist_row_wrapper.offset().top;
+    let properTblHeight = wh - tlist_row_wrapper.offset().top;
     tlist_row_wrapper[0].style.maxHeight = properTblHeight + "px";
-    // var properThreadHeight = wh;
+    // let properThreadHeight = wh;
     // thread[0].style.minHeight = properThreadHeight + "px";
     // thread[0].style.height = properThreadHeight + "px";
 
     //
     // #tlist and #thread width setting
-    var tlist_w = ww * appConfig.dividerPos / 100; // for left pane
-    var thread_w = ww - tlist_w - 46; // for right pane
+    let tlist_w = ww * appConfig.dividerPos / 100; // for left pane
+    let thread_w = ww - tlist_w - 46; // for right pane
     tlist[0].style.width = tlist_w + "px";
     tlist_header[0].style.width = (tlist_w - 20) + "px";
-    var ttitle_col_w = tlist_w - (124); // = tlist_w - (.rescnt + .newcnt)
+    let ttitle_col_w = tlist_w - (124); // = tlist_w - (.rescnt + .newcnt)
     $("#tlist_row_wrapper .ttitle").width(ttitle_col_w);
     thread[0].style.right = "0px";
     thread[0].style.width = thread_w + "px";
@@ -2576,7 +2580,7 @@ $(function() {
   $document.on("mouseleave", ".refpop", function() {
     console.log("mouseleave");
     // if most upper layer, remove itself.
-    var lastIdx = refpops.length - 1;
+    let lastIdx = refpops.length - 1;
     if (refpops[lastIdx] === this) {
       removeRefpop(lastIdx);
     }
@@ -2605,22 +2609,22 @@ $(function() {
    *  event
    */
   function showRefpop(query, e) {
-    var refpop = $(document.createElement("div"));
+    let refpop = $(document.createElement("div"));
     refpop.addClass("refpop").addClass("res_wrapper");
     refpop.css("overflow", "auto");
     // get res by resnum
-    var html = "";
-    var key = query.key;
-    var value = query.value;
+    let html = "";
+    let key = query.key;
+    let value = query.value;
     if (key == "resnum") {
       if ($.isNumeric(value)) {
         // get res by resnum
         html = getResHTML(value);
       } else if (value.match(/\d+\-\d+/)) {
         // get reses by range.
-        var arr = value.match(/(\d+)\-(\d+)/);
-        var from = Number(arr[1]);
-        var to = Number(arr[2]);
+        let arr = value.match(/(\d+)\-(\d+)/);
+        let from = Number(arr[1]);
+        let to = Number(arr[2]);
         html = getResHTML(from, to);
       }
     } else {
@@ -2635,8 +2639,8 @@ $(function() {
   }
 
   function getResHTML(from, to, query) {
-    var html = "";
-    var txt, tmp, res, res_clone;
+    let html = "";
+    let txt, tmp, res, res_clone;
     if (!to) to = from;
     for (i = from; i <= to; i++) {
       res = $("#resnum" + i);
@@ -2666,8 +2670,8 @@ $(function() {
   // if param "onmoused" is null, remove all refpops.
   function removeRefpops(onmoused) {
     if (onmoused) {
-      var flg = false;
-      for (var len = refpops.length, i = 0; i < len; i++) {
+      let flg = false;
+      for (let len = refpops.length, i = 0; i < len; i++) {
         if (onmoused === refpops[i]) {
           flg = true;
           continue;
@@ -2677,7 +2681,7 @@ $(function() {
       }
     } else {
       // remove all refpops
-      for (var len = refpops.length, i = 0; i < len; i++) {
+      for (let len = refpops.length, i = 0; i < len; i++) {
         removeRefpop(0);
       }
     }
@@ -2691,7 +2695,7 @@ $(function() {
   // get resnum from bookmark's or readhere's store by key=url
   function getReadhereFromStore(daturl, cb) {
     console.log("getReadhereFromStore", daturl);
-    var ret;
+    let ret;
     // First, get resnum from bookmarks.
     getBookmark(daturl, function(bm) {
       if (bm) {
@@ -2715,7 +2719,7 @@ $(function() {
   // save readhere info to store
   function saveReadhereToStore(daturl, resnum) {
     console.log("saveReadhereToStore", daturl, resnum);
-    var data = {
+    let data = {
       url: daturl,
       res: resnum
     };
@@ -2736,9 +2740,9 @@ $(function() {
   // get bookmarks from store
   function getAllBookmarks(cb) {
     console.log("getAllBookmarks");
-    var col = "update";
-    var range = null;
-    var direction = "prev";
+    let col = "update";
+    let range = null;
+    let direction = "prev";
     idbutil.list("bookmarks", col, range, direction, function(data) {
       cb(data);
     });
@@ -2753,8 +2757,8 @@ $(function() {
   // save a bookmark to store
   function saveBookmark(daturl, title, resnum) {
     console.log("saveBookmark");
-    var update = new Date().getTime();
-    var data = {
+    let update = new Date().getTime();
+    let data = {
       url: daturl,
       title: title,
       res: resnum,
@@ -2779,12 +2783,12 @@ $(function() {
    *    click event
    */
   function adjustRefpopPos(pu, e) {
-    var rtx = e.clientX + pu.width(); // right top X
-    var rby = e.clientY + pu.height(); // right bottom Y
-    var WW = $window.width();
-    var WH = $window.height();
-    var top = e.clientY - 16; // "-16" is for creating refpop under mouse cursor.
-    var left = e.clientX - 18; // "-18" is for creating refpop under mouse cursor.
+    let rtx = e.clientX + pu.width(); // right top X
+    let rby = e.clientY + pu.height(); // right bottom Y
+    let WW = $window.width();
+    let WH = $window.height();
+    let top = e.clientY - 16; // "-16" is for creating refpop under mouse cursor.
+    let left = e.clientX - 18; // "-18" is for creating refpop under mouse cursor.
     if (rtx >= WW) {
       left -= rtx - WW;
     }
@@ -2812,7 +2816,7 @@ $(function() {
 
   // reply button click
   $document.on("click", ".restool .btn_reply", function() {
-    var repmsg = createReplyMessage($(this).parent().parent());
+    let repmsg = createReplyMessage($(this).parent().parent());
     btn_showPaneWrite.trigger("click", [{
       // from: "",
       email: "sage",
@@ -2821,19 +2825,18 @@ $(function() {
   });
   // readhere button click
   $document.on("click", ".restool .btn_readhere", function() {
-    var resdiv = $(this).parent().parent();
-    var url = thread_title.data("url");
-    var lastResnum = getLastResnumOfThreadPane();
-    var curResnum = parseInt(resdiv.find(".num").text());
-    var newcnt = lastResnum - curResnum;
+    let resdiv = $(this).parent().parent();
+    let url = thread_title.data("url");
+    let lastResnum = getLastResnumOfThreadPane();
+    let curResnum = parseInt(resdiv.find(".num").text());
     // insert readhere element
     readhere.insertAfter(resdiv).show();
     btn_jumpToReadhere.removeClass("disabled");
     // save the last resnum into readhere's store
     saveReadhereToStore(url, curResnum);
     // update also rescnt col in the thread list
-    var newcnt = lastResnum - curResnum;
-    var selectedRow = tlist_row_wrapper.find("[data-url='" + url + "']");
+    let newcnt = lastResnum - curResnum;
+    let selectedRow = tlist_row_wrapper.find("[data-url='" + url + "']");
     if (selectedRow[0]) {
       // update the text of ".rescnt" col of the selected row
       selectedRow.find(".rescnt").text(lastResnum);
@@ -2843,13 +2846,13 @@ $(function() {
   });
 
   function getLastResnumOfThreadPane() {
-    var lastResnum;
+    let lastResnum;
     lastResnum = $(".res[id]").last().attr("id").split("resnum")[1];
     return parseInt(lastResnum);
   }
 
   function getLastResIdxOfThreadPane() {
-    var lastResIdxum;
+    let lastResIdxum;
     lastResIdx = $(".res[id]").length - 1;
     return parseInt(lastResIdx);
   }
@@ -2860,12 +2863,12 @@ $(function() {
    *  jquery element selectored '.res'
    */
   function createReplyMessage(resElem) {
-    var ret;
-    var num = resElem.find(".res_header .num").text();
-    var htmlcontent = resElem.find(".content")
+    let ret;
+    let num = resElem.find(".res_header .num").text();
+    let htmlcontent = resElem.find(".content")
       .html()
       .replace(/<br\s*[\/]?>/gi, '\\n> '); // replace <br> with '\n>'
-    var txtcontent = $("<div>" + htmlcontent + "</div>")
+    let txtcontent = $("<div>" + htmlcontent + "</div>")
       .text() // html to text
       .replace(/'/gi, "\\'"); // escape
     ret = ">>" + num + '\\n> ' + txtcontent;
@@ -2878,11 +2881,11 @@ $(function() {
 
   function filterTList(txt) {
     // -- filtering TList.
-    var re = new RegExp(txt, "i");
-    var parent_cloned = $("#tlist_row_wrapper .body").clone();
-    var rows_cloned = parent_cloned.find(".row");
-    var row;
-    for (var len = rows_cloned.length, i = 0; i < len; i++) {
+    let re = new RegExp(txt, "i");
+    let parent_cloned = $("#tlist_row_wrapper .body").clone();
+    let rows_cloned = parent_cloned.find(".row");
+    let row;
+    for (let len = rows_cloned.length, i = 0; i < len; i++) {
       row = rows_cloned[i];
       if (!txt || row.children[0].title.search(re) >= 0) {
         row.style.display = "block";
@@ -2895,11 +2898,11 @@ $(function() {
 
   function filterRes(txt) {
     // -- filtering res.
-    var re = new RegExp(txt, "i");
-    var parent_cloned = $("#res_wrapper").clone();
-    var rows_cloned = parent_cloned.find(".res");
-    var row;
-    for (var len = rows_cloned.length, i = 0; i < len; i++) {
+    let re = new RegExp(txt, "i");
+    let parent_cloned = $("#res_wrapper").clone();
+    let rows_cloned = parent_cloned.find(".res");
+    let row;
+    for (let len = rows_cloned.length, i = 0; i < len; i++) {
       row = rows_cloned[i];
       if (!txt || row.innerText.search(re) >= 0) {
         row.style.display = "block";
@@ -2915,14 +2918,14 @@ $(function() {
   // 
 
   $("#sel_themes").on("change", function(e) {
-    var theme = $(this).val();
+    let theme = $(this).val();
     applyTheme(theme);
     // save to appConfig
     appConfig.theme = theme;
   });
 
   $("#txt_confFontSize").on("change", function(e) {
-    var val = $(this).val();
+    let val = $(this).val();
     if ($.isNumeric(val)) {
       applyFontSize(val + "px");
       // save to appConfig
@@ -2933,7 +2936,7 @@ $(function() {
   });
 
   $("#ta_confNGWords").on("change", function(e) {
-    var val = $(this).val();
+    let val = $(this).val();
     if (!val) {
       appConfig.ngWords = undefined;
       return;
@@ -2942,7 +2945,7 @@ $(function() {
   });
 
   $('input[type=radio][name=rdo_appInWindow').on("change", function() {
-    var val = $(this).val();
+    let val = $(this).val();
     if (!val) {
       appConfig.appInWindow = 1;
     }
@@ -2955,7 +2958,7 @@ $(function() {
   }
 
   $('input[type=radio][name=rdo_autoImgLoad]').on("change", function() {
-    var val = $(this).val();
+    let val = $(this).val();
     if (!val) {
       appConfig.autoImgLoad = 0;
     }
@@ -2973,15 +2976,15 @@ $(function() {
   }
 
   function getThemes(onSuccess, onError) {
-    var ret = [];
+    let ret = [];
     chrome.runtime.getPackageDirectoryEntry(function(root) {
       root.getDirectory("themes", {
         create: false
       }, function(dirEntry) {
-        var dirReader = dirEntry.createReader();
+        let dirReader = dirEntry.createReader();
         dirReader.readEntries(function(entries) {
-          for (var len = entries.length, i = 0; i < len; i++) {
-            var entry = entries[i];
+          for (let len = entries.length, i = 0; i < len; i++) {
+            let entry = entries[i];
             if (entry.isDirectory) {
               console.log('Directory: ' + entry.fullPath + ", " + entry.name);
               ret.push(entry.name);
@@ -2996,7 +2999,7 @@ $(function() {
 
   // reflect the theme to mainWindow
   function applyTheme(theme) {
-    var themepath;
+    let themepath;
     if (theme == "default") {
       themepath = "themes/theme.css";
     } else {
@@ -3040,19 +3043,19 @@ $(function() {
 
   // create themes list if themes.length <= 1 ('default' only)
   function setConfThemeOptions() {
-    var sel_themes = $("#sel_themes");
-    var sel_themes_len = $("#sel_themes option").length;
+    let sel_themes = $("#sel_themes");
+    let sel_themes_len = $("#sel_themes option").length;
     if (sel_themes_len <= 1) {
       getThemes(function(themes) {
-        var theme;
-        var themename;
-        for (var len = themes.length, i = 0; i < len; i++) {
+        let theme;
+        let themename;
+        for (let len = themes.length, i = 0; i < len; i++) {
           theme = themes[i];
           themename = theme.split("theme-")[1];
           sel_themes.append('<option value="' + theme + '">' + themename + '</option>');
         }
         // make current theme 'selected'
-        var currentTheme = appConfig.theme;
+        let currentTheme = appConfig.theme;
         if (!currentTheme) currentTheme = "default";
         $("#sel_themes").val(currentTheme);
       });
@@ -3065,14 +3068,14 @@ $(function() {
   }
 
   function setConfAutoImgLoad() {
-    var autoImgLoad = appConfig.autoImgLoad;
+    let autoImgLoad = appConfig.autoImgLoad;
     if (autoImgLoad === undefined) return;
     if (autoImgLoad === 1) rdo_autoImgLoad_on.prop("checked", true);
     if (autoImgLoad === 0) rdo_autoImgLoad_off.prop("checked", true);
   }
 
   function setConfAppInWindow() {
-    var appInWindow = appConfig.appInWindow;
+    let appInWindow = appConfig.appInWindow;
     if (appInWindow === undefined) return;
     if (appInWindow === 1) rdo_appInWindow_on.prop("checked", true);
     if (appInWindow === 0) rdo_appInWindow_off.prop("checked", true);
@@ -3081,7 +3084,7 @@ $(function() {
   // save appConfig to localStorage
   function saveAppConfig() {
     console.log("saveAppConfig");
-    var appConfigStr = JSON.stringify(appConfig);
+    let appConfigStr = JSON.stringify(appConfig);
     chrome.storage.sync.set({
       'appConfig': appConfigStr
     }, function() {
@@ -3093,12 +3096,12 @@ $(function() {
   function loadAppConfig(cb) {
     console.log("loadAppConfig");
     chrome.storage.sync.get("appConfig", function(items) {
-      var appConfigStrInStorage = items.appConfig;
-      var appConfigInStorage;
+      let appConfigStrInStorage = items.appConfig;
+      let appConfigInStorage;
       console.log("appConfig in storage:", appConfigInStorage);
       if (appConfigStrInStorage) {
-        var appConfigInStorage = JSON.parse(appConfigStrInStorage);
-        for (var k in appConfigInStorage) {
+        let appConfigInStorage = JSON.parse(appConfigStrInStorage);
+        for (let k in appConfigInStorage) {
           console.log(k, appConfigInStorage[k]);
           appConfig[k] = appConfigInStorage[k];
         }
