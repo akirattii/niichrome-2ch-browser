@@ -143,6 +143,15 @@ div#thread .res_wrapper {
   margin-right: 4px;
   color: #a0a0a0;
   font-weight: bold;
+}
+.res_wrapper .res .res_header .num.red {
+  color: #f34;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.res_wrapper .res .res_header .num.pink {
+  color: #fcc;
+  text-decoration: underline;
   cursor: pointer;
 }
 .res_wrapper .res .res_header .handle {

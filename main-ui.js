@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.5.0
+ * @version 1.6.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -754,97 +754,97 @@ $(function() {
   });
 
   function initWriteForm() {
-      console.log("initWriteForm");
+    console.log("initWriteForm");
 
-      // block evil external sites
-      wv[0].request.onBeforeRequest.addListener(
-        function(details) {
-          return {
-            cancel: true
-          };
-        }, {
-          urls: [
-            "*://*.microad.jp/*",
-            "*://*.adlantis.jp/*"
-          ],
-          // urls: ["<all_urls>"],
-          types: [
-            "sub_frame",
-            "stylesheet",
-            "script",
-            "image",
-            "object",
-            "xmlhttprequest",
-            "other"
-          ]
-        }, ["blocking"]); // block evil external sites
+    // block evil external sites
+    wv[0].request.onBeforeRequest.addListener(
+      function(details) {
+        return {
+          cancel: true
+        };
+      }, {
+        urls: [
+          "*://*.microad.jp/*",
+          "*://*.adlantis.jp/*"
+        ],
+        // urls: ["<all_urls>"],
+        types: [
+          "sub_frame",
+          "stylesheet",
+          "script",
+          "image",
+          "object",
+          "xmlhttprequest",
+          "other"
+        ]
+      }, ["blocking"]); // block evil external sites
 
-      //
-      // -- webview loadcommit
-      wv[0].addEventListener("loadcommit", function() {
-        console.log("webview loadcommit");
-        // insert css
-        insertWriteFormCSS();
-        // execute script on document_start
-        wv[0].executeScript({
-          runAt: 'document_start',
-          code: "console.log('writeForm webview loadcommit document_start');" +
-            // remove 2ch cookie "READJS" for "bbs.cgi mode" POST
-            "function setJSModeOff() {" +
-            // "  console.log('befor document.cookie', document.cookie);" +
-            "  var maxAge = 365*24*60*60;" +
-            "  var date  = new Date();" +
-            "  date.setTime(date.getTime() + maxAge*1000);" +
-            "  var expires = date.toUTCString();" +
-            "  document.cookie = 'READJS=off; version=1; path=/; domain=.2ch.sc; max-age=' + maxAge + '; expires=' + expires + '; ';" +
-            // "  console.log('after document.cookie', document.cookie);" +
-            "}" +
-            "setJSModeOff();" + // always set READJS=off as "read.cgi mode".
-            // On messaging "getTitle" command, returns the title to app's window.
-            "var appWindow, appOrigin;" +
-            "window.addEventListener('message', function(e){" +
-            "  console.log('Received:', e.data);" +
-            "  appWindow = e.source;" +
-            "  appOrigin = e.origin;" +
-            "  if(e.data.command == 'getTitle'){" +
-            "    console.log('Reterning title...', document.title);" +
-            "    appWindow.postMessage({ title: document.title }, appOrigin);" +
-            "    if(document.title == e.data.ttitle) document.getElementById('backBtn').style.display = 'none';" +
-            "  }" +
-            "});" +
-            // create custom back button 
-            "var backBtn = document.getElementById('backBtn');" +
-            "if (!backBtn) {" +
-            "  backBtn = document.createElement('div');" +
-            "  backBtn.setAttribute('id', 'backBtn');" +
-            "  backBtn.innerText = '< Back';" +
-            "  backBtn.setAttribute('onclick', 'history.back()');" +
-            "  backBtn.style.cssText = 'z-index:999999;display:block;cursor:pointer;padding:10px 4px 10px 4px;background-color:rgba(0,0,0,0.8);border-radius:6px;color:white;position:fixed;top:2px;right:2px;';" +
-            "  document.body.appendChild(backBtn);" +
-            "}"
-        });
-        // execute script on document_end
-        wv[0].executeScript({
-          runAt: 'document_end',
-          code: "console.log('writeForm webview loadcommit document_end');" +
-            // remove side_ad of machi.to because it bothers to set mouse pointer on input.
-            "var sideAd = document.getElementById('side_ad');" +
-            "if (sideAd) sideAd.parentElement.removeChild(sideAd);" +
-            // remake postForm for "bbs.cgi mode" POST
-            "var postForm = document.getElementById('postForm');" +
-            "console.log('postForm', postForm);" +
-            "if(postForm) {" +
-            "  postForm.method = 'POST';" +
-            "  postForm.action = '../test/bbs.cgi?guid=ON';" +
-            "}"
-        });
-        // posts "getTitle" command to writeForm's webview
-        // IMPORTANT: needs enough time using setTimeout to complete to render html&script by the above executeScript()
-        setTimeout(function() {
-          requestTitleToWriteForm();
-        }, 200);
-      }); // wv[0].addEventListener
-    } // initWriteForm
+    //
+    // -- webview loadcommit
+    wv[0].addEventListener("loadcommit", function() {
+      console.log("webview loadcommit");
+      // insert css
+      insertWriteFormCSS();
+      // execute script on document_start
+      wv[0].executeScript({
+        runAt: 'document_start',
+        code: "console.log('writeForm webview loadcommit document_start');" +
+          // remove 2ch cookie "READJS" for "bbs.cgi mode" POST
+          "function setJSModeOff() {" +
+          // "  console.log('befor document.cookie', document.cookie);" +
+          "  var maxAge = 365*24*60*60;" +
+          "  var date  = new Date();" +
+          "  date.setTime(date.getTime() + maxAge*1000);" +
+          "  var expires = date.toUTCString();" +
+          "  document.cookie = 'READJS=off; version=1; path=/; domain=.2ch.sc; max-age=' + maxAge + '; expires=' + expires + '; ';" +
+          // "  console.log('after document.cookie', document.cookie);" +
+          "}" +
+          "setJSModeOff();" + // always set READJS=off as "read.cgi mode".
+          // On messaging "getTitle" command, returns the title to app's window.
+          "var appWindow, appOrigin;" +
+          "window.addEventListener('message', function(e){" +
+          "  console.log('Received:', e.data);" +
+          "  appWindow = e.source;" +
+          "  appOrigin = e.origin;" +
+          "  if(e.data.command == 'getTitle'){" +
+          "    console.log('Reterning title...', document.title);" +
+          "    appWindow.postMessage({ title: document.title }, appOrigin);" +
+          "    if(document.title == e.data.ttitle) document.getElementById('backBtn').style.display = 'none';" +
+          "  }" +
+          "});" +
+          // create custom back button 
+          "var backBtn = document.getElementById('backBtn');" +
+          "if (!backBtn) {" +
+          "  backBtn = document.createElement('div');" +
+          "  backBtn.setAttribute('id', 'backBtn');" +
+          "  backBtn.innerText = '< Back';" +
+          "  backBtn.setAttribute('onclick', 'history.back()');" +
+          "  backBtn.style.cssText = 'z-index:999999;display:block;cursor:pointer;padding:10px 4px 10px 4px;background-color:rgba(0,0,0,0.8);border-radius:6px;color:white;position:fixed;top:2px;right:2px;';" +
+          "  document.body.appendChild(backBtn);" +
+          "}"
+      });
+      // execute script on document_end
+      wv[0].executeScript({
+        runAt: 'document_end',
+        code: "console.log('writeForm webview loadcommit document_end');" +
+          // remove side_ad of machi.to because it bothers to set mouse pointer on input.
+          "var sideAd = document.getElementById('side_ad');" +
+          "if (sideAd) sideAd.parentElement.removeChild(sideAd);" +
+          // remake postForm for "bbs.cgi mode" POST
+          "var postForm = document.getElementById('postForm');" +
+          "console.log('postForm', postForm);" +
+          "if(postForm) {" +
+          "  postForm.method = 'POST';" +
+          "  postForm.action = '../test/bbs.cgi?guid=ON';" +
+          "}"
+      });
+      // posts "getTitle" command to writeForm's webview
+      // IMPORTANT: needs enough time using setTimeout to complete to render html&script by the above executeScript()
+      setTimeout(function() {
+        requestTitleToWriteForm();
+      }, 200);
+    }); // wv[0].addEventListener
+  } // initWriteForm
 
   function requestTitleToWriteForm() {
     wv[0].contentWindow.postMessage({
@@ -1029,147 +1029,147 @@ $(function() {
    *    default is "false"
    */
   function viewResponses(url, row, historyUpdate, isReadmoreClicked) {
-      startLoading(url, row);
-      txt_url.val(url);
-      var thread_title_url = thread_title.data("url");
-      if (!historyUpdate) historyUpdate = false;
-      if (!isReadmoreClicked) isReadmoreClicked = false;
-      console.log("url:", url);
-      // get resnum of readhere
-      getReadhereFromStore(url, function(resnum) {
-        var startIdx = 0; // starting res index.
-        // get url for getting responses.
-        var daturl;
-        if (!util2ch.isMachiReadCGIURL(url)) {
-          daturl = util2ch.readCGIURLToDatURL(url);
-        } else { // when url of machibbs's readcgi
-          daturl = url;
+    startLoading(url, row);
+    txt_url.val(url);
+    var thread_title_url = thread_title.data("url");
+    if (!historyUpdate) historyUpdate = false;
+    if (!isReadmoreClicked) isReadmoreClicked = false;
+    console.log("url:", url);
+    // get resnum of readhere
+    getReadhereFromStore(url, function(resnum) {
+      var startIdx = 0; // starting res index.
+      // get url for getting responses.
+      var daturl;
+      if (!util2ch.isMachiReadCGIURL(url)) {
+        daturl = util2ch.readCGIURLToDatURL(url);
+      } else { // when url of machibbs's readcgi
+        daturl = url;
+      }
+      // get res.
+      util2ch.getResponses(daturl, appConfig.ngWords, function(data, type) {
+        console.log("type:", type, " data:", data);
+        var responses = data.responses;
+        // If type="html", get threadTitle from data.title. Else from selected row's "title" attr.
+        var title;
+        // the res ID for starting to fetch. This uses on readmore clicked.
+        // it's required because #resnum's index is not always same as #resnum's id
+        var fetchStartResId;
+        var prevURL = thread_title.data("url");
+        if (type == "dat") {
+          responses ? title = responses[0].title : title = "";
+        } else { // "html" or "kako"
+          title = data.title;
         }
-        // get res.
-        util2ch.getResponses(daturl, appConfig.ngWords, function(data, type) {
-          console.log("type:", type, " data:", data);
-          var responses = data.responses;
-          // If type="html", get threadTitle from data.title. Else from selected row's "title" attr.
-          var title;
-          // the res ID for starting to fetch. This uses on readmore clicked.
-          // it's required because #resnum's index is not always same as #resnum's id
-          var fetchStartResId;
-          var prevURL = thread_title.data("url");
-          if (type == "dat") {
-            responses ? title = responses[0].title : title = "";
-          } else { // "html" or "kako"
-            title = data.title;
-          }
-          // access history update
-          if (historyUpdate) {
-            util2ch.updateHistory(url, title);
-          }
-          //
-          setThreadInfo({
-            url: url,
-            title: title
-          });
-          // effect of thread_title appearance
-          thread_title.effect("slide", {}, 400);
-          // if type="kako", disabled btn_write & readmore
-          if (type == "kako") {
-            btn_showPaneWrite.addClass("disabled");
-            readmore.hide();
-            lbl_kakolog.show();
-          } else {
-            btn_showPaneWrite.removeClass("disabled");
-            readmore.show();
-            lbl_kakolog.hide();
-            // preload read.cgi for preparing to write a response.
-            prepareWriteForm(url);
-          }
-          // make the buttons of readhere, arrowUp and arrowDn enable.
-          if (resnum) {
-            btn_jumpToReadhere.removeClass("disabled");
-          } else {
-            btn_jumpToReadhere.addClass("disabled");
-          }
-          btn_arrowUp.removeClass("disabled");
-          btn_arrowDn.removeClass("disabled");
+        // access history update
+        if (historyUpdate) {
+          util2ch.updateHistory(url, title);
+        }
+        //
+        setThreadInfo({
+          url: url,
+          title: title
+        });
+        // effect of thread_title appearance
+        thread_title.effect("slide", {}, 400);
+        // if type="kako", disabled btn_write & readmore
+        if (type == "kako") {
+          btn_showPaneWrite.addClass("disabled");
+          readmore.hide();
+          lbl_kakolog.show();
+        } else {
+          btn_showPaneWrite.removeClass("disabled");
+          readmore.show();
+          lbl_kakolog.hide();
+          // preload read.cgi for preparing to write a response.
+          prepareWriteForm(url);
+        }
+        // make the buttons of readhere, arrowUp and arrowDn enable.
+        if (resnum) {
+          btn_jumpToReadhere.removeClass("disabled");
+        } else {
+          btn_jumpToReadhere.addClass("disabled");
+        }
+        btn_arrowUp.removeClass("disabled");
+        btn_arrowDn.removeClass("disabled");
 
-          // history button toggle style
-          if (util2ch.getHistory().length >= 1) {
-            btn_history.removeClass("disabled");
-          } else {
-            btn_history.addClass("disabled");
-          }
+        // history button toggle style
+        if (util2ch.getHistory().length >= 1) {
+          btn_history.removeClass("disabled");
+        } else {
+          btn_history.addClass("disabled");
+        }
 
-          // close res write webview if opened.
-          pane_wv[0].style.visibility = "hidden";
+        // close res write webview if opened.
+        pane_wv[0].style.visibility = "hidden";
 
-          if (isReadmoreClicked) {
-            // if it comes by clicking readmore button, set lastResnum as startIdx
-            startIdx = getLastResIdxOfThreadPane() + 1;
-          } else if (!resnum || thread_title_url != url) {
-            // unless by clicking readmore button nor any thread with readhere, clear responses.
-            startIdx = 0;
-            if (resnum === undefined) {
-              resnum = 0; // init resnum for getting all res.
-              // jump to top
-              thread.scrollTop(0);
-            }
+        if (isReadmoreClicked) {
+          // if it comes by clicking readmore button, set lastResnum as startIdx
+          startIdx = getLastResIdxOfThreadPane() + 1;
+        } else if (!resnum || thread_title_url != url) {
+          // unless by clicking readmore button nor any thread with readhere, clear responses.
+          startIdx = 0;
+          if (resnum === undefined) {
+            resnum = 0; // init resnum for getting all res.
+            // jump to top
+            thread.scrollTop(0);
           }
-          // draw responses.
-          var lastResnum = drawResponses(responses, startIdx);
-          if (lastResnum < 0) {
-            showErrorMessage("datが存在しない or dat落ち or 鯖落ちです");
-          } else if (isReadmoreClicked) {
-            fetchStartResId = $(".res[id]").get(startIdx - 1).id;
-            fetchline.insertAfter($("#" + fetchStartResId)).show();
-          } else {
-            fetchline.hide();
-          }
-          // insert Readhere element after the last read res
-          if (resnum >= 1) insertReadhereElem(resnum);
-          // set lastResnum as ThreadTitle's data
-          thread_title.data("resnum", lastResnum);
-          // make previous selected row's style to "unselected"
-          var prevSelectedRow = tlist_row_wrapper.find(".selected");
-          if (prevSelectedRow[0]) {
-            prevSelectedRow.removeClass("selected");
-          }
-          // make new selected row's style to "selected"
-          var selectedRow;
-          if (row) {
-            selectedRow = row;
-          } else {
-            selectedRow = tlist_row_wrapper.find("[data-url='" + url + "']");
-          }
-          if (selectedRow[0]) {
-            // affect each cols of selected row to "selected"
-            selectedRow.children().addClass("selected");
-            // update the text of ".rescnt" col of the selected row
-            selectedRow.find(".rescnt").text(lastResnum);
-            // zero-init the text of ".newcnt" col of the selected row
-            var newcnt = "";
-            if (resnum) newcnt = lastResnum - resnum;
-            selectedRow.find(".newcnt").text(newcnt);
-          }
-          // change readhere's visibility
-          if (isReadmoreClicked) {
-            scrollToTheRes($("#" + fetchStartResId));
-          } else if (resnum === 0) {
-            readhere.hide();
-            btn_jumpToReadhere.addClass("disabled");
-          } else {
-            readhere.show();
-            btn_jumpToReadhere
-              .removeClass("disabled")
-              .trigger("click");
-          }
-          stopLoading();
-        }, function(e) { // onerror of util2ch.getResponses.
-          showErrorMessage("レスを取得できませんでした");
-          stopLoading();
-        }); // util2ch.getResponses
-      });
-      changeBmStarStyle(url, btn_addBm);
-    } // viewResponses
+        }
+        // draw responses.
+        var lastResnum = drawResponses(responses, startIdx);
+        if (lastResnum < 0) {
+          showErrorMessage("datが存在しない or dat落ち or 鯖落ちです");
+        } else if (isReadmoreClicked) {
+          fetchStartResId = $(".res[id]").get(startIdx - 1).id;
+          fetchline.insertAfter($("#" + fetchStartResId)).show();
+        } else {
+          fetchline.hide();
+        }
+        // insert Readhere element after the last read res
+        if (resnum >= 1) insertReadhereElem(resnum);
+        // set lastResnum as ThreadTitle's data
+        thread_title.data("resnum", lastResnum);
+        // make previous selected row's style to "unselected"
+        var prevSelectedRow = tlist_row_wrapper.find(".selected");
+        if (prevSelectedRow[0]) {
+          prevSelectedRow.removeClass("selected");
+        }
+        // make new selected row's style to "selected"
+        var selectedRow;
+        if (row) {
+          selectedRow = row;
+        } else {
+          selectedRow = tlist_row_wrapper.find("[data-url='" + url + "']");
+        }
+        if (selectedRow[0]) {
+          // affect each cols of selected row to "selected"
+          selectedRow.children().addClass("selected");
+          // update the text of ".rescnt" col of the selected row
+          selectedRow.find(".rescnt").text(lastResnum);
+          // zero-init the text of ".newcnt" col of the selected row
+          var newcnt = "";
+          if (resnum) newcnt = lastResnum - resnum;
+          selectedRow.find(".newcnt").text(newcnt);
+        }
+        // change readhere's visibility
+        if (isReadmoreClicked) {
+          scrollToTheRes($("#" + fetchStartResId));
+        } else if (resnum === 0) {
+          readhere.hide();
+          btn_jumpToReadhere.addClass("disabled");
+        } else {
+          readhere.show();
+          btn_jumpToReadhere
+            .removeClass("disabled")
+            .trigger("click");
+        }
+        stopLoading();
+      }, function(e) { // onerror of util2ch.getResponses.
+        showErrorMessage("レスを取得できませんでした");
+        stopLoading();
+      }); // util2ch.getResponses
+    });
+    changeBmStarStyle(url, btn_addBm);
+  } // viewResponses
 
   /**
    * toggle the bookmark button ON if the url will be bookmarked.
@@ -1270,9 +1270,10 @@ $(function() {
         '<div class="col rescnt">' + res + '</div>\n' +
         '</div>';
     }
-    target.html(html);
-    // callback onEnd
-    if (endHandler) endHandler();
+    target.html(html).promise().done(function(){
+      // callback onEnd
+      if (endHandler) endHandler();
+    });
     // go to top
     tlist.scrollTop(0);
     // set new count of each threads if it is NOT the bookmark view
@@ -1306,14 +1307,14 @@ $(function() {
 
   function drawResponses(responses, startIdx) {
     console.log("drawResponses");
-    var htmlBuf = "";
-    var res;
-    var num, handle, email, date, uid, be, content, host;
+    let htmlBuf = "";
+    let res;
+    let num, handle, email, date, uid, be, content, host;
     if (!startIdx) startIdx = 0;
     // evacuate readhere & fetchline element
     readhere.insertAfter($("#res_wrapper"));
     fetchline.insertAfter($("#res_wrapper"));
-    for (var len = responses.length, i = 0; i < len; i++) {
+    for (let len = responses.length, i = 0; i < len; i++) {
       // start to build html from specified index of responses
       if (startIdx <= i) {
         res = responses[i];
@@ -1353,14 +1354,67 @@ $(function() {
     if (startIdx != 0) {
       htmlBuf = $("#res_wrapper").html() + htmlBuf;
     }
-    $("#res_wrapper").html(htmlBuf);
+    $("#res_wrapper").html(htmlBuf).promise().done(function() {
+      reddenReferedResnums(); // all refered nums' color to red
+    });
+
     // return last resnum.
-    var lastResnum = responses[responses.length - 1].num;
+    let lastResnum = responses[responses.length - 1].num;
     if (lastResnum < 0) {
       // FIXME: deal with kakolog.
       console.log("Maybe this thead's gone to kakolog storage...");
     }
     return lastResnum;
+  }
+
+  // make refered nums red (>=3), pink (1 - 2) , or default
+  function reddenReferedResnums() {
+    let arr = [];
+    let tmpArr = [];
+    let resEls = document.querySelectorAll("#res_wrapper > .res");
+    let resEl;
+    let linkEls;
+    let linkEl;
+    let resnum;
+    for (let i = 0; i < resEls.length; i++) {
+      resEl = resEls[i];
+      linkEls = resEl.querySelectorAll(".content > [data-resnum]");
+      for (let j = 0; j < linkEls.length; j++) {
+        linkEl = linkEls[j];
+        // TODO: consider some resnum value like "201-202"
+        resnum = linkEl.dataset.resnum;
+        if (!$.isNumeric(resnum)) {
+          continue;
+        }
+        // excludes same refered resnum in this res.
+        if (tmpArr.indexOf(resnum) < 0) {
+          tmpArr.push(resnum);
+          arr.push(resnum);
+        }
+      }
+      tmpArr = [];
+    }
+    // referedResnums is like this: { resnum: count, ...}
+    let referedResnums = arr.reduce(function(acc, curr) {
+      if (typeof acc[curr] == 'undefined') {
+        acc[curr] = 1;
+      } else {
+        acc[curr] += 1;
+      }
+      return acc;
+    }, {});
+    // redden resnums!
+    let el;
+    let cnt;
+    for (let k in referedResnums) {
+      el = document.querySelector("#resnum" + k + " .num");
+      if (!el) continue;
+      cnt = referedResnums[k];
+      if (cnt >= 3)
+        el.className = "num red";
+      else if (cnt >= 1)
+        el.className = "num pink";
+    }
   }
 
 
@@ -1455,21 +1509,21 @@ $(function() {
    * For best performance, remove this listener when not using image auto-loading
    */
   function addAutoImgLoadInviewListener() {
-      // a link of image enter in the viewport
-      $document.on("inview", ".content a", function(event, isInView, visiblePartX, visiblePartY) {
-        if (appConfig.autoImgLoad !== 1) return;
-        if (isInView) {
-          // if an image link is in the viewport, load the image automatically.
-          var url = $(this).attr("href");
-          if (isImageLink(url) || amazonutil.isValidURL(url)) {
-            $(this).trigger("click");
-          }
+    // a link of image enter in the viewport
+    $document.on("inview", ".content a", function(event, isInView, visiblePartX, visiblePartY) {
+      if (appConfig.autoImgLoad !== 1) return;
+      if (isInView) {
+        // if an image link is in the viewport, load the image automatically.
+        var url = $(this).attr("href");
+        if (isImageLink(url) || amazonutil.isValidURL(url)) {
+          $(this).trigger("click");
         }
-      });
-    }
-    /**
-     * remove inviewListenr for image auto-loading
-     */
+      }
+    });
+  }
+  /**
+   * remove inviewListenr for image auto-loading
+   */
   function removeAutoImgLoadInviewListener() {
     // a link of image enter in the viewport
     $document.off("inview", ".content a");
@@ -1505,7 +1559,7 @@ $(function() {
               img[2].textContent = percentComplete + "%";
             },
             onsuccess: function(xhr) {
-              var ourl = window.webkitURL.createObjectURL(xhr.response);
+              var ourl = window.URL.createObjectURL(xhr.response);
               img.attr("src", ourl)
                 .addClass("thumb")
                 .attr("title", "クリックで拡大");
@@ -1695,14 +1749,14 @@ $(function() {
 
   // start loading.
   function startLoading(url, row) {
-      if (row) row.addClass("loading_in_cell");
-      txt_url.addClass("loading_in_cell_rev");
-      if (url == $("#readmore").data("url")) {
-        readmore.addClass("loading_in_cell");
-      }
-      nowloading = true;
+    if (row) row.addClass("loading_in_cell");
+    txt_url.addClass("loading_in_cell_rev");
+    if (url == $("#readmore").data("url")) {
+      readmore.addClass("loading_in_cell");
     }
-    // stop loading.
+    nowloading = true;
+  }
+  // stop loading.
   function stopLoading() {
     $("#tlist_row_wrapper .body .loading_in_cell").removeClass("loading_in_cell");
     txt_url.removeClass("loading_in_cell_rev");
@@ -2660,55 +2714,55 @@ $(function() {
 
   // save readhere info to store
   function saveReadhereToStore(daturl, resnum) {
-      console.log("saveReadhereToStore", daturl, resnum);
-      var data = {
-        url: daturl,
-        res: resnum
-      };
-      idbutil.update("readheres", data);
-      // get the bookmark from store
-      getBookmark(daturl, function(bm) {
-        // update the bookmark 
-        if (!bm) return;
-        bm.res = resnum;
-        idbutil.update("bookmarks", bm);
-      });
-    }
-    // remove readhere from store
+    console.log("saveReadhereToStore", daturl, resnum);
+    var data = {
+      url: daturl,
+      res: resnum
+    };
+    idbutil.update("readheres", data);
+    // get the bookmark from store
+    getBookmark(daturl, function(bm) {
+      // update the bookmark 
+      if (!bm) return;
+      bm.res = resnum;
+      idbutil.update("bookmarks", bm);
+    });
+  }
+  // remove readhere from store
   function removeReadhereFromStore(daturl) {
     idbutil.remove("readheres", daturl);
   }
 
   // get bookmarks from store
   function getAllBookmarks(cb) {
-      console.log("getAllBookmarks");
-      var col = "update";
-      var range = null;
-      var direction = "prev";
-      idbutil.list("bookmarks", col, range, direction, function(data) {
-        cb(data);
-      });
-    }
-    // get a bookmark from store by key
+    console.log("getAllBookmarks");
+    var col = "update";
+    var range = null;
+    var direction = "prev";
+    idbutil.list("bookmarks", col, range, direction, function(data) {
+      cb(data);
+    });
+  }
+  // get a bookmark from store by key
   function getBookmark(daturl, cb) {
-      console.log("getBookmark", daturl);
-      idbutil.get("bookmarks", daturl, function(data) {
-        cb(data);
-      });
-    }
-    // save a bookmark to store
+    console.log("getBookmark", daturl);
+    idbutil.get("bookmarks", daturl, function(data) {
+      cb(data);
+    });
+  }
+  // save a bookmark to store
   function saveBookmark(daturl, title, resnum) {
-      console.log("saveBookmark");
-      var update = new Date().getTime();
-      var data = {
-        url: daturl,
-        title: title,
-        res: resnum,
-        update: update
-      };
-      idbutil.update("bookmarks", data);
-    }
-    // remove a bookmark from store
+    console.log("saveBookmark");
+    var update = new Date().getTime();
+    var data = {
+      url: daturl,
+      title: title,
+      res: resnum,
+      update: update
+    };
+    idbutil.update("bookmarks", data);
+  }
+  // remove a bookmark from store
   function removeBookmark(daturl) {
     console.log("removeBookmark");
     idbutil.remove("bookmarks", daturl);
@@ -2896,8 +2950,8 @@ $(function() {
     applyAppInWindow(appConfig.appInWindow);
   });
 
-  function applyAppInWindow(flag){
-    chrome.storage.sync.set({"appInWindow": flag});
+  function applyAppInWindow(flag) {
+    chrome.storage.sync.set({ "appInWindow": flag });
   }
 
   $('input[type=radio][name=rdo_autoImgLoad]').on("change", function() {
@@ -3017,7 +3071,7 @@ $(function() {
     if (autoImgLoad === 0) rdo_autoImgLoad_off.prop("checked", true);
   }
 
-  function setConfAppInWindow(){
+  function setConfAppInWindow() {
     var appInWindow = appConfig.appInWindow;
     if (appInWindow === undefined) return;
     if (appInWindow === 1) rdo_appInWindow_on.prop("checked", true);
