@@ -1164,7 +1164,9 @@ $(function() {
         }
         stopLoading();
       }, function(e) { // onerror of util2ch.getResponses.
-        showErrorMessage("レスを取得できませんでした");
+        let suppl;
+        e.status === 0 ? suppl = "Timeout" : suppl = e.status;
+        showErrorMessage(`レスを取得できませんでした: ${suppl}`);
         stopLoading();
       }); // util2ch.getResponses
     });
@@ -2003,7 +2005,9 @@ $(function() {
       // finish loading image.
       stopLoading();
       el.removeClass("loading_mini").addClass("reload24");
-      showErrorMessage("Error: スレッド一覧の取得に失敗しました");
+      let suppl;
+      e.status === 0 ? suppl = "Timeout" : suppl = e.status;  
+      showErrorMessage(`Error: スレッド一覧の取得に失敗しました: ${suppl}`);
     });
   }
 
