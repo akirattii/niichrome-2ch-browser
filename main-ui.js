@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.6.1
+ * @version 1.7.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -42,6 +42,7 @@ $(function() {
   var util2ch = niichrome.util2ch();
   var idbutil = niichrome.idbutil("niichromedb", 1);
   var amazonutil = niichrome.amazonutil();
+  var ju = JapaneseUtil();
   var gdriveutil = niichrome.gdriveutil();
   var findbar = niichrome.findbar("#findbar", "#thread", {
     toggleSpeed: 100,
@@ -234,7 +235,9 @@ $(function() {
   var pane_wv_adsbar = $("#pane_wv_adsbar");
   var wv_adsbar = $("#wv_adsbar");
   var adsbar_dogear = $("#adsbar_dogear");
-
+  var pane_recommend = $("#pane_recommend");
+  var pane_recommendImg = $("#pane_recommendImg");
+  var btn_closePaneRecommend = $("#btn_closePaneRecommend");
 
   txt_url.focus();
 
@@ -1163,6 +1166,9 @@ $(function() {
             .trigger("click");
         }
         stopLoading();
+        // analyze the sentence then get amazon recommends...
+        let sentence = responses[0].title + "\n" + responses[0].content;
+        analyzeAndGetAmazonRecommends(sentence);
       }, function(e) { // onerror of util2ch.getResponses.
         let suppl;
         e.status === 0 ? suppl = "Timeout" : suppl = e.status;
@@ -1173,6 +1179,65 @@ $(function() {
     changeBmStarStyle(url, btn_addBm);
   } // viewResponses
 
+  /**
+   * analyzes the sentence passing as param then gets related amazon items.
+   * @param {String} the sentence to analyze
+   */
+  function analyzeAndGetAmazonRecommends(sentence) {
+    let analysis = ju.analyze(sentence);
+    let kwd = analysis.freqRankingTop.join(" ");
+    // get some amazon recommend items.
+    amazonutil.getRecommends(kwd, 3, function(err, items) {
+      if (err || !items || items.length <= 0) return;
+      let idx = getRandomInt(0, items.length - 1);
+      let item = items[idx];
+      let html = `<a href="${item.href}" target="_blank" title="${item.title}"></a>`;
+      pane_recommendImg.html(html);
+      let aEl = pane_recommendImg[0].querySelector("a");
+      loadImage(item.imgsrc, aEl, function(imgEl) {
+        pane_recommend.fadeIn().delay(6000).fadeOut('slow');
+      });
+    });
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+  }
+
+  /**
+   * dl an external image resource and append it as an img element into the rootEl
+   *
+   * @param {String}
+   *    image resource's url
+   * @param {Element} Optional
+   *    root element to be appended an img element.
+   * @param {Function} Optional
+   *    callback function. 'function(imgEl){...}'
+   */
+  function loadImage(url, rootEl, cb) {
+    if (!url) {
+      console.error("url is required.");
+      return cb && cb(null);
+    }
+    if (!rootEl) rootEl = document.body;
+
+    let xhr = new XMLHttpRequest();
+
+    xhr.onload = function(e) {
+      if (this.readyState === XMLHttpRequest.DONE) {
+        if (this.status === 200) {
+          let img = document.createElement('img');
+          rootEl.appendChild(img);
+          img.src = window.URL.createObjectURL(this.response);
+          return cb && cb(img);
+        }
+      }
+    };
+
+    xhr.responseType = "blob";
+    xhr.open('GET', url, true);
+    xhr.send();
+  }
   /**
    * toggle the bookmark button ON if the url will be bookmarked.
    * @param {string} url which might be bookmarked.
@@ -1670,7 +1735,7 @@ $(function() {
             percentCompleteElem.text(percentComplete + "%");
           },
           onsuccess: function(xhr) {
-            let ourl = window.webkitURL.createObjectURL(xhr.response);
+            let ourl = window.URL.createObjectURL(xhr.response);
             imgElem
               .attr("src", ourl)
               .addClass("thumb")
@@ -1862,6 +1927,11 @@ $(function() {
     showMessage(msg, true, "#ffcfcf");
   }
 
+
+  btn_closePaneRecommend.click(function(e) {
+    pane_recommend.hide();
+  });
+
   //
   // -- error handler
   //
@@ -2006,7 +2076,7 @@ $(function() {
       stopLoading();
       el.removeClass("loading_mini").addClass("reload24");
       let suppl;
-      e.status === 0 ? suppl = "Timeout" : suppl = e.status;  
+      e.status === 0 ? suppl = "Timeout" : suppl = e.status;
       showErrorMessage(`Error: スレッド一覧の取得に失敗しました: ${suppl}`);
     });
   }
