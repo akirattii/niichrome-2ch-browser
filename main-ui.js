@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.7.0
+ * @version 1.7.1
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -1167,7 +1167,7 @@ $(function() {
         }
         stopLoading();
         // analyze the sentence then get amazon recommends...
-        let sentence = responses[0].title + "\n" + responses[0].content;
+        let sentence = createSentenceToAnalyze(responses);
         analyzeAndGetAmazonRecommends(sentence);
       }, function(e) { // onerror of util2ch.getResponses.
         let suppl;
@@ -1178,6 +1178,24 @@ $(function() {
     });
     changeBmStarStyle(url, btn_addBm);
   } // viewResponses
+
+  function createSentenceToAnalyze(reses) {
+    const re = /(<([^>]+)>)/ig; // strip tags
+    const max = 10; // pick up some reses to analyze
+    let arr = [];
+    let len = reses.length;
+    if (len > max) len = max;
+    let title, content;
+    for (let i = 0; i < len; i++) {
+      if (i === 0) {
+        title = reses[i].title.replace(re, "");
+        arr.push(title);
+      }
+      content = reses[i].content.replace(re, "");
+      arr.push(content);
+    }
+    return arr.join("\n");
+  }
 
   /**
    * analyzes the sentence passing as param then gets related amazon items.
