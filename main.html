@@ -44,8 +44,8 @@
       <input id="rng_divider" type="range" min="0" max="100" title="スレ一覧とスレの仕切り位置を調整">
     </div>
     <div id="btn_settings"></div>
-  </div><!-- tools -->
-
+  </div>
+  <!-- tools -->
   <div id="pane_confBg">
     <div id="pane_confWrapper">
       <h1>設定</h1>
@@ -53,53 +53,84 @@
       <div style="clear:both;"></div>
       <div id="pane_conf">
         <div id="conf_font">
-          <h3>フォント</h3>
-          サイズ: <input type="number" id="txt_confFontSize" min="8" max="30"> px
-        </div><!-- conf_font -->
+          <h3>フォント</h3> サイズ:
+          <input type="number" id="txt_confFontSize" min="8" max="30"> px
+        </div>
+        <!-- conf_font -->
         <div id="conf_themes">
           <h3>テーマ</h3>
           <select id="sel_themes">
             <option value="default">デフォルト</option>
           </select>
-        </div><!-- conf_themes -->
+        </div>
+        <!-- conf_themes -->
         <div id="conf_appInWindow">
           <h3>起動</h3>
-          <label><input value="1" id="rdo_appInWindow_on" name="rdo_appInWindow" type="radio">Window</label>
-          <label><input value="0" id="rdo_appInWindow_off" name="rdo_appInWindow" type="radio">Tab</label>
+          <label>
+            <input value="1" id="rdo_appInWindow_on" name="rdo_appInWindow" type="radio">Window</label>
+          <label>
+            <input value="0" id="rdo_appInWindow_off" name="rdo_appInWindow" type="radio">Tab</label>
           <br>
           <span class="confDescription">
             niichromeをChromeタブとして開く場合は Tab にチェックを入れます ※要再起動
           </span>
-        </div><!-- conf_autoImgLoading -->
+        </div>
+        <!-- conf_autoImgLoading -->
         <div id="conf_autoImgLoad">
           <h3>画像の自動表示</h3>
-          <label><input value="1" id="rdo_autoImgLoad_on" name="rdo_autoImgLoad" type="radio">ON</label>
-          <label><input value="0" id="rdo_autoImgLoad_off" name="rdo_autoImgLoad" type="radio">OFF</label>
+          <label>
+            <input value="1" id="rdo_autoImgLoad_on" name="rdo_autoImgLoad" type="radio">ON
+          </label>
+          <label>
+            <input value="0" id="rdo_autoImgLoad_off" name="rdo_autoImgLoad" type="radio">OFF
+          </label>
           <br>
           <span class="confDescription">
             ONにするとレス内の画像リンクを自動で表示します<br>
             ※環境によってはONにするとレス表示のスクロール速度が低下する場合があります
           </span>
-        </div><!-- conf_autoImgLoading -->
+        </div>
+        <!-- conf_autoImgLoading -->
         <div id="conf_history">
           <h3>履歴</h3>
-          <button id="btn_confClearReadheres">「ここまで読んだ」履歴をクリア</button><br>
+          <button id="btn_confClearReadheres">「ここまで読んだ」履歴をクリア</button>
+          <br>
           <span class="confDescription">※「お気に入り」スレ以外の「ここまで読んだ」履歴を削除し空きストレージを増やします</span>
-        </div><!-- conf_history -->
+        </div>
+        <!-- conf_history -->
         <div id="conf_ngword">
           <h3>NGワード</h3>
-          <textarea id="ta_confNGWords" placeholder="NGにしたい文字列(ハンドル、ID等)"></textarea><br>
+          <textarea id="ta_confNGWords" placeholder="NGにしたい文字列(ハンドル、ID等)"></textarea>
+          <br>
           <span class="confDescription">※NGワードは改行区切りで複数入力可能</span>
-        </div><!-- conf_ngword -->
-
-      </div><!-- pane_conf -->
-    </div><!-- pane_confWrapper -->
-  </div><!-- pane_confBg -->
-
+        </div>
+        <!-- conf_ngword -->
+        <div id="conf_excludeRes">
+          <h3>レス表示</h3>
+          <label>
+            <input value="0" id="rdo_showRes_all" name="rdo_showRes" type="radio">全て
+          </label>
+          <label>
+            <input value="1" id="rdo_showRes_refered" name="rdo_showRes" type="radio">レス付きのみ
+          </label>
+          <label>
+            <input value="2" id="rdo_showRes_red" name="rdo_showRes" type="radio">赤レスのみ
+          </label>
+          <br>
+          <span class="confDescription">
+            ※レスが付いたレスを抽出表示できます
+          </span>
+        </div>
+        <!-- conf_ngword -->
+      </div>
+      <!-- pane_conf -->
+    </div>
+    <!-- pane_confWrapper -->
+  </div>
+  <!-- pane_confBg -->
   <div id="menu_historyURLs">
     <!--div class="row" data-url="test">hoge</div-->
   </div>
-
   <div id="pane_settings">
     <div class="setting" id="btn_settingBMList">
       <div class="setting_title">お気に入り一覧</div>
@@ -159,18 +190,16 @@
     <div id="btn_closePaneSettings" title="設定メニューを閉じます">×</div>
     <div id="lbl_version">v.###</div>
   </div>
-
   <div id="pane_wv_adsbar">
     <div id="adsbar_dogear">お知らせ</div>
-    <webview id="wv_adsbar" src="http://niichrome-adserver.appspot.com/?bgcolor=%23ffffff"></webview>  
+    <webview id="wv_adsbar" src="http://niichrome-adserver.appspot.com/?bgcolor=%23ffffff"></webview>
   </div>
-
-  <div id="tlist"> 
+  <div id="tlist">
     <div id="tlist_header">
       <h2 id="bbs_title" data-url="">スレッド一覧</h2>
       <div id="tlist_icons">
         <div id="btn_addBBSBm" class="icon star_on24 grayout" title="お気に入りに登録"></div>
-        <div id="btn_readherefilter" class="icon readherefilter24 grayout" data-url="" title="既読スレを抽出"></div>        
+        <div id="btn_readherefilter" class="icon readherefilter24 grayout" data-url="" title="既読スレを抽出"></div>
         <div id="btn_sortByMomentum" class="icon sortByMomentum24 grayout" data-url="" title="勢い順にソート"></div>
         <div id="btn_reloadTList" class="icon reload24" data-url="" title="更新"></div>
         <div id="btn_arrowUpTList" class="icon arrow_up24" title="一番上へ"></div>
@@ -188,8 +217,6 @@
       <div class="body"></div>
     </div>
   </div>
-
-  
   <div id="blist_wrapper">
     <div id="blist">
       <div id="btn_bmlist" title="お気に入り一覧 (Ctrl+B)">お気に入り</div>
@@ -214,19 +241,16 @@
     </div>
     <div id="blist_toggle_bar"></div>
   </div>
-
-
   <div id="pane_wv">
     <p>カキコ</p>
     <img id="btn_closeWv" title="閉じる"></img>
     <webview id="wv" src=""></webview>
   </div>
-
-
   <div id="thread">
     <h2 id="thread_title" data-url=""></h2>
-    <div id="res_wrapper" class="res_wrapper">      
-    </div><!--/ res_wrapper -->
+    <div id="res_wrapper" class="res_wrapper">
+    </div>
+    <!--/ res_wrapper -->
     <div id="readhere" data-resnum="">
       <div class="text" title="クリックで消去">-- ここまで読んだ --</div>
       <div style="clear:both;"></div>
@@ -235,23 +259,18 @@
     <div id="readmore" data-url="">もっと読む</div>
     <div id="lbl_kakolog" style="display:none;">これは過去ログ倉庫のスレッドです</div>
   </div>
-
-  
   <div id="pane_message">
     <div id="btn_closePaneMessage">×</div>
     <div id="txt_message">
       message
     </div>
   </div>
-
   <div id="pane_recommend">
     <div id="btn_closePaneRecommend">×</div>
     <div id="pane_recommendImg">
       recommendImg
     </div>
   </div>
-
-
   <div id="pane_dialogYN_wrapper">
     <div id="pane_dialogYN">
       <div id="pane_dialogYN_txt">test</div>
@@ -261,16 +280,16 @@
       </div>
     </div>
   </div>
-
   <div id="dlg_adultCheck">
     <div style="margin-left:auto;margin-right:auto;margin-top:10%;margin-bottom:auto;">
       <h2>アダルト確認</h2>
-      <p>ここから先はアダルト・コンテンツを含みます。<br>18歳未満の方は閲覧できません。<br>あなたは18歳以上ですか？</p>
+      <p>ここから先はアダルト・コンテンツを含みます。
+        <br>18歳未満の方は閲覧できません。
+        <br>あなたは18歳以上ですか？</p>
       <button id="btn_adultCheckYes">はい</button>
       <button id="btn_adultCheckNo">いいえ</button>
     </div>
   </div>
-
   <div id="findbar">
     <input class="findbar_input" type="text" value="" placeholder="スレ内検索">
     <div class="findbar_result">&nbsp;</div>
@@ -279,7 +298,6 @@
     <div class="button findbar_close">×</div>
     <div style="clear:both;"></div>
   </div>
-
 </body>
 <script src="lib/js/object-observe-lite.min.js"></script>
 <script src="lib/js/niichrome-logger.js"></script>
@@ -288,7 +306,8 @@
 <script src="lib/js/niichrome-util2ch.js"></script>
 <script src="lib/js/JapaneseUtil.js"></script>
 <script src="lib/js/niichrome-amazonutil.js"></script>
-<script src="lib/js/upload.js"></script><!-- for niichrome-gdriveutil -->
+<script src="lib/js/upload.js"></script>
+<!-- for niichrome-gdriveutil -->
 <script src="lib/js/niichrome-gdriveutil.js"></script>
 <script src="lib/js/jquery-2.2.4.min.js"></script>
 <script src="lib/js/jquery-ui-1.10.4.custom.min.js"></script>
@@ -298,4 +317,5 @@
 <script src="lib/js/niichrome-findbar.js"></script>
 <script src="lib/js/niichrome-updatechecker.js"></script>
 <script src="main-ui.js"></script>
+
 </html>

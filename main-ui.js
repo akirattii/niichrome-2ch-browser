@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.7.1
+ * @version 1.8.0
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -58,7 +58,8 @@ $(function() {
     ngWords: undefined, // NG word list {string[]}
     dividerPos: 50, // 2PaneDivider's X position (percent)
     autoImgLoad: 0, // auto-load images within res_content. 0:off 1:on
-    appInWindow: 1 // start application in new window
+    appInWindow: 1, // start application in new window
+    showRes: 0 // res view style
   };
 
   // this app's config
@@ -213,6 +214,9 @@ $(function() {
   var rdo_autoImgLoad_off = $("#rdo_autoImgLoad_off");
   var rdo_appInWindow_on = $("#rdo_appInWindow_on");
   var rdo_appInWindow_off = $("#rdo_appInWindow_off");
+  var rdo_showRes_all = $("#rdo_showRes_all");
+  var rdo_showRes_refered = $("#rdo_showRes_refered");
+  var rdo_showRes_red = $("#rdo_showRes_red");
   var body = $("body");
   var menu_historyURLs = $("#menu_historyURLs");
   var dlg_adultCheck = $("#dlg_adultCheck");
@@ -1465,10 +1469,17 @@ $(function() {
     let linkEls;
     let linkEl;
     let resnum;
-    for (let i = 0; i < resEls.length; i++) {
+    let resElsLen = resEls.length;
+    let linkElsLen;
+    for (let i = 0; i < resElsLen; i++) {
       resEl = resEls[i];
+      // TODO: First, makes reses' display style to 'none' (After this redden process, backs display to 'block'.)
+      if (i !== 0 && appConfig.showRes >= 1) { // showRes type: 0:all, 1:refered, 2:redden
+        resEl.style.display = "none";
+      }
       linkEls = resEl.querySelectorAll(".content > [data-resnum]");
-      for (let j = 0; j < linkEls.length; j++) {
+      linkElsLen = linkEls.length;
+      for (let j = 0; j < linkElsLen; j++) {
         linkEl = linkEls[j];
         // TODO: consider some resnum value like "201-202"
         resnum = linkEl.dataset.resnum;
@@ -1492,17 +1503,22 @@ $(function() {
       }
       return acc;
     }, {});
-    // redden resnums!
+    // reddens resnums being refered.
     let el;
     let cnt;
     for (let k in referedResnums) {
       el = document.querySelector("#resnum" + k + " .num");
       if (!el) continue;
       cnt = referedResnums[k];
-      if (cnt >= 3)
+      if (cnt >= 3) { // when: refered num is 3 or more.
         el.className = "num red";
-      else if (cnt >= 1)
+        el.closest(".res").style.display = "block";
+      } else if (cnt >= 1) { // when: refered num is between 1 to 2.
         el.className = "num pink";
+        if (appConfig.showRes === 1) {
+          el.closest(".res").style.display = "block ";
+        }
+      }
     }
   }
 
@@ -3067,6 +3083,14 @@ $(function() {
     }
   }
 
+  $('input[type=radio][name=rdo_showRes]').on("change", function() {
+    let val = $(this).val();
+    if (!val) {
+      appConfig.showRes = 0;
+    }
+    appConfig.showRes = parseInt(val);
+  });
+
   function getThemes(onSuccess, onError) {
     let ret = [];
     chrome.runtime.getPackageDirectoryEntry(function(root) {
@@ -3121,6 +3145,8 @@ $(function() {
     setConfAutoImgLoad();
     // start in new window
     setConfAppInWindow();
+    // showRes mode. 0:all, 1:refered, 2:redden,
+    setConfShowRes();
   }
 
   function closeConfPane() {
@@ -3171,6 +3197,14 @@ $(function() {
     if (appInWindow === undefined) return;
     if (appInWindow === 1) rdo_appInWindow_on.prop("checked", true);
     if (appInWindow === 0) rdo_appInWindow_off.prop("checked", true);
+  }
+
+  function setConfShowRes() {
+    let showRes = appConfig.showRes;
+    if (showRes === undefined) return;
+    if (showRes === 0) rdo_showRes_all.prop("checked", true);
+    if (showRes === 1) rdo_showRes_refered.prop("checked", true);
+    if (showRes === 2) rdo_showRes_red.prop("checked", true);
   }
 
   // save appConfig to localStorage
