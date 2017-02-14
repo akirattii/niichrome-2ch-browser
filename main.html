@@ -43,6 +43,11 @@
     <div class="tool">
       <input id="rng_divider" type="range" min="0" max="100" title="スレ一覧とスレの仕切り位置を調整">
     </div>
+    <div id="ad_tools">
+      <a href="https://monaplay.com" target="_blank">
+        <span class="monacoin">PR:登録不要！モナーコインで遊ぼう！</span>
+      </a>
+    </div>
     <div id="btn_settings"></div>
   </div>
   <!-- tools -->
@@ -52,6 +57,16 @@
       <div id="btn_closeConfPane">×</div>
       <div style="clear:both;"></div>
       <div id="pane_conf">
+        <div id="conf_handle">
+          <h3>ハンドル</h3>
+          <input type="text" id="txt_confHandle" size="18">
+          <br>
+          <span class="confDescription">
+            書き込み画面の名前欄に自動的に入れる文字を指定できます。<br>
+            TIPS: 認証で弾かれてしまう場合は、一旦ブラウザから書き込みを行い、その時に発行されるキーを上記のハンドルに入力することで、次回からniichromeからも書き込みが可能になります。
+          </span>
+        </div>
+        <!-- conf_handle -->
         <div id="conf_font">
           <h3>フォント</h3> サイズ:
           <input type="number" id="txt_confFontSize" min="8" max="30"> px

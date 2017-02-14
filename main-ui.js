@@ -1,7 +1,7 @@
 /**
  * niichrome 2ch browser
  *
- * @version 1.8.0
+ * @version 1.8.1
  * @author akirattii <tanaka.akira.2006@gmail.com>
  * @license The MIT License
  * @copyright (c) akirattii
@@ -53,6 +53,7 @@ $(function() {
 
   // appConfig's default setting
   DEFAULT_APP_CONFIG = {
+    handle: undefined,
     fontSize: 16, // px
     theme: 'default',
     ngWords: undefined, // NG word list {string[]}
@@ -207,6 +208,7 @@ $(function() {
   var pane_confWrapper = $("#pane_confWrapper");
   var pane_conf = $("#pane_conf");
   var btn_closeConfPane = $("#btn_closeConfPane");
+  var txt_confHandle = $("#txt_confHandle");
   var txt_confFontSize = $("#txt_confFontSize");
   var btn_confClearReadheres = $("#btn_confClearReadheres");
   var ta_confNGWords = $("#ta_confNGWords");
@@ -701,7 +703,7 @@ $(function() {
     // insert css
     insertWriteFormCSS();
     // preset anything into writeform's input
-    // let from = "";
+    let from = appConfig.handle ? appConfig.handle : "";
     let mail = "sage";
     let msg = "";
     if (data) {
@@ -735,8 +737,8 @@ $(function() {
     // execute script
     wv[0].executeScript({
       code:
-      // "let ipt_from = document.getElementsByName('" + keyname_from + "')[0];"+
-      // "if(ipt_from) ipt_from.value = '" + from + "';" +
+        "let ipt_from = document.getElementsByName('" + keyname_from + "')[0];"+
+        "if(ipt_from) ipt_from.value = '" + from + "';" +
         "let ipt_mail = document.getElementsByName('" + keyname_mail + "')[0];" +
         "if(ipt_mail) ipt_mail.value = '" + mail + "';" +
         "let ta_msg = document.getElementsByName('" + keyname_message + "')[0];" +
@@ -1015,6 +1017,7 @@ $(function() {
     let row = $(this); // a selected row on threadList
     let url = row.data("url");
     url = util2ch.prettifyReadCGIURL(url);
+    url = util2ch.replace2chNetDomainToSc(url);
     if (util2ch.isBBSURL(url) || util2ch.isDig2chURL(url) || isCommand(url)) {
       // if the url of bbs|dig2ch|command, set url to txt_url and trigger enterkey down.
       e.keyCode = 13; // set Enter key to the event
@@ -2926,7 +2929,7 @@ $(function() {
   $document.on("click", ".restool .btn_reply", function() {
     let repmsg = createReplyMessage($(this).parent().parent());
     btn_showPaneWrite.trigger("click", [{
-      // from: "",
+      // from: appConfig.handle,
       email: "sage",
       msg: repmsg
     }]);
@@ -3043,6 +3046,15 @@ $(function() {
     }
   });
 
+  $("#txt_confHandle").on("change", function(e) {
+    let val = $(this).val();
+    if (!val) {
+      appConfig.handle = undefined;
+      return;
+    }
+    appConfig.handle = val.trim();
+  });
+
   $("#ta_confNGWords").on("change", function(e) {
     let val = $(this).val();
     if (!val) {
@@ -3135,6 +3147,8 @@ $(function() {
   function openConfPane() {
     console.log("openConfPane");
     pane_confBg.show();
+    // handle
+    setConfHandle();
     // font
     setConfFontSize();
     // theme
@@ -3153,6 +3167,10 @@ $(function() {
     console.log("closeConfPane");
     pane_confBg.hide();
     // saveAppConfig();
+  }
+
+  function setConfHandle() {
+    txt_confHandle.val(appConfig.handle);
   }
 
   function setConfFontSize() {
