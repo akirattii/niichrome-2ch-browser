@@ -736,8 +736,7 @@ $(function() {
     wv.focus();
     // execute script
     wv[0].executeScript({
-      code:
-        "let ipt_from = document.getElementsByName('" + keyname_from + "')[0];"+
+      code: "let ipt_from = document.getElementsByName('" + keyname_from + "')[0];" +
         "if(ipt_from) ipt_from.value = '" + from + "';" +
         "let ipt_mail = document.getElementsByName('" + keyname_mail + "')[0];" +
         "if(ipt_mail) ipt_mail.value = '" + mail + "';" +
@@ -1175,7 +1174,8 @@ $(function() {
         stopLoading();
         // analyze the sentence then get amazon recommends...
         let sentence = createSentenceToAnalyze(responses);
-        analyzeAndGetAmazonRecommends(sentence);
+        // analyzeAndGetAmazonRecommends(sentence);
+        analyzeAndGetRakutenRecommends(sentence);
       }, function(e) { // onerror of util2ch.getResponses.
         let suppl;
         e.status === 0 ? suppl = "Timeout" : suppl = e.status;
@@ -1228,6 +1228,37 @@ $(function() {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
   }
+  /**
+   * analyzes the sentence passing as param then gets related rakuten items.
+   * @param {String} the sentence to analyze
+   */
+  function analyzeAndGetRakutenRecommends(sentence) {
+    let analysis = ju.analyze(sentence);
+    let kwd = analysis.freqRankingTop.join(" ");
+    // get some rakuten recommend items.
+    const url = `https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706?applicationId=1046138673581239889&affiliateId=0d0619c2.5881aeb9.0d0619c3.6893f6a4&orFlag=1&keyword=${encodeURIComponent(kwd)}`;
+    $.get(url).done(function(res) {
+      if (!res || !res["Items"] || res["Items"].length <= 0) return;
+      let idx = getRandomInt(0, res["Items"].length - 1);
+      let item = res["Items"][idx]["Item"];
+      let imgurl = (item["mediumImageUrls"])?item["mediumImageUrls"][0]["imageUrl"]:null;
+      let affurl = item["affiliateUrl"];
+      let title = item["itemName"];
+      let html = `<a href="${affurl}" target="_blank" title="${title}"></a>`;
+      pane_recommendImg.html(html);
+      let aEl = pane_recommendImg[0].querySelector("a");
+      loadImage(imgurl, aEl, function(imgEl) {
+        pane_recommend.fadeIn().delay(6000).fadeOut('slow');
+      });
+    });
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+  }
+
+
+
 
   /**
    * dl an external image resource and append it as an img element into the rootEl
